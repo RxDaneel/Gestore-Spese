@@ -249,9 +249,23 @@ nav .plus:active svg{opacity:.6}
 .seg{display:flex;gap:6px;padding:6px 16px 0}
 .seg button{flex:1;border:0;border-radius:999px;padding:9px 12px;background:var(--raised);font-weight:600;font-size:14px;color:var(--muted)}
 .seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
-.amount{display:flex;align-items:baseline;justify-content:center;gap:6px;padding:26px 16px 18px}
-.amount input{width:4.2ch;min-width:2.2ch;max-width:calc(100vw - 90px);border:0;background:none;outline:none;text-align:right;font:700 44px/1.1 var(--font)!important;padding:0;font-variant-numeric:tabular-nums}
-.amount span{font:700 32px var(--font);color:var(--muted)}
+.amount{display:flex;align-items:center;justify-content:center;gap:6px;padding:22px 16px 16px;width:100%;border:0;background:none;color:var(--fg)}
+.amount #amt{font:700 44px/1.1 var(--font);font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap}
+.amount #amt.ph{color:var(--muted)}
+.amount #amt.long{font-size:34px}
+.amount .cur{font:700 32px var(--font);color:var(--muted)}
+.amount .caret{width:2px;height:36px;background:var(--fg);margin:0 2px 0 -4px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+/* tastierino dell'app: l'importo resta sempre visibile e c'è il tasto OK */
+.kp{position:fixed;left:0;right:0;bottom:0;z-index:45;max-width:760px;margin:0 auto;background:var(--surface);border-top:1px solid var(--line);
+  padding:8px 8px calc(var(--bot) + 8px);display:grid;grid-template-columns:repeat(4,1fr);gap:6px;box-shadow:0 -8px 24px rgba(0,0,0,.18)}
+.kp button{height:52px;border:0;border-radius:12px;background:var(--raised);font:500 24px var(--font);color:var(--fg);display:grid;place-items:center;-webkit-user-select:none;user-select:none}
+.kp button:active{background:var(--line)}
+.kp .ok{grid-row:span 2;height:auto;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:20px}
+.kp .ok:active{opacity:.8;background:var(--accent)}
+.kp .zero{grid-column:span 3}
+.kp svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sheet.kpon{padding-bottom:calc(var(--bot) + 290px)}
 .field{padding:0 16px 14px}
 .field label{display:block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
 .field input[type=text],.field input[type=date],.field input[inputmode]{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);outline:none;-webkit-appearance:none;appearance:none;min-height:46px}
@@ -330,7 +344,7 @@ nav .plus:active svg{opacity:.6}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261013004840";
+const BUILD = "20261013005455";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -827,10 +841,10 @@ function openTx(id, day){
   const t = id ? D.tx.find(x => x.id === id) : null;
   const last = D.tx.length ? [...D.tx].sort((a, b) => b.ts - a.ts)[0] : null;
   const lastOut = last && last.type === "out";
-  S.edit = t ? { ...t, sub: t.sub || null } : { id: null, type: "out", amt: 0, cat: lastOut ? last.cat : D.cats.find(c => c.type === "out")?.id, sub: lastOut ? last.sub || null : null, date: day || (S.month === thisMonth() ? today() : S.month + "-01"), note: "" };
+  S.kp = !t;
+  S.edit = t ? { ...t, sub: t.sub || null, raw: fmtInput(t.amt) } : { id: null, type: "out", amt: 0, raw: "", cat: lastOut ? last.cat : D.cats.find(c => c.type === "out")?.id, sub: lastOut ? last.sub || null : null, date: day || (S.month === thisMonth() ? today() : S.month + "-01"), note: "" };
   drawTx();
-  open("#sTx"); sizeAmt();
-  if (!t) $("#amt").focus();
+  open("#sTx");
 }
 function drawTx(){
   const e = S.edit, cats = D.cats.filter(c => c.type === e.type);
@@ -840,7 +854,7 @@ function drawTx(){
   $("#sTx").innerHTML = `<div class="pbar"><button class="icon-btn" data-act="close" aria-label="Chiudi">${ICON_X}</button>
     <h3>${e.id ? "Modifica movimento" : e.type === "out" ? "Nuova spesa" : "Nuova entrata"}</h3><button class="btn" data-act="saveTx">Salva</button></div>
     <div class="seg"><button data-type="out" aria-pressed="${e.type === "out"}">Spesa</button><button data-type="in" aria-pressed="${e.type === "in"}">Entrata</button></div>
-    <div class="amount"><input id="amt" inputmode="decimal" placeholder="0,00" autocomplete="off" value="${e.amt ? fmtInput(e.amt) : ""}" aria-label="Importo"><span>€</span></div>
+    <button class="amount" data-act="kp" aria-label="Importo"><span id="amt"></span><i class="caret"${S.kp ? "" : " hidden"}></i><span class="cur">€</span></button>
     <div class="field"><label>Categoria</label><div class="catgrid">${cats.map(c => `<button class="chip" data-pick="${c.id}" aria-pressed="${c.id === e.cat}">${cmark(c)}${esc(c.name)}</button>`).join("")}
       <button class="chip" data-act="newCat" data-type="${e.type}">+ Nuova</button></div></div>
     ${e.cat ? `<div class="field"><label>Sottocategoria di ${esc(mc.name)}</label><div class="catgrid subs">
@@ -848,7 +862,31 @@ function drawTx(){
       <button class="chip" data-act="newSubTx">+ Nuova</button></div></div>` : ""}
     <div class="field"><label for="txDate">Data</label><input type="date" id="txDate" value="${e.date}"></div>
     <div class="field"><label for="txNote">Nota</label><input type="text" id="txNote" placeholder="${e.type === "out" ? "es. Esselunga, cena con amici" : "es. stipendio di ottobre"}" value="${esc(e.note)}" autocomplete="off"></div>
-    ${e.id ? `<div class="field"><button class="btn danger wide" data-act="delTx">Elimina movimento</button></div>` : ""}`;
+    ${e.id ? `<div class="field"><button class="btn danger wide" data-act="delTx">Elimina movimento</button></div>` : ""}
+    <div class="kp" id="kp"${S.kp ? "" : " hidden"}>${["1", "2", "3", "del", "4", "5", "6", ",", "7", "8", "9", "ok", "0"].map(k =>
+      k === "del" ? `<button data-k="del" aria-label="Cancella"><svg viewBox="0 0 24 24"><path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="m12 9 5 6M17 9l-5 6"/></svg></button>`
+      : k === "ok" ? `<button class="ok" data-k="ok">OK</button>` : `<button data-k="${k}"${k === "0" ? ' class="zero"' : ""}>${k}</button>`).join("")}</div>`;
+  $("#sTx").classList.toggle("kpon", !!S.kp);
+  sizeAmt();
+}
+/* tastierino: aggiorna l'importo scritto (al massimo 7 cifre intere e 2 decimali) */
+function kpPress(k){
+  let r = S.edit.raw || "";
+  if (k === "del") r = r.slice(0, -1);
+  else if (k === ","){ if (!r.includes(",")) r = (r || "0") + ","; }
+  else {
+    const [int, dec] = r.split(",");
+    if (dec !== undefined){ if (dec.length >= 2) return; r += k; }
+    else { if (int.length >= 7) return; r = (int === "0" ? "" : int) + k; }
+  }
+  S.edit.raw = r; sizeAmt();
+}
+function showKp(on){
+  S.kp = on;
+  if (on) document.activeElement?.blur?.();
+  $("#kp")?.toggleAttribute("hidden", !on);
+  document.querySelector("#sTx .caret")?.toggleAttribute("hidden", !on);
+  $("#sTx").classList.toggle("kpon", on);
 }
 function newSubTx(){
   readTx(); const c = cat(S.edit.cat);
@@ -859,11 +897,11 @@ function newSubTx(){
   S.edit.sub = x.id; drawTx(); sizeAmt();
 }
 function readTx(){
-  const e = S.edit; e.amt = parseAmt($("#amt").value); e.date = $("#txDate").value || today(); e.note = $("#txNote").value.trim();
+  const e = S.edit; e.amt = parseAmt(e.raw || ""); e.date = $("#txDate").value || today(); e.note = $("#txNote").value.trim();
 }
 function saveTx(){
   readTx(); const e = S.edit;
-  if (!(e.amt > 0)){ toast("Scrivi un importo"); $("#amt").focus(); return; }
+  if (!(e.amt > 0)){ toast("Scrivi un importo"); showKp(true); $("#sTx").scrollTop = 0; return; }
   if (!e.cat){ toast("Scegli una categoria"); return; }
   if (e.id){ const i = D.tx.findIndex(t => t.id === e.id); D.tx[i] = { ...D.tx[i], ...e }; }
   else D.tx.push({ ...e, id: uid(), ts: Date.now() });
@@ -1083,6 +1121,7 @@ function toast(msg, act, fn){
 document.addEventListener("click", e => {
   const el = e.target.closest("button, .hit, .seg");
   if (!el) return;
+  if (el.dataset.k){ if (el.dataset.k === "ok") showKp(false); else kpPress(el.dataset.k); return; }
   if (el.classList.contains("hit")){ chartTap(el.closest(".chart"), +el.dataset.i); return; }
   const d = el.dataset;
   if (d.tab) return go(d.tab);
@@ -1107,6 +1146,7 @@ document.addEventListener("click", e => {
   if (d.themePick){ applyTheme(d.themePick); save(); document.querySelectorAll("[data-theme-pick]").forEach(b => b.setAttribute("aria-pressed", b === el)); return render(); }
   switch (d.act){
     case "add": return openTx();
+    case "kp": return showKp(true);
     case "addOn": return openTx(null, d.day);
     case "close": return close();
     case "saveTx": return saveTx();
@@ -1140,7 +1180,7 @@ document.addEventListener("pointerdown", e => {
     $("#dVal").style.fontSize = "17px";
   } else { $("#dLbl").textContent = "Totale spese"; $("#dVal").textContent = eur0(monthStats(S.month).tot); $("#dVal").style.fontSize = ""; }
 });
-const sizeAmt = () => { const a = $("#amt"); if (a) a.style.width = Math.max(2.2, (a.value || a.placeholder).length * .62 + .3) + "em"; };
+function sizeAmt(){ const a = $("#amt"); if (!a || !S.edit) return; const r = S.edit.raw || ""; a.textContent = r || "0,00"; a.classList.toggle("ph", !r); a.classList.toggle("long", r.length > 8); }
 document.addEventListener("input", e => {
   if (e.target.id === "catName"){ const b = $("#catPrev b"); if (b) b.textContent = e.target.value.trim() || "Nuova categoria"; const x = $("#catPrev .cb"); if (x && !ICONS[S.cat.icon]){ S.cat.name = e.target.value; x.outerHTML = cbadge(S.cat, "lg"); } }
   if (e.target.id === "amt") sizeAmt();
@@ -1151,6 +1191,13 @@ document.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.id === "newSub"){ e.preventDefault(); addSub(); return; }
   if (e.key === "Enter" && e.target.closest("#sCat") && e.target.matches("input")){ e.preventDefault(); saveCat(); }
   if (e.key === "Escape") close();
+  // da tastiera fisica, quando il tastierino è aperto
+  if (S.kp && $("#sTx").classList.contains("open") && !e.target.matches("input,textarea")){
+    const k = e.key === "." ? "," : e.key;
+    if (/^[0-9,]$/.test(k)){ e.preventDefault(); kpPress(k); }
+    else if (k === "Backspace"){ e.preventDefault(); kpPress("del"); }
+    else if (k === "Enter"){ e.preventDefault(); showKp(false); }
+  }
 });
 const dropTip = () => { document.querySelector(".tip")?.remove(); document.querySelectorAll(".chart.focus").forEach(c => { c.classList.remove("focus"); delete c.dataset.on; }); };
 $("#main").addEventListener("scroll", dropTip, { passive: true });
@@ -1176,7 +1223,7 @@ fitApp();
 addEventListener("resize", fitApp);
 addEventListener("orientationchange", () => setTimeout(fitApp, 300));
 window.visualViewport?.addEventListener("resize", fitApp);
-document.addEventListener("focusin", () => setTimeout(fitApp, 300));
+document.addEventListener("focusin", e => { if (S.kp && e.target.closest?.("#sTx") && e.target.matches("input")) showKp(false); setTimeout(fitApp, 300); });
 document.addEventListener("focusout", () => setTimeout(fitApp, 300));
 /* se l'app resta aperta a cavallo di mezzanotte o del cambio mese */
 document.addEventListener("visibilitychange", () => { if (!document.hidden){ setTimeout(fitApp, 100); render(); } });
