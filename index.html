@@ -307,6 +307,33 @@ nav .plus:active svg{opacity:.6}
 .themes .sw{width:44px;height:44px;border-radius:50%;border:1px solid rgba(128,128,128,.35);position:relative;overflow:hidden}
 .themes .sw i{position:absolute;right:0;bottom:0;width:50%;height:50%}
 
+.ghform{padding:12px 14px 14px;display:grid;gap:10px}
+.ghform input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);outline:none;min-height:46px}
+.ghform input:focus{border-color:var(--accent)}
+.ghstat{display:flex;align-items:center;gap:10px;padding:13px 14px;font-size:14px}
+.ghstat i{width:10px;height:10px;border-radius:50%;flex:none;background:var(--good)}
+.ghstat.err i{background:var(--danger)}
+.ghstat.off i{background:var(--muted)}
+.ghstat small{display:block;color:var(--muted);font-size:12px}
+.ghstat.err small{color:var(--danger)}
+.help ol{padding-left:20px;margin:6px 0 0}
+.help li{margin:3px 0}
+.help a{color:var(--fg);font-weight:600}
+.banner.warn{background:var(--danger);color:#fff}
+.spark{display:flex;align-items:flex-end;gap:2px;height:22px;margin-top:8px}
+.spark i{flex:1;border-radius:2px 2px 0 0;min-height:1px;display:block}
+.spark i.z{background:var(--line)!important;height:1px!important}
+.mtab{width:100%;border-collapse:collapse;font-size:13.5px}
+.mtab th{text-align:right;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:10px 14px 6px}
+.mtab th:first-child,.mtab td:first-child{text-align:left}
+.mtab td{text-align:right;padding:9px 14px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mtab tr[data-mrep]{cursor:pointer}
+.mtab tr[data-mrep]:active td{background:var(--raised)}
+.mtab td:first-child{text-transform:capitalize;font-weight:500}
+.mtab td.pos{color:var(--good)}
+.mtab td.neg{color:var(--danger)}
+.mtab tr.off td{color:var(--muted)}
+.mtab tfoot td{font-weight:700;border-top:2px solid var(--line)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--bot) + var(--nav-h) + 14px);background:var(--fg);color:var(--bg);padding:10px 12px 10px 16px;border-radius:12px;z-index:60;font-size:14px;max-width:calc(100% - 32px);display:flex;align-items:center;gap:14px}
 .toast button{border:0;background:none;color:var(--bg);font-weight:700;padding:2px 4px;text-decoration:underline}
 @media (prefers-reduced-motion:reduce){.sheet{transition:none}}
@@ -355,7 +382,7 @@ nav .plus:active svg{opacity:.6}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261013010151";
+const BUILD = "20261013011302";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -450,7 +477,7 @@ if (!D.cats || !D.tx) D = fresh();
 D.opt ||= {};
 const wasV1 = !(D.v >= 2);
 D = migrate(D);
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(D)); } catch { toast("Spazio pieno: esporta un backup"); } }
+function save(){ D.updated = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(D)); } catch { toast("Spazio pieno: esporta un backup"); } if (typeof scheduleBackup === "function") scheduleBackup(); }
 if (wasV1) save();
 try { navigator.storage?.persist?.(); } catch {}
 
@@ -513,7 +540,7 @@ function monthStats(m){
 }
 
 /* ---------- stato interfaccia ---------- */
-const S = { tab: "vHome", month: thisMonth(), filter: "all", sf: null, q: "", edit: null, view: D.opt.txView === "cal" ? "cal" : "list", day: null };
+const S = { rview: "month", tab: "vHome", month: thisMonth(), filter: "all", sf: null, q: "", edit: null, view: D.opt.txView === "cal" ? "cal" : "list", day: null };
 
 /* ---------- grafici ---------- */
 function donut(rows, total){
@@ -622,6 +649,9 @@ function renderHome(){
   if (D.opt.seenReport !== pm && txIn(pm).length)
     banner = `<button class="banner" data-act="openReport" data-m="${pm}"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-5M12 16V6M17 16v-8"/></svg>
       <div><b>Il report di ${mName(pm)} è pronto</b><small>Dove hai speso, cosa è cambiato, cosa tenere d'occhio</small></div>${ICON_CHEV.replace("chev", "chev\" style=\"stroke:currentColor")}</button>`;
+  if (GH.repo && GH.err && (!GH.last || Date.now() - GH.last > 864e5))
+    banner = `<button class="banner warn" data-act="settings"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+      <div><b>Backup su GitHub non riuscito</b><small>${esc(GH.err)}</small></div></button>` + banner;
   if (!st.out.length && !st.inc.length){ v.innerHTML = banner + emptyMonth(); return; }
 
   // confronto: mese in corso contro gli stessi giorni del mese prima
@@ -771,9 +801,11 @@ function reportStory(st, pst){
   }
   return ps.map(p => `<p>${p}</p>`).join("");
 }
+const rToggle = () => `<div class="seg viewseg noprint"><button data-rview="month" aria-pressed="${S.rview === "month"}">Mese</button><button data-rview="year" aria-pressed="${S.rview === "year"}">Anno</button></div>`;
 function renderReport(){
+  if (S.rview === "year") return renderYear();
   const v = $("#vReport"), st = monthStats(S.month), pst = monthStats(addMonth(S.month, -1)), cur = S.month === thisMonth();
-  if (!st.out.length && !st.inc.length){ v.innerHTML = emptyMonth(); return; }
+  if (!st.out.length && !st.inc.length){ v.innerHTML = rToggle() + emptyMonth(); return; }
   if (S.month === addMonth(thisMonth(), -1) && D.opt.seenReport !== S.month){ D.opt.seenReport = S.month; save(); }
   const dm = daysIn(S.month), dd = cur ? +today().slice(8) : dm;
   // andamento giornaliero
@@ -791,7 +823,7 @@ function renderReport(){
   const lv = leaves(st);
   const saved = st.income - st.tot;
 
-  v.innerHTML = `<div class="hero"><small>Report di ${mLabel(S.month)}${cur ? ` <span class="pill-status">in corso</span>` : ""}</small></div>
+  v.innerHTML = rToggle() + `<div class="hero"><small>Report di ${mLabel(S.month)}${cur ? ` <span class="pill-status">in corso</span>` : ""}</small></div>
   <div class="section" style="padding-top:0">
     <div class="panel pad story">${reportStory(st, pst)}</div>
     <div class="tiles" style="margin-top:10px">
@@ -832,6 +864,90 @@ function renderReport(){
     <div class="panel">${top5.map(txRow).join("")}</div>` : ""}
 
     <div class="row-btns noprint"><button class="btn" data-act="print">Salva in PDF</button><button class="btn ghost" data-act="csvMonth">Esporta CSV del mese</button></div>
+  </div>`;
+}
+
+/* ---------- Report annuale ---------- */
+function renderYear(){
+  const v = $("#vReport"), Y = S.month.slice(0, 4), PY = String(+Y - 1), cur = Y === thisMonth().slice(0, 4);
+  const st = monthStats(Y), pst = monthStats(PY);
+  if (!st.out.length && !st.inc.length){
+    v.innerHTML = rToggle() + `<div class="empty"><h2>Nessun movimento nel ${Y}</h2><p>Con le frecce in alto puoi passare a un altro anno.</p></div>`; return;
+  }
+  const months = Array.from({ length: 12 }, (_, i) => `${Y}-${pad(i + 1)}`);
+  const ms = months.map(m => { const o = sum(txIn(m, "out")), n = sum(txIn(m, "in")); return { m, out: o, inc: n }; });
+  const lastIdx = cur ? +thisMonth().slice(5) - 1 : 11;
+  const firstIdx = Math.max(0, ms.findIndex(x => x.out || x.inc));
+  const span = Math.max(1, lastIdx - firstIdx + 1);
+  const avg = st.tot / span, saved = st.income - st.tot;
+  const live = ms.slice(firstIdx, cur ? lastIdx : lastIdx + 1).filter(x => x.out);   // il mese in corso non conta: è incompleto
+  const hi = live.reduce((a, b) => b.out > (a?.out ?? -1) ? b : a, null), lo = live.reduce((a, b) => b.out < (a?.out ?? Infinity) ? b : a, null);
+
+  // racconto dell'anno
+  const ps = [];
+  let p1 = `Nel ${Y}${cur ? " (finora)" : ""} hai speso <b>${eur(st.tot)}</b> in ${movs(st.out.length)}, in media <b>${eur(avg)}</b> al mese.`;
+  if (pst.tot){
+    // per un anno in corso confronto gli stessi mesi dell'anno prima
+    const prevSame = cur ? sum(D.tx.filter(t => t.type === "out" && t.date.startsWith(PY) && +t.date.slice(5, 7) <= lastIdx + 1)) : pst.tot;
+    if (prevSame){ const p = pct(st.tot - prevSame, prevSame); p1 += ` Rispetto ${cur ? "agli stessi mesi del" : "al"} ${PY} (${eur0(prevSame)}) è ${p === 0 ? "praticamente uguale" : `<b>il ${Math.abs(p)}% ${p > 0 ? "in più" : "in meno"}</b>`}.`; }
+  }
+  if (cur && lastIdx < 11 && span >= 2) p1 += ` A questo ritmo chiuderesti l'anno intorno a <b>${eur0(st.tot + avg * (11 - lastIdx))}</b>.`;
+  ps.push(p1);
+  if (hi && lo && hi !== lo) ps.push(`Il mese più caro è stato <b>${mName(hi.m)}</b> (${eur0(hi.out)}), il più leggero ${mName(lo.m)} (${eur0(lo.out)}).`);
+  if (st.cats.length){
+    const [a, b, c] = st.cats;
+    let p3 = `La voce più pesante dell'anno è <b>${esc(a.cat.name)}</b>: ${eur0(a.amt)}, il ${pct(a.amt, st.tot)}% del totale, circa ${eur0(a.amt / span)} al mese.`;
+    if (b) p3 += ` Seguono ${esc(b.cat.name)} (${pct(b.amt, st.tot)}%)${c ? ` e ${esc(c.cat.name)} (${pct(c.amt, st.tot)}%)` : ""}.`;
+    const lv = leaves(st);
+    if (lv.length) p3 += ` Nel dettaglio, la sottocategoria che pesa di più è ${esc(lv[0].s.name)} (${esc(lv[0].c.name)}) con ${eur0(lv[0].s.amt)}.`;
+    ps.push(p3);
+  }
+  if (pst.cats.length && st.cats.length && !cur){
+    const pm = new Map(pst.cats.map(c => [c.cat.id, c.amt]));
+    const ch = st.cats.map(c => ({ c: c.cat, d: c.amt - (pm.get(c.cat.id) || 0) })).sort((a, b) => b.d - a.d);
+    if (ch[0].d >= 5000) ps.push(`Rispetto al ${PY} è cresciuta soprattutto <b>${esc(ch[0].c.name)}</b> (+${eur0(ch[0].d)}).`);
+  }
+  if (st.income) ps.push(saved >= 0 ? `Sono entrati ${eur(st.income)}: hai messo da parte <b>${eur(saved)}</b>, il ${pct(saved, st.income)}% delle entrate.`
+    : `Sono entrati ${eur(st.income)}: hai speso <b>${eur(-saved)} più di quanto è entrato</b>.`);
+  const big = st.out.length ? st.out.reduce((a, b) => b.amt > a.amt ? b : a) : null;
+  if (big) ps.push(`La spesa singola più alta dell'anno: ${esc(big.note || catLabel(big))}, <b>${eur(big.amt)}</b> il ${dShort(big.date)}.`);
+
+  // andamento di ogni categoria mese per mese
+  const perCat = new Map(st.cats.map(c => [c.cat.id, Array(12).fill(0)]));
+  st.out.forEach(t => { const a = perCat.get(cat(t.cat).id); if (a) a[+t.date.slice(5, 7) - 1] += t.amt; });
+  const prevMap = new Map(pst.cats.map(c => [c.cat.id, c.amt]));
+  const mvals = ms.map((x, i) => ({ v: x.out, lab: mShort(x.m), tip: mLabel(x.m), color: i > lastIdx ? "var(--line)" : "var(--accent)" }));
+
+  v.innerHTML = rToggle() + `<div class="hero"><small>Report del ${Y}${cur ? ` <span class="pill-status">in corso</span>` : ""}</small></div>
+  <div class="section" style="padding-top:0">
+    <div class="panel pad story">${ps.map(x => `<p>${x}</p>`).join("")}</div>
+    <div class="tiles" style="margin-top:10px">
+      <div class="tile"><small>Spese</small><b class="num">${eur0(st.tot)}</b><span>${movs(st.out.length)}</span></div>
+      <div class="tile"><small>Entrate</small><b class="num">${eur0(st.income)}</b><span>${movs(st.inc.length)}</span></div>
+      <div class="tile"><small>${saved >= 0 ? "Risparmio" : "Disavanzo"}</small><b class="num">${eur0(Math.abs(saved))}</b><span>${st.income ? pct(Math.abs(saved), st.income) + "% delle entrate" : "nessuna entrata"}</span></div>
+      <div class="tile"><small>Media al mese</small><b class="num">${eur0(avg)}</b><span>su ${span} ${span === 1 ? "mese" : "mesi"}</span></div>
+    </div>
+
+    <div class="shead"><h2>Spese mese per mese</h2><span class="help">tocca una barra</span></div>
+    <div class="panel">${bars("chYear", mvals, { h: 150, maxW: 20, avg, label: "Spese di ogni mese dell'anno" })}</div>
+
+    ${st.cats.length ? `<div class="shead"><h2>Dove hai speso nell'anno</h2></div>
+    <div class="panel">${st.cats.map(c => {
+      const arr = perCat.get(c.cat.id), mx = Math.max(1, ...arr), p = prevMap.get(c.cat.id) || 0, d = c.amt - p;
+      const dtxt = !pst.tot || cur ? "" : !p ? "nuova" : `${d >= 0 ? "▲ +" : "▼ −"}${eur0(Math.abs(d))} vs ${PY}`;
+      return `<button class="crow" data-cat="${c.cat.id}">${cbadge(c.cat)}<div class="mid">
+        <div class="nm"><span>${esc(c.cat.name)}</span><span class="num">${eur(c.amt)}</span></div>
+        <div class="meta"><span>${pct(c.amt, st.tot)}% · ${eur0(c.amt / span)} al mese</span><span class="num">${dtxt}</span></div>
+        <div class="spark" aria-label="Andamento mensile di ${esc(c.cat.name)}">${arr.map((x, i) => `<i class="${x ? "" : "z"}" title="${mName(months[i])}: ${eur(x)}" style="height:${x ? Math.max(8, x / mx * 100) : 0}%;background:${cvar(c.cat.color)}${i > lastIdx ? ";opacity:.3" : ""}"></i>`).join("")}</div>
+      </div></button>${hasSubs(c) ? `<div class="nest">${c.subs.slice(0, 5).map(x => `<div class="srow"><div><span>${esc(x.name)}</span><span class="num">${eur(x.amt)}</span></div><small>${movs(x.n)} · ${pct(x.amt, c.amt)}% di ${esc(c.cat.name)}</small></div>`).join("")}${c.subs.length > 5 ? `<div class="srow"><small>e altre ${c.subs.length - 5} sottocategorie</small></div>` : ""}</div>` : ""}`;
+    }).join("")}</div>` : ""}
+
+    <div class="shead"><h2>Riepilogo dei mesi</h2><span class="help">tocca un mese</span></div>
+    <div class="panel"><table class="mtab"><thead><tr><th>Mese</th><th>Spese</th><th>Entrate</th><th>Saldo</th></tr></thead><tbody>
+      ${ms.map((x, i) => { const sd = x.inc - x.out, empty = !x.out && !x.inc; return `<tr${empty ? ' class="off"' : ` data-mrep="${x.m}"`}><td>${mName(x.m)}</td><td>${x.out ? eur0(x.out) : "–"}</td><td>${x.inc ? eur0(x.inc) : "–"}</td><td class="${empty ? "" : sd >= 0 ? "pos" : "neg"}">${empty ? "–" : (sd >= 0 ? "+" : "−") + eur0(Math.abs(sd))}</td></tr>`; }).join("")}
+    </tbody><tfoot><tr><td>Totale</td><td>${eur0(st.tot)}</td><td>${eur0(st.income)}</td><td class="${saved >= 0 ? "pos" : "neg"}">${(saved >= 0 ? "+" : "−") + eur0(Math.abs(saved))}</td></tr></tfoot></table></div>
+
+    <div class="row-btns noprint"><button class="btn" data-act="print">Salva in PDF</button><button class="btn ghost" data-act="csvYear">Esporta CSV dell'anno</button></div>
   </div>`;
 }
 
@@ -1077,6 +1193,8 @@ function openSettings(){
     <h2>Tema</h2>
     <div class="panel"><div class="themes">${Object.entries(THEMES).map(([k, t]) => `<button data-theme-pick="${k}" aria-pressed="${k === cur}">
       <span class="sw" style="background:${k === "auto" ? `linear-gradient(135deg,${t.bg} 50%,${t.su} 50%)` : t.bg}"><i style="background:${k === "auto" ? "transparent" : t.ac}"></i></span>${t.name}</button>`).join("")}</div></div>
+    <h2>Backup automatico su GitHub</h2>
+    <div id="ghBox">${ghBox()}</div>
     <h2>I tuoi dati</h2>
     <div class="panel">
       <button class="list-item" data-act="backup"><span>Esporta backup<small>${n} movimenti${first ? " dal " + dShort(first) + " " + first.slice(0, 4) : ""} · file .json</small></span>${ICON_CHEV}</button>
@@ -1086,7 +1204,7 @@ function openSettings(){
       <button class="list-item danger" data-act="wipe"><span>Cancella tutti i movimenti</span></button>
     </div>
     <p class="help">Versione ${BUILD.slice(6, 8)}/${BUILD.slice(4, 6)} ${BUILD.slice(8, 10)}:${BUILD.slice(10, 12)}</p>
-    <p class="help">I dati restano solo su questo telefono, dentro l'app: nessun server, nessun account. Fai ogni tanto un backup, perché se cancelli l'app dalla schermata Home i dati vanno persi.</p>
+    <p class="help">I dati stanno su questo telefono, dentro l'app. Con il backup su GitHub attivo, ogni modifica viene copiata anche nel tuo repository privato; senza, esporta ogni tanto un file, perché se il browser cancella i dati del sito vanno persi.</p>
   </div>`;
   open("#sSet");
 }
@@ -1104,6 +1222,7 @@ function csv(list){
   return "﻿Data;Tipo;Categoria;Sottocategoria;Importo;Nota\n" + [...list].sort((a, b) => a.date.localeCompare(b.date))
     .map(t => [t.date, t.type === "out" ? "Spesa" : "Entrata", q(cat(t.cat).name), q(sub(t)?.name || ""), fmtInput(t.type === "out" ? -t.amt : t.amt), q(t.note || "")].join(";")).join("\n");
 }
+function applyData(d){ D = migrate({ v: d.v || 1, cats: d.cats, tx: d.tx, opt: { ...(d.opt || {}), theme: D.opt.theme } }); save(); }
 function restore(file){
   const r = new FileReader();
   r.onload = () => {
@@ -1111,7 +1230,7 @@ function restore(file){
       const d = JSON.parse(r.result);
       if (!Array.isArray(d.cats) || !Array.isArray(d.tx)) throw 0;
       if (!confirm(`Ripristinare ${d.tx.length} movimenti e ${d.cats.length} categorie? I dati attuali verranno sostituiti.`)) return;
-      D = migrate({ v: d.v || 1, cats: d.cats, tx: d.tx, opt: { ...(d.opt || {}), theme: D.opt.theme } }); save(); close(); render(); toast("Backup ripristinato");
+      applyData(d); close(); render(); toast("Backup ripristinato");
     } catch { toast("Questo file non è un backup valido"); }
   };
   r.readAsText(file);
@@ -1150,6 +1269,147 @@ function demo(){
   save(); close(); render(); toast("Caricati " + tx.length + " movimenti di esempio");
 }
 
+/* ---------- backup automatico su GitHub ----------
+   Il file spese.json va in un repository privato dell'utente, con un token che può scrivere solo lì.
+   Ogni salvataggio è un commit: GitHub conserva la cronologia di tutte le versioni.
+   Il token resta solo su questo telefono e non finisce mai nel backup. */
+const GHK = "spese.gh", GH_FILE = "spese.json";
+var GH = {}; try { GH = JSON.parse(localStorage.getItem(GHK)) || {}; } catch {}
+const ghSave = () => { try { localStorage.setItem(GHK, JSON.stringify(GH)); } catch {} };
+var ghReady = false, ghBusy = false, ghAgain = false, ghTimer = null;
+const b64e = str => { const b = new TextEncoder().encode(str); let x = ""; for (let i = 0; i < b.length; i += 0x8000) x += String.fromCharCode(...b.subarray(i, i + 0x8000)); return btoa(x); };
+const b64d = str => new TextDecoder().decode(Uint8Array.from(atob(str.replace(/\s/g, "")), c => c.charCodeAt(0)));
+function ghFetch(path, opt = {}){
+  return fetch("https://api.github.com/repos/" + GH.repo + path, { cache: "no-store", ...opt,
+    headers: { Authorization: "Bearer " + GH.token, Accept: opt.raw ? "application/vnd.github.raw+json" : "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", ...(opt.body ? { "Content-Type": "application/json" } : {}) } });
+}
+function ghMsg(e){
+  if (e instanceof Response){
+    if (e.status === 401) return "Il token non è valido o è scaduto";
+    if (e.status === 403) return "Il token non ha il permesso di scrivere nel repository";
+    if (e.status === 404) return "Repository non trovato: controlla il nome e i permessi del token";
+    return "GitHub ha risposto con errore " + e.status;
+  }
+  return navigator.onLine ? "GitHub non raggiungibile, riprovo più tardi" : "Sei offline: il backup partirà appena torni online";
+}
+/* legge il backup remoto: { sha, data } oppure null se il file non c'è ancora */
+async function ghRead(){
+  const r = await ghFetch("/contents/" + GH_FILE + "?t=" + Date.now());
+  if (r.status === 404) return null;
+  if (!r.ok) throw r;
+  const j = await r.json();
+  let text = j.content ? b64d(j.content) : "";
+  if (!text){ const rr = await ghFetch("/contents/" + GH_FILE + "?t=" + Date.now(), { raw: true }); if (!rr.ok) throw rr; text = await rr.text(); }
+  return { sha: j.sha, data: JSON.parse(text) };
+}
+const snapshot = () => ({ app: "Spese", v: D.v, updated: D.updated || Date.now(), cats: D.cats, tx: D.tx, opt: { ...D.opt, theme: undefined } });
+async function backupNow(manual){
+  if (!GH.repo || !GH.token) return;
+  if (ghBusy){ ghAgain = true; return; }
+  clearTimeout(ghTimer); ghBusy = true; ghPaint("Backup in corso…");
+  try {
+    const snap = snapshot();
+    const body = { message: "Backup " + new Date().toLocaleString("it-IT") + " · " + movs(snap.tx.length), content: b64e(JSON.stringify(snap)) };
+    if (GH.sha) body.sha = GH.sha;
+    let r = await ghFetch("/contents/" + GH_FILE, { method: "PUT", body: JSON.stringify(body) });
+    if (r.status === 409 || r.status === 422){   // il file è cambiato altrove: prendo lo sha attuale e riprovo
+      const cur = await ghFetch("/contents/" + GH_FILE + "?t=" + Date.now());
+      if (cur.ok) body.sha = (await cur.json()).sha; else delete body.sha;
+      r = await ghFetch("/contents/" + GH_FILE, { method: "PUT", body: JSON.stringify(body) });
+    }
+    if (!r.ok) throw r;
+    GH.sha = (await r.json()).content.sha; GH.last = Date.now(); GH.synced = snap.updated; GH.err = null; ghSave();
+    if (manual) toast("Backup salvato su GitHub");
+  } catch (e) { GH.err = ghMsg(e); ghSave(); if (manual) toast(GH.err); }
+  ghBusy = false; ghPaint();
+  if (ghAgain){ ghAgain = false; scheduleBackup(); }
+}
+function scheduleBackup(){
+  if (!GH || !GH.repo || !GH.token || !ghReady) return;
+  clearTimeout(ghTimer); ghTimer = setTimeout(backupNow, 4000);
+}
+/* all'apertura: se nel backup c'è una versione più recente (salvata da un altro dispositivo) la propongo */
+async function ghCheck(){
+  if (!GH.repo || !GH.token) return;
+  try {
+    const rem = await ghRead(); GH.err = null;
+    if (rem){
+      GH.sha = rem.sha;
+      const ru = rem.data.updated || 0, lu = D.updated || 0;
+      if (ru > lu && ru !== GH.synced && Array.isArray(rem.data.tx)){
+        const when = new Date(ru).toLocaleString("it-IT", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+        if (!D.tx.length || confirm(`Nel backup su GitHub c'è una versione più recente (${when}, ${movs(rem.data.tx.length)}).\nVuoi caricarla? I dati di questo telefono verranno sostituiti.`)){
+          applyData(rem.data); D.updated = ru; GH.synced = ru; try { localStorage.setItem(KEY, JSON.stringify(D)); } catch {}
+          ghSave(); ghReady = true; render(); toast("Dati aggiornati dal backup"); ghPaint(); return;
+        }
+      }
+    }
+    ghReady = true; ghSave();
+    if (!rem || (D.updated || 0) !== GH.synced) backupNow();
+  } catch (e) {
+    GH.err = ghMsg(e); ghSave();
+    ghReady = !!GH.synced;   // offline: se questo telefono era già sincronizzato, i prossimi salvataggi partiranno comunque
+  }
+  ghPaint();
+}
+const ago = t => { if (!t) return "mai"; const m = Math.round((Date.now() - t) / 60000); if (m < 1) return "adesso"; if (m < 60) return m + " min fa";
+  const d = new Date(t); return (ymd(d) === today() ? "oggi" : dShort(ymd(d))) + " alle " + pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+function ghBox(){
+  if (GH.repo && GH.token) return `<div class="panel">
+    <div class="ghstat${GH.err ? " err" : ""}" id="ghStat"><i></i><span>${ghBusy ? "Backup in corso…" : GH.err ? "Backup non riuscito" : "Backup attivo"}<small>${GH.err ? esc(GH.err) : "Ultimo backup: " + ago(GH.last)} · ${esc(GH.repo)}</small></span></div>
+    <button class="list-item" data-act="ghNow" style="border-top:1px solid var(--line)"><span>Fai il backup adesso</span>${ICON_CHEV}</button>
+    <button class="list-item" data-act="ghRestore"><span>Ripristina dal backup<small>sostituisce i dati di questo telefono</small></span>${ICON_CHEV}</button>
+    <a class="list-item" href="https://github.com/${esc(GH.repo)}/commits" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span>Vedi le versioni precedenti<small>la cronologia su GitHub</small></span>${ICON_CHEV}</a>
+    <button class="list-item danger" data-act="ghOff"><span>Scollega il backup</span></button></div>`;
+  return `<div class="panel"><div class="ghform">
+    <input type="text" id="ghRepo" placeholder="utente/repository, es. RxDaneel/spese-backup" value="${esc(GH.repo || "RxDaneel/spese-backup")}" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <input type="password" id="ghToken" placeholder="Token GitHub (github_pat_…)" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button class="btn" data-act="ghOn">Collega e fai il primo backup</button></div></div>
+    <div class="help" style="padding:8px 4px 0">Una volta sola, da Safari:<ol>
+      <li>Crea un repository <b>privato</b> chiamato <b>spese-backup</b> su <a href="https://github.com/new" target="_blank" rel="noopener">github.com/new</a>.</li>
+      <li>Crea un token su <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a>: in <i>Repository access</i> scegli <i>Only select repositories</i> → spese-backup; in <i>Permissions</i> → <i>Contents</i> scegli <i>Read and write</i>; come scadenza metti la più lunga possibile.</li>
+      <li>Copia il token e incollalo qui sopra.</li></ol>
+      Il token resta solo su questo telefono e può scrivere soltanto in quel repository.</div>`;
+}
+function ghPaint(msg){
+  const box = $("#ghBox"); if (!box || !$("#sSet").classList.contains("open")) return;
+  box.innerHTML = ghBox();
+  if (msg){ const st = $("#ghStat span"); if (st) st.firstChild.textContent = msg; }
+}
+async function ghConnect(){
+  const repo = $("#ghRepo").value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$|\/$/g, ""), token = $("#ghToken").value.trim();
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)){ toast("Scrivi il repository come utente/nome"); return; }
+  if (!token){ toast("Incolla il token"); $("#ghToken").focus(); return; }
+  GH = { repo, token }; toast("Controllo il collegamento…");
+  try {
+    const r = await ghFetch(""); if (!r.ok) throw r;
+    const info = await r.json();
+    if (!info.permissions?.push) throw new Response(null, { status: 403 });
+    if (!info.private && !confirm("Attenzione: questo repository è pubblico, chiunque potrebbe leggere le tue spese. Continuare lo stesso?")){ GH = {}; return; }
+    ghSave(); ghReady = false;
+    const rem = await ghRead();
+    if (rem && Array.isArray(rem.data.tx) && rem.data.tx.length){
+      GH.sha = rem.sha;
+      if (confirm(`Nel repository c'è già un backup con ${movs(rem.data.tx.length)}.\nOK = carica quei dati su questo telefono\nAnnulla = sovrascrivilo con i dati di questo telefono`)){
+        applyData(rem.data); GH.synced = D.updated; GH.last = Date.now(); ghReady = true; ghSave(); render(); ghPaint(); toast("Dati caricati dal backup"); return;
+      }
+    }
+    ghReady = true; await backupNow(true);
+  } catch (e) { const m = ghMsg(e); GH = {}; ghSave(); toast(m); }
+  ghPaint();
+}
+async function ghRestore(){
+  try {
+    const rem = await ghRead();
+    if (!rem){ toast("Nel repository non c'è ancora nessun backup"); return; }
+    const when = new Date(rem.data.updated || 0).toLocaleString("it-IT", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+    if (!confirm(`Ripristinare il backup del ${when} (${movs(rem.data.tx.length)})? I dati di questo telefono verranno sostituiti.`)) return;
+    GH.sha = rem.sha; applyData(rem.data); GH.synced = D.updated; ghSave(); render(); ghPaint(); toast("Backup ripristinato");
+  } catch (e) { toast(ghMsg(e)); }
+}
+document.addEventListener("visibilitychange", () => { if (document.hidden && ghTimer){ backupNow(); } });
+addEventListener("online", () => { if (GH.repo && (D.updated || 0) !== GH.synced) backupNow(); });
+
 /* ---------- navigazione ---------- */
 function open(sel){ document.querySelectorAll(".sheet.open").forEach(s => s !== $(sel) && s.id !== "sTx" && s.classList.remove("open")); $(sel).classList.add("open"); $(sel).scrollTop = 0; }
 function close(){
@@ -1160,8 +1420,9 @@ function close(){
 }
 function render(){
   document.querySelector(".tip")?.remove();
-  $("#hMonth").textContent = mLabel(S.month) + (S.month === thisMonth() ? "" : "");
-  $("#btnNext").disabled = S.month >= thisMonth();
+  const yearMode = S.tab === "vReport" && S.rview === "year";
+  $("#hMonth").textContent = yearMode ? "Anno " + S.month.slice(0, 4) : mLabel(S.month);
+  $("#btnNext").disabled = yearMode ? S.month.slice(0, 4) >= thisMonth().slice(0, 4) : S.month >= thisMonth();
   document.querySelectorAll("nav [data-tab]").forEach(b => b.setAttribute("aria-current", b.dataset.tab === S.tab));
   document.querySelectorAll(".view").forEach(v => v.hidden = v.id !== S.tab);
   ({ vHome: renderHome, vTx: renderTx, vReport: renderReport, vCats: renderCats })[S.tab]();
@@ -1180,6 +1441,8 @@ document.addEventListener("click", e => {
   const sx = e.target.closest(".swipe > .tx");
   if (sx && (sx._x || Date.now() - (sx._sw || 0) < 450)){ setSwipe(sx, 0); return; }
   if (!sx) closeSwipes();
+  const tr = e.target.closest("tr[data-mrep]");
+  if (tr){ S.month = tr.dataset.mrep; S.rview = "month"; $("#main").scrollTop = 0; return render(); }
   const el = e.target.closest("button, .hit, .seg");
   if (!el) return;
   if (el.dataset.del){ swipeDelete(el.closest(".swipe")); return; }
@@ -1189,6 +1452,7 @@ document.addEventListener("click", e => {
   if (d.tab) return go(d.tab);
   if (d.tabgo) return go(d.tabgo);
   if (d.filter){ S.filter = d.filter; S.sf = null; return renderTx(); }
+  if (d.rview){ S.rview = d.rview; $("#main").scrollTop = 0; return render(); }
   if (d.view){ S.view = d.view; D.opt.txView = d.view; save(); return renderTx(); }
   if (d.day && el.classList.contains("cd")){ S.day = d.day; return renderTx(); }
   if (d.sfilter !== undefined){ S.sf = d.sfilter === "" ? null : d.sfilter; return renderTx(); }
@@ -1209,6 +1473,11 @@ document.addEventListener("click", e => {
   switch (d.act){
     case "add": return openTx();
     case "kp": return showKp(true);
+    case "settings": return openSettings();
+    case "ghOn": return ghConnect();
+    case "ghNow": return backupNow(true);
+    case "ghRestore": return ghRestore();
+    case "ghOff": if (confirm("Scollegare il backup? Il token verrà cancellato da questo telefono; il repository su GitHub resta com'è.")){ GH = {}; ghSave(); ghPaint(); render(); } return;
     case "addOn": return openTx(null, d.day);
     case "close": return close();
     case "saveTx": return saveTx();
@@ -1218,8 +1487,9 @@ document.addEventListener("click", e => {
     case "addSub": return addSub();
     case "newSubTx": return newSubTx();
     case "delCat": return delCat();
-    case "openReport": S.month = d.m; return go("vReport");
+    case "openReport": S.month = d.m; S.rview = "month"; return go("vReport");
     case "print": return window.print();
+    case "csvYear": return giveFile(`spese-${S.month.slice(0, 4)}.csv`, csv(txIn(S.month.slice(0, 4))), "text/csv");
     case "csvMonth": return giveFile(`spese-${S.month}.csv`, csv(txIn(S.month)), "text/csv");
     case "csvAll": return giveFile(`spese-tutto.csv`, csv(D.tx), "text/csv");
     case "backup": return giveFile(`spese-backup-${today()}.json`, JSON.stringify(D), "application/json");
@@ -1266,8 +1536,9 @@ $("#main").addEventListener("scroll", dropTip, { passive: true });
 document.addEventListener("scroll", dropTip, { capture: true, passive: true });
 document.addEventListener("change", e => { if (e.target.id === "ownColor"){ readCat(); S.cat.color = e.target.value.toLowerCase(); drawCat(); } });
 $("#fileIn").addEventListener("change", e => { if (e.target.files[0]) restore(e.target.files[0]); e.target.value = ""; });
-$("#btnPrev").onclick = () => { S.month = addMonth(S.month, -1); render(); };
-$("#btnNext").onclick = () => { if (S.month < thisMonth()){ S.month = addMonth(S.month, 1); render(); } };
+const yStep = () => S.tab === "vReport" && S.rview === "year" ? 12 : 1;
+$("#btnPrev").onclick = () => { S.month = addMonth(S.month, -yStep()); render(); };
+$("#btnNext").onclick = () => { if (S.month < thisMonth()){ const m = addMonth(S.month, yStep()); S.month = m > thisMonth() ? thisMonth() : m; render(); } };
 $("#hMonth").onclick = $("#logo").onclick = () => { S.month = thisMonth(); render(); };
 $("#btnGear").onclick = openSettings;
 
@@ -1309,6 +1580,7 @@ async function checkUpdate(){
 }
 checkUpdate();
 document.addEventListener("visibilitychange", () => { if (!document.hidden) checkUpdate(); });
+ghCheck();
 </script>
 </body>
 </html>
