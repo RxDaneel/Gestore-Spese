@@ -282,7 +282,13 @@ nav .plus:active svg{opacity:.6}
 .subadd .btn{flex:none}
 .swatches{display:flex;flex-wrap:wrap;gap:7px}
 .swatches button{width:33px;height:33px;border-radius:50%;border:3px solid var(--bg);box-shadow:0 0 0 1.5px transparent;padding:0}
-.swatches button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--fg)}
+.swatches button[aria-pressed="true"],.swatches label[aria-pressed="true"]{box-shadow:0 0 0 2px var(--fg)}
+.swatches label{position:relative;width:33px;height:33px;border-radius:50%;border:3px solid var(--bg);display:grid;place-items:center;overflow:hidden;cursor:pointer;
+  background:conic-gradient(#e34948,#eda100,#d4d000,#1baf7a,#2a78d6,#6250d6,#e87ba4,#e34948)}
+.swatches label.set{background:var(--sw)}
+.swatches label svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.6;stroke-linecap:round;filter:drop-shadow(0 0 1.5px rgba(0,0,0,.6))}
+.swatches label input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;cursor:pointer}
+.swlab{display:block;font-size:12px;color:var(--muted);margin:12px 0 8px}
 .list-item{display:flex;align-items:center;gap:12px;padding:13px 14px;border-top:1px solid var(--line);width:100%;border-left:0;border-right:0;border-bottom:0;background:none;text-align:left;font-size:15px}
 .list-item:first-child{border-top:0}
 .list-item:active{background:var(--raised)}
@@ -344,7 +350,7 @@ nav .plus:active svg{opacity:.6}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261013005455";
+const BUILD = "20261013005903";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -390,7 +396,7 @@ const ICONS = {
 };
 const DEF_ICON = { casa: "casa", cibo: "posate", bollette: "fulmine", trasporti: "auto", svago: "gioco", shopping: "borsa", salute: "cuore", altro: "altro", stip: "banca", entrate: "entrata" };
 /* cerchio colorato con icona (o iniziale, se la categoria non ha icona) */
-const cbadge = (c, size = "") => `<span class="cb ${size}" style="background:${cvar(c.color)}" aria-hidden="true">${ICONS[c.icon] ? `<svg viewBox="0 0 24 24">${ICONS[c.icon]}</svg>` : esc((c.name || "?").charAt(0).toUpperCase())}</span>`;
+const cbadge = (c, size = "") => `<span class="cb ${size}" style="background:${cvar(c.color)};color:${ink(c.color)}" aria-hidden="true">${ICONS[c.icon] ? `<svg viewBox="0 0 24 24">${ICONS[c.icon]}</svg>` : esc((c.name || "?").charAt(0).toUpperCase())}</span>`;
 /* segno piccolo dentro i bottoni: icona colorata, o pallino */
 const cmark = c => ICONS[c.icon] ? `<svg class="ci" viewBox="0 0 24 24" style="stroke:${cvar(c.color)}">${ICONS[c.icon]}</svg>` : `<span class="dot" style="background:${cvar(c.color)}"></span>`;
 const ICON_CHEV = `<svg class="chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>`;
@@ -447,7 +453,13 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 const cat = id => D.cats.find(c => c.id === id) || D.cats.find(c => c.fallback) || { name: "?", color: -1 };
 const sub = t => t.sub ? (cat(t.cat).subs || []).find(x => x.id === t.sub) || null : null;
 const catLabel = t => { const s = sub(t); return cat(t.cat).name + (s ? " › " + s.name : ""); };
-const cvar = c => c >= 0 && c < 8 ? `var(--c${c + 1})` : "var(--cx)";
+const cvar = c => typeof c === "string" && /^#[0-9a-f]{6}$/i.test(c) ? c : c >= 0 && c < 8 ? `var(--c${c + 1})` : "var(--cx)";
+/* colori in più tra cui scegliere, oltre a quelli del tema */
+const MORE_COLORS = ["#0ea5e9", "#06b6d4", "#14b8a6", "#22c55e", "#84cc16", "#facc15", "#f59e0b", "#f97316", "#ef4444", "#be123c",
+  "#ec4899", "#d946ef", "#a855f7", "#6366f1", "#1e40af", "#0f766e", "#166534", "#92400e", "#a16207", "#64748b", "#334155", "#a8a29e"];
+/* inchiostro dell'icona: scuro sui colori chiari scelti a mano, bianco altrimenti */
+const ink = c => { if (typeof c !== "string") return "#fff"; const n = parseInt(c.slice(1), 16), r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.68 ? "#1a1a19" : "#fff"; };
 
 /* ---------- date e numeri ---------- */
 const pad = n => String(n).padStart(2, "0");
@@ -944,8 +956,10 @@ function drawCat(){
     ${c.id ? "" : `<div class="seg" style="padding-bottom:14px"><button data-ctype="out" aria-pressed="${c.type === "out"}">Di spesa</button><button data-ctype="in" aria-pressed="${c.type === "in"}">Di entrata</button></div>`}
     <div class="catprev" id="catPrev">${cbadge(c, "lg")}<b>${esc(c.name || "Nuova categoria")}</b></div>
     <div class="field"><label for="catName">Nome</label><input type="text" id="catName" value="${esc(c.name)}" placeholder="es. Palestra" autocomplete="off" maxlength="40"></div>
-    <div class="field"><label>Icona</label><div class="icons">${Object.entries(ICONS).map(([k, v]) => `<button data-icon="${k}" aria-pressed="${c.icon === k}" aria-label="Icona ${k}"${c.icon === k ? ` style="background:${cvar(c.color)}"` : ""}><svg viewBox="0 0 24 24">${v}</svg></button>`).join("")}</div></div>
-    <div class="field"><label>Colore</label><div class="swatches">${[0, 1, 2, 3, 4, 5, 6, 7, -1].map(i => `<button data-color="${i}" aria-pressed="${c.color === i}" style="background:${cvar(i)}" aria-label="Colore ${i + 2}"></button>`).join("")}</div></div>
+    <div class="field"><label>Icona</label><div class="icons">${Object.entries(ICONS).map(([k, v]) => `<button data-icon="${k}" aria-pressed="${c.icon === k}" aria-label="Icona ${k}"${c.icon === k ? ` style="background:${cvar(c.color)};color:${ink(c.color)}"` : ""}><svg viewBox="0 0 24 24">${v}</svg></button>`).join("")}</div></div>
+    <div class="field"><label>Colore</label><div class="swatches">${[0, 1, 2, 3, 4, 5, 6, 7, -1].map(i => `<button data-color="${i}" aria-pressed="${c.color === i}" style="background:${cvar(i)}" aria-label="Colore ${i + 2}"></button>`).join("")}</div>
+      <span class="swlab">Altri colori</span><div class="swatches">${MORE_COLORS.map(h => `<button data-color="${h}" aria-pressed="${c.color === h}" style="background:${h}" aria-label="Colore ${h}"></button>`).join("")}
+      ${(() => { const own = typeof c.color === "string" && !MORE_COLORS.includes(c.color); return `<label class="${own ? "set" : ""}" aria-pressed="${own}" style="--sw:${own ? c.color : "transparent"}" title="Scegli un colore qualsiasi"><svg viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></svg><input type="color" id="ownColor" value="${typeof c.color === "string" ? c.color : "#2a78d6"}" aria-label="Scegli un colore qualsiasi"></label>`; })()}</div></div>
     <div class="field"><label>Sottocategorie</label>
       ${c.subs.length ? `<div class="panel">${c.subs.map((x, i) => `<div class="subed"><input type="text" data-subname="${i}" value="${esc(x.name)}" maxlength="40" autocomplete="off" aria-label="Nome sottocategoria"><button class="icon-btn" data-subdel="${i}" aria-label="Elimina ${esc(x.name)}">${ICON_X}</button></div>`).join("")}</div>` : `<p class="help" style="margin:0">Nessuna sottocategoria: aggiungine una qui sotto.</p>`}
       <div class="subadd"><input type="text" id="newSub" placeholder="Nuova sottocategoria" maxlength="40" autocomplete="off" enterkeyhint="done"><button class="btn ghost" data-act="addSub">Aggiungi</button></div>
@@ -1137,10 +1151,10 @@ document.addEventListener("click", e => {
   if (d.subdel !== undefined) return delSub(+d.subdel);
   if (d.type && el.closest(".seg")){ readTx(); S.edit.type = d.type; drawTx(); return sizeAmt(); }
   if (d.ctype){ readCat(); S.cat.type = d.ctype; return drawCat(); }
-  if (d.color !== undefined){ readCat(); S.cat.color = +d.color; return drawCat(); }
+  if (d.color !== undefined){ readCat(); S.cat.color = /^-?\d+$/.test(d.color) ? +d.color : d.color; return drawCat(); }
   if (d.icon !== undefined){
     S.cat.icon = d.icon;
-    document.querySelectorAll("[data-icon]").forEach(b => { const on = b === el; b.setAttribute("aria-pressed", on); b.style.background = on ? cvar(S.cat.color) : ""; });
+    document.querySelectorAll("[data-icon]").forEach(b => { const on = b === el; b.setAttribute("aria-pressed", on); b.style.background = on ? cvar(S.cat.color) : ""; b.style.color = on ? ink(S.cat.color) : ""; });
     $("#catPrev .cb").outerHTML = cbadge(S.cat, "lg"); return;
   }
   if (d.themePick){ applyTheme(d.themePick); save(); document.querySelectorAll("[data-theme-pick]").forEach(b => b.setAttribute("aria-pressed", b === el)); return render(); }
@@ -1202,6 +1216,7 @@ document.addEventListener("keydown", e => {
 const dropTip = () => { document.querySelector(".tip")?.remove(); document.querySelectorAll(".chart.focus").forEach(c => { c.classList.remove("focus"); delete c.dataset.on; }); };
 $("#main").addEventListener("scroll", dropTip, { passive: true });
 document.addEventListener("scroll", dropTip, { capture: true, passive: true });
+document.addEventListener("change", e => { if (e.target.id === "ownColor"){ readCat(); S.cat.color = e.target.value.toLowerCase(); drawCat(); } });
 $("#fileIn").addEventListener("change", e => { if (e.target.files[0]) restore(e.target.files[0]); e.target.value = ""; });
 $("#btnPrev").onclick = () => { S.month = addMonth(S.month, -1); render(); };
 $("#btnNext").onclick = () => { if (S.month < thisMonth()){ S.month = addMonth(S.month, 1); render(); } };
