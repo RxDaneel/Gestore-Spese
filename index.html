@@ -202,16 +202,21 @@ nav .plus:active svg{opacity:.6}
 .dayhead b::first-letter{text-transform:uppercase}
 .dayhead span{color:var(--muted);font-size:13px}
 .day{display:flex;justify-content:space-between;padding:16px 16px 6px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-.tx{display:flex;align-items:center;gap:12px;padding:10px 16px;width:100%;border:0;background:none;text-align:left}
+.tx{position:relative;z-index:1;display:flex;align-items:center;gap:12px;padding:10px 16px;width:100%;border:0;background:var(--bg);text-align:left;touch-action:pan-y;transition:transform .22s ease}
 .tx:active{background:var(--surface)}
+/* scorrendo un movimento verso sinistra compare "Elimina" */
+.swipe{position:relative;overflow:hidden;transition:height .2s ease,opacity .2s ease}
+.sdel{position:absolute;inset:0;border:0;background:var(--danger);color:#fff;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:0 22px;font-weight:600;font-size:14px}
+.sdel svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .tx .ic{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:700;font-size:14px;color:#fff}
 .tx .mid{flex:1;min-width:0}
 .tx .t{font-weight:500;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tx .s{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tx .a{font-weight:600;font-size:14.5px;white-space:nowrap}
 .tx .a.in{color:var(--good)}
-.panel .tx{padding:10px 14px;border-top:1px solid var(--line)}
-.panel .tx:first-child{border-top:0}
+.panel .tx{padding:10px 14px;background:var(--surface)}
+.panel .tx:active{background:var(--raised)}
+.panel .swipe+.swipe{border-top:1px solid var(--line)}
 
 /* grafici a barre */
 .chart{position:relative;padding:14px 10px 8px}
@@ -350,7 +355,7 @@ nav .plus:active svg{opacity:.6}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261013005903";
+const BUILD = "20261013010151";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -599,9 +604,9 @@ function txRow(t){
   const c = cat(t.cat), s = sub(t);
   const title = t.note || (s ? s.name : c.name);
   const line = [t.note ? catLabel(t) : s ? c.name : "", dShort(t.date)].filter(Boolean).join(" · ");
-  return `<button class="tx" data-tx="${t.id}">${cbadge(c, "lg")}
+  return `<div class="swipe"><button class="sdel" data-del="${t.id}" tabindex="-1"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>Elimina</button><button class="tx" data-tx="${t.id}">${cbadge(c, "lg")}
     <div class="mid"><div class="t">${esc(title)}</div><div class="s">${esc(line)}</div></div>
-    <span class="a num${t.type === "in" ? " in" : ""}">${t.type === "in" ? "+" : "−"}${eur(t.amt)}</span></button>`;
+    <span class="a num${t.type === "in" ? " in" : ""}">${t.type === "in" ? "+" : "−"}${eur(t.amt)}</span></button></div>`;
 }
 function emptyMonth(){
   return `<div class="empty"><h2>Nessun movimento a ${mName(S.month)}</h2>
@@ -922,11 +927,50 @@ function saveTx(){
   toast(e.id ? "Movimento aggiornato" : `${e.type === "out" ? "Spesa" : "Entrata"} di ${eur(e.amt)} salvata`);
   render();
 }
-function delTx(){
-  const i = D.tx.findIndex(t => t.id === S.edit.id); if (i < 0) return;
-  const [gone] = D.tx.splice(i, 1); save(); close(); render();
-  toast("Movimento eliminato", "Annulla", () => { D.tx.push(gone); save(); render(); });
+function delTx(){ const id = S.edit.id; close(); removeTx(id); }
+function removeTx(id){
+  const i = D.tx.findIndex(t => t.id === id); if (i < 0) return;
+  const [gone] = D.tx.splice(i, 1); save();
+  const refresh = () => { render(); if ($("#sCat").classList.contains("open") && S.cat?.id){ readCat(); drawCat(); } };
+  refresh();
+  toast(`Eliminato: ${gone.note || catLabel(gone)}`, "Annulla", () => { D.tx.push(gone); save(); refresh(); });
 }
+/* gesto: trascina a sinistra per scoprire Elimina; trascinando oltre metà riga elimina subito */
+const OPEN_W = 96;
+function setSwipe(tx, x, anim = true){ tx.style.transition = anim ? "" : "none"; tx.style.transform = x ? `translateX(${x}px)` : ""; tx._x = x; }
+function closeSwipes(except){ document.querySelectorAll(".swipe > .tx").forEach(t => { if (t !== except && t._x) setSwipe(t, 0); }); }
+function swipeDelete(row){
+  const tx = row.querySelector(".tx"), id = tx.dataset.tx;
+  setSwipe(tx, -row.offsetWidth);
+  row.style.height = row.offsetHeight + "px";
+  requestAnimationFrame(() => { row.style.height = "0px"; row.style.opacity = "0"; });
+  setTimeout(() => removeTx(id), 220);
+}
+let SW = null;
+document.addEventListener("touchstart", e => {
+  const tx = e.target.closest(".swipe > .tx");
+  closeSwipes(tx);
+  if (!tx || e.touches.length > 1) { SW = null; return; }
+  SW = { tx, row: tx.parentElement, x0: e.touches[0].clientX, y0: e.touches[0].clientY, base: tx._x || 0, x: tx._x || 0, mode: null };
+}, { passive: true });
+document.addEventListener("touchmove", e => {
+  if (!SW) return;
+  const dx = e.touches[0].clientX - SW.x0, dy = e.touches[0].clientY - SW.y0;
+  if (!SW.mode){ if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.2) SW.mode = "h"; else if (Math.abs(dy) > 8) { SW = null; return; } else return; }
+  e.preventDefault();
+  let x = Math.min(0, SW.base + dx);
+  if (x > -OPEN_W) x = x; else x = -OPEN_W + (x + OPEN_W) * 0.9;   // un filo di resistenza oltre il pulsante
+  SW.x = x; setSwipe(SW.tx, x, false);
+}, { passive: false });
+document.addEventListener("touchend", () => {
+  if (!SW) return;
+  const { tx, row, x, mode } = SW; SW = null;
+  if (mode !== "h") return;
+  tx._sw = Date.now();
+  if (x < -row.offsetWidth * 0.55) swipeDelete(row);
+  else setSwipe(tx, x < -OPEN_W / 2 ? -OPEN_W : 0);
+});
+document.addEventListener("touchcancel", () => { if (SW){ setSwipe(SW.tx, 0); SW = null; } });
 
 /* ---------- foglio categoria ---------- */
 function openCat(id, type){
@@ -1133,8 +1177,12 @@ function toast(msg, act, fn){
 }
 
 document.addEventListener("click", e => {
+  const sx = e.target.closest(".swipe > .tx");
+  if (sx && (sx._x || Date.now() - (sx._sw || 0) < 450)){ setSwipe(sx, 0); return; }
+  if (!sx) closeSwipes();
   const el = e.target.closest("button, .hit, .seg");
   if (!el) return;
+  if (el.dataset.del){ swipeDelete(el.closest(".swipe")); return; }
   if (el.dataset.k){ if (el.dataset.k === "ok") showKp(false); else kpPress(el.dataset.k); return; }
   if (el.classList.contains("hit")){ chartTap(el.closest(".chart"), +el.dataset.i); return; }
   const d = el.dataset;
