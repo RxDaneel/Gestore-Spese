@@ -124,7 +124,20 @@ nav .plus:active svg{opacity:.6}
 .crow{display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid var(--line);width:100%;border-left:0;border-right:0;border-bottom:0;background:none;text-align:left}
 .crow:first-child{border-top:0}
 .crow:active{background:var(--raised)}
-.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.dot{width:12px;height:12px;border-radius:50%;flex:none!important}
+/* cerchio colorato con l'icona della categoria */
+.cb{width:34px;height:34px;border-radius:50%;flex:none!important;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;line-height:1}
+.cb svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.cb.lg{width:36px;height:36px}.cb.lg svg{width:20px;height:20px}
+.cb.sm{width:28px;height:28px;font-size:12px}.cb.sm svg{width:16px;height:16px}
+.chip .ci{width:16px;height:16px;flex:none;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chip[aria-pressed="true"] .ci{stroke:currentColor!important}
+.icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:8px}
+.icons button{aspect-ratio:1;border:0;border-radius:50%;background:var(--surface);color:var(--fg);display:grid;place-items:center;padding:0}
+.icons button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icons button[aria-pressed="true"]{color:#fff}
+.catprev{display:flex;align-items:center;gap:12px;padding:4px 16px 14px}
+.catprev b{font-size:17px;font-weight:600}
 .crow .mid{flex:1;min-width:0}
 .crow .nm{display:flex;justify-content:space-between;gap:10px;font-size:14.5px;font-weight:500}
 .crow .nm span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -292,7 +305,55 @@ nav .plus:active svg{opacity:.6}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261013002827";
+const BUILD = "20261013003421";
+/* icone delle categorie (24×24, tratto) */
+const ICONS = {
+  casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
+  posate: '<path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10"/><path d="M17 21V3c-2 1-3 4-3 7.5h3"/>',
+  carrello: '<path d="M3 4h2l2.4 10.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H6.2"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>',
+  caffe: '<path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5V6M12 3.5V6"/>',
+  cocktail: '<path d="M5 4h14l-7 8z"/><path d="M12 12v8M8 20h8"/>',
+  borsa: '<path d="M5 8h14l-1 12H6z"/><path d="M9 10V7a3 3 0 0 1 6 0v3"/>',
+  maglia: '<path d="M8.5 4 4 6.5l1.5 4 2-1V20h9V9.5l2 1 1.5-4L15.5 4a3.5 3.5 0 0 1-7 0z"/>',
+  regalo: '<rect x="4" y="9" width="16" height="4" rx="1"/><path d="M5.5 13v7h13v-7M12 9v11M12 9c-1.5-3-5-3.5-5-1.2C7 9 9 9 12 9zM12 9c1.5-3 5-3.5 5-1.2 0 1.2-2 1.2-5 1.2z"/>',
+  fulmine: '<path d="M13 3 5 13.5h6L10 21l8-10.5h-6z"/>',
+  fiamma: '<path d="M12 21a6 6 0 0 0 6-6c0-3.5-2.5-5.5-3.5-8.5-1 2-2 3-3.5 3.5C11 8 10.5 6 10.5 4 7.5 6.5 6 10.5 6 15a6 6 0 0 0 6 6z"/>',
+  goccia: '<path d="M12 3.5s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+  wifi: '<path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.3" r=".6"/>',
+  telefono: '<rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 18h2"/>',
+  pc: '<rect x="3.5" y="5" width="17" height="11" rx="1.5"/><path d="M9 20h6M12 16v4"/>',
+  auto: '<path d="M4 16v-4l2-5.2A1.5 1.5 0 0 1 7.4 6h9.2a1.5 1.5 0 0 1 1.4.8L20 12v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 12h16M6 17v2M18 17v2"/><circle cx="7.5" cy="14.5" r=".5"/><circle cx="16.5" cy="14.5" r=".5"/>',
+  bus: '<rect x="5" y="3.5" width="14" height="14" rx="2.5"/><path d="M5 11h14M8 17.5V20M16 17.5V20"/><circle cx="8.5" cy="14.3" r=".5"/><circle cx="15.5" cy="14.3" r=".5"/>',
+  benzina: '<path d="M5 20V5a1.5 1.5 0 0 1 1.5-1.5h6A1.5 1.5 0 0 1 14 5v15M3.5 20h12M5 10h9M14 8h2a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 0 3 0V8l-2.5-2.5"/>',
+  aereo: '<path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/>',
+  gioco: '<path d="M7 7h10a4.5 4.5 0 0 1 4.4 5.4l-.8 4a2.7 2.7 0 0 1-4.6 1.4L14.3 16H9.7L8 17.8a2.7 2.7 0 0 1-4.6-1.4l-.8-4A4.5 4.5 0 0 1 7 7zM7.5 10v4M5.5 12h4"/><circle cx="15.5" cy="11" r=".5"/><circle cx="17.5" cy="13" r=".5"/>',
+  film: '<rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M3.5 9.5h17M3.5 14.5h17M8 5v14M16 5v14"/>',
+  musica: '<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>',
+  libro: '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5z"/>',
+  cuore: '<path d="M12 20s-7.5-4.5-7.5-10A4.3 4.3 0 0 1 12 7.5 4.3 4.3 0 0 1 19.5 10c0 5.5-7.5 10-7.5 10z"/>',
+  pillola: '<path d="M10.6 4.4a4.9 4.9 0 0 1 7 7l-6.2 6.2a4.9 4.9 0 0 1-7-7zM7.5 10.5l6 6"/>',
+  pesi: '<path d="M6.5 7v10M17.5 7v10M4 9.5v5M20 9.5v5M6.5 12h11"/>',
+  zampa: '<circle cx="7" cy="10" r="1.6"/><circle cx="10.5" cy="6.5" r="1.6"/><circle cx="14.5" cy="6.5" r="1.6"/><circle cx="18" cy="10" r="1.6"/><path d="M12 12c-2.5 0-5 3.5-5 5.5S9 20 12 19.5s5 .5 5-2-2.5-5.5-5-5.5z"/>',
+  scuola: '<path d="M2.5 9.5 12 5l9.5 4.5L12 14zM6.5 11.5V16c3 2.5 8 2.5 11 0v-4.5M21.5 9.5v5"/>',
+  lavoro: '<rect x="3.5" y="7.5" width="17" height="12" rx="2"/><path d="M9 7.5V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v1.5M3.5 12.5h17"/>',
+  attrezzi: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/>',
+  forbici: '<circle cx="6.5" cy="6.5" r="2.5"/><circle cx="6.5" cy="17.5" r="2.5"/><path d="M8.6 8 20 18M8.6 16 20 6"/>',
+  foglia: '<path d="M5 19c0-8 5-13 14-14-.5 9-6 14-14 14zM5 19l8-8"/>',
+  ombrello: '<path d="M3.5 12a8.5 8.5 0 0 1 17 0zM12 12v6.5a2 2 0 0 1-4 0"/>',
+  carta: '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/>',
+  ricevuta: '<path d="M6 3.5h12V21l-2-1.3-2 1.3-2-1.3-2 1.3-2-1.3L6 21zM9 8h6M9 11.5h6M9 15h3"/>',
+  monete: '<ellipse cx="9" cy="7" rx="5.5" ry="2.5"/><path d="M3.5 7v4c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V7M9.5 16.2c.6 1.3 2.8 2.3 5.5 2.3 3 0 5.5-1.1 5.5-2.5v-4c0-1.2-1.8-2.2-4.3-2.4"/>',
+  banca: '<path d="M3.5 9 12 4.5 20.5 9M5 9v8M9.5 9v8M14.5 9v8M19 9v8M3.5 19.5h17"/>',
+  entrata: '<path d="M12 4v12M6.5 10.5 12 16l5.5-5.5M5 20h14"/>',
+  etichetta: '<path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1 1 0 0 1 0 1.4l-7.3 7.3a1 1 0 0 1-1.4 0z"/><circle cx="8" cy="8" r="1.3"/>',
+  stella: '<path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/>',
+  altro: '<circle cx="6" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="18" cy="12" r="1"/>'
+};
+const DEF_ICON = { casa: "casa", cibo: "posate", bollette: "fulmine", trasporti: "auto", svago: "gioco", shopping: "borsa", salute: "cuore", altro: "altro", stip: "banca", entrate: "entrata" };
+/* cerchio colorato con icona (o iniziale, se la categoria non ha icona) */
+const cbadge = (c, size = "") => `<span class="cb ${size}" style="background:${cvar(c.color)}" aria-hidden="true">${ICONS[c.icon] ? `<svg viewBox="0 0 24 24">${ICONS[c.icon]}</svg>` : esc((c.name || "?").charAt(0).toUpperCase())}</span>`;
+/* segno piccolo dentro i bottoni: icona colorata, o pallino */
+const cmark = c => ICONS[c.icon] ? `<svg class="ci" viewBox="0 0 24 24" style="stroke:${cvar(c.color)}">${ICONS[c.icon]}</svg>` : `<span class="dot" style="background:${cvar(c.color)}"></span>`;
 const ICON_CHEV = `<svg class="chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>`;
 const ICON_X = `<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>`;
 
@@ -309,13 +370,13 @@ const DEF_OUT = [
   ["altro", "Altro", -1, [], true]
 ];
 const DEF_IN = [["stip", "Stipendio", 5, []], ["entrate", "Altre entrate", -1, ["Rimborsi", "Regali ricevuti", "Vendite"], true]];
-const mkCat = type => ([id, name, color, subs, fb]) => ({ id, name, color, type, budget: null, fallback: !!fb, subs: subs.map((n, i) => ({ id: `${id}.${i}`, name: n })) });
+const mkCat = type => ([id, name, color, subs, fb]) => ({ id, name, color, icon: DEF_ICON[id] || null, type, budget: null, fallback: !!fb, subs: subs.map((n, i) => ({ id: `${id}.${i}`, name: n })) });
 const DEFAULT_CATS = DEF_OUT.map(mkCat("out")).concat(DEF_IN.map(mkCat("in")));
 
 function fresh(){ return { v: 2, cats: structuredClone(DEFAULT_CATS), tx: [], opt: {} }; }
 /* dalla prima versione (categorie senza sottocategorie): i movimenti passano nelle nuove macrocategorie */
 function migrate(d){
-  if (d.v >= 2){ d.cats.forEach(c => { if (!Array.isArray(c.subs)) c.subs = []; }); return d; }
+  if (d.v >= 2){ d.cats.forEach(c => { if (!Array.isArray(c.subs)) c.subs = []; if (c.icon === undefined) c.icon = DEF_ICON[c.id] || null; }); return d; }
   const old = { c0: ["Casa", "casa"], c1: ["Spesa", "cibo", "cibo.0"], c2: ["Ristoranti e bar", "cibo"], c3: ["Trasporti", "trasporti"],
     c4: ["Bollette", "bollette"], c5: ["Svago", "svago"], c6: ["Shopping", "shopping"], c7: ["Salute", "salute"], c8: ["Altro", "altro"],
     i0: ["Stipendio", "stip"], i1: ["Altre entrate", "entrate"] };
@@ -327,7 +388,7 @@ function migrate(d){
       if (c.budget) n.budget = (n.budget || 0) + c.budget;
     } else {
       const fb = cats.findIndex(x => x.fallback && x.type === c.type);
-      cats.splice(fb < 0 ? cats.length : fb, 0, { ...c, fallback: false, subs: [] }); map[c.id] = [c.id, null];
+      cats.splice(fb < 0 ? cats.length : fb, 0, { ...c, fallback: false, subs: [], icon: null }); map[c.id] = [c.id, null];
     }
   }
   for (const t of d.tx){ const m = map[t.cat]; if (m){ t.cat = m[0]; t.sub = m[1]; } }
@@ -473,7 +534,7 @@ function catRows(st, opts = {}){
   const max = st.cats[0].amt;
   return `<div class="panel">${st.cats.map(c => {
     const b = c.cat.budget, over = b && c.amt > b;
-    return `<button class="crow" data-cat="${c.cat.id}"><span class="dot" style="background:${cvar(c.cat.color)}"></span><div class="mid">
+    return `<button class="crow" data-cat="${c.cat.id}">${cbadge(c.cat)}<div class="mid">
       <div class="nm"><span>${esc(c.cat.name)}</span><span class="num">${eur(c.amt)}</span></div>
       <div class="meta"><span>${c.n} moviment${c.n === 1 ? "o" : "i"}${b ? ` · budget ${eur0(b)}` : ""}</span><span class="num">${pct(c.amt, st.tot)}%</span></div>
       ${b ? `<div class="bar budget${over ? " over" : ""}"><i style="width:${Math.min(100, pct(c.amt, b))}%"></i></div>
@@ -484,10 +545,10 @@ function catRows(st, opts = {}){
   }).join("")}</div>`;
 }
 function txRow(t){
-  const c = cat(t.cat), s = sub(t), letter = (c.name || "?").charAt(0).toUpperCase();
+  const c = cat(t.cat), s = sub(t);
   const title = t.note || (s ? s.name : c.name);
   const line = [t.note ? catLabel(t) : s ? c.name : "", dShort(t.date)].filter(Boolean).join(" · ");
-  return `<button class="tx" data-tx="${t.id}"><span class="ic" style="background:${cvar(c.color)}">${esc(letter)}</span>
+  return `<button class="tx" data-tx="${t.id}">${cbadge(c, "lg")}
     <div class="mid"><div class="t">${esc(title)}</div><div class="s">${esc(line)}</div></div>
     <span class="a num${t.type === "in" ? " in" : ""}">${t.type === "in" ? "+" : "−"}${eur(t.amt)}</span></button>`;
 }
@@ -540,9 +601,9 @@ function renderTx(){
     if (q && !(`${t.note} ${catLabel(t)} ${fmtInput(t.amt)}`.toLowerCase().includes(q))) return false;
     return true;
   }).sort((a, b) => b.date.localeCompare(a.date) || b.ts - a.ts);
-  const chip = (k, label, dot) => `<button class="chip" data-filter="${k}" aria-pressed="${S.filter === k}">${dot ? `<span class="dot" style="background:${dot}"></span>` : ""}${esc(label)}</button>`;
+  const chip = (k, label, c) => `<button class="chip" data-filter="${k}" aria-pressed="${S.filter === k}">${c ? cmark(c) : ""}${esc(label)}</button>`;
   let html = `<div class="searchbar"><input type="search" id="q" placeholder="Cerca per nota, categoria o importo" value="${esc(S.q)}" enterkeyhint="search"></div>
-    <div class="chips">${chip("all", "Tutti")}${chip("out", "Spese")}${chip("in", "Entrate")}${usedCats.map(c => chip("c:" + c.id, c.name, cvar(c.color))).join("")}</div>`;
+    <div class="chips">${chip("all", "Tutti")}${chip("out", "Spese")}${chip("in", "Entrate")}${usedCats.map(c => chip("c:" + c.id, c.name, c)).join("")}</div>`;
   if (macro){
     const subs = bySub(all.filter(t => t.cat === macro));
     const schip = (k, label) => `<button class="chip" data-sfilter="${k ?? ""}" aria-pressed="${S.sf === k}">${esc(label)}</button>`;
@@ -655,16 +716,16 @@ function renderReport(){
     <div class="panel">${st.cats.map(c => {
       const p = prevMap.get(c.cat.id) || 0, d = c.amt - p;
       const dtxt = !pst.tot ? "" : p === 0 ? "nuova" : Math.abs(d) < 100 ? "= stabile" : `${d > 0 ? "▲ +" : "▼ −"}${eur0(Math.abs(d))}`;
-      return `<button class="crow" data-cat="${c.cat.id}"><span class="dot" style="background:${cvar(c.cat.color)}"></span><div class="mid">
+      return `<button class="crow" data-cat="${c.cat.id}">${cbadge(c.cat)}<div class="mid">
         <div class="nm"><span>${esc(c.cat.name)}</span><span class="num">${eur(c.amt)}</span></div>
         <div class="meta"><span>${pct(c.amt, st.tot)}% · ${c.n} mov. · media ${eur0(c.amt / c.n)}</span><span class="num">${dtxt}${dtxt && pst.tot ? ` vs ${mShort(pst.m)}` : ""}</span></div>
         <div class="bar"><i style="width:${Math.max(2, c.amt / st.cats[0].amt * 100)}%;background:${cvar(c.cat.color)}"></i></div></div></button>
         ${hasSubs(c) ? `<div class="nest">${c.subs.map(x => `<div class="srow"><div><span>${esc(x.name)}</span><span class="num">${eur(x.amt)}</span></div><small>${movs(x.n)} · ${pct(x.amt, c.amt)}% di ${esc(c.cat.name)}</small></div>`).join("")}</div>` : ""}`;
-    }).join("")}${pst.cats.filter(c => !st.cats.some(x => x.cat.id === c.cat.id)).map(c => `<div class="crow"><span class="dot" style="background:${cvar(c.cat.color)}"></span><div class="mid">
+    }).join("")}${pst.cats.filter(c => !st.cats.some(x => x.cat.id === c.cat.id)).map(c => `<div class="crow">${cbadge(c.cat)}<div class="mid">
       <div class="nm"><span>${esc(c.cat.name)}</span><span class="num">${eur(0)}</span></div><div class="meta"><span>nessuna spesa questo mese</span><span>▼ −${eur0(c.amt)} vs ${mShort(pst.m)}</span></div></div></div>`).join("")}</div>` : ""}
 
     ${lv.length ? `<div class="shead"><h2>Le voci più costose</h2></div>
-    <div class="panel">${lv.slice(0, 6).map(x => `<div class="leaf"><span class="dot" style="background:${cvar(x.c.color)}"></span><div class="mid">
+    <div class="panel">${lv.slice(0, 6).map(x => `<div class="leaf">${cbadge(x.c, "sm")}<div class="mid">
       <div class="nm" style="display:flex;justify-content:space-between;gap:10px;font-size:14.5px;font-weight:500"><span>${esc(x.s.name)}</span><span class="num">${eur(x.s.amt)}</span></div>
       <div class="meta" style="display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:2px"><span>${esc(x.c.name)} · ${movs(x.s.n)}</span><span class="num">${pct(x.s.amt, st.tot)}%</span></div>
       <div class="bar"><i style="width:${Math.max(2, x.s.amt / lv[0].s.amt * 100)}%;background:${cvar(x.c.color)}"></i></div></div></div>`).join("")}</div>` : ""}
@@ -692,7 +753,7 @@ function renderCats(){
     const a = (type === "out" ? st.cats : inc).find(x => x.cat.id === c.id)?.amt || 0;
     const info = [`${mName(S.month)}: ${eur(a)}`]; if (c.budget) info.push(`budget ${eur0(c.budget)}`);
     const subs = c.subs.length ? c.subs.map(x => esc(x.name)).join(", ") : "nessuna sottocategoria";
-    return `<button class="list-item" data-cat="${c.id}"><span class="dot" style="background:${cvar(c.color)}"></span><span>${esc(c.name)}<small class="clamp">${subs}</small><small>${info.join(" · ")}</small></span>${ICON_CHEV}</button>`;
+    return `<button class="list-item" data-cat="${c.id}">${cbadge(c)}<span>${esc(c.name)}<small class="clamp">${subs}</small><small>${info.join(" · ")}</small></span>${ICON_CHEV}</button>`;
   }).join("");
   v.innerHTML = `<div class="section">
     <div class="shead"><h2>Categorie di spesa</h2><button data-act="newCat" data-type="out">+ Nuova</button></div>
@@ -722,7 +783,7 @@ function drawTx(){
     <h3>${e.id ? "Modifica movimento" : e.type === "out" ? "Nuova spesa" : "Nuova entrata"}</h3><button class="btn" data-act="saveTx">Salva</button></div>
     <div class="seg"><button data-type="out" aria-pressed="${e.type === "out"}">Spesa</button><button data-type="in" aria-pressed="${e.type === "in"}">Entrata</button></div>
     <div class="amount"><input id="amt" inputmode="decimal" placeholder="0,00" autocomplete="off" value="${e.amt ? fmtInput(e.amt) : ""}" aria-label="Importo"><span>€</span></div>
-    <div class="field"><label>Categoria</label><div class="catgrid">${cats.map(c => `<button class="chip" data-pick="${c.id}" aria-pressed="${c.id === e.cat}"><span class="dot" style="background:${cvar(c.color)}"></span>${esc(c.name)}</button>`).join("")}
+    <div class="field"><label>Categoria</label><div class="catgrid">${cats.map(c => `<button class="chip" data-pick="${c.id}" aria-pressed="${c.id === e.cat}">${cmark(c)}${esc(c.name)}</button>`).join("")}
       <button class="chip" data-act="newCat" data-type="${e.type}">+ Nuova</button></div></div>
     ${e.cat ? `<div class="field"><label>Sottocategoria di ${esc(mc.name)}</label><div class="catgrid subs">
       <button class="chip" data-psub="" aria-pressed="${!e.sub}">Nessuna</button>${subs.map(x => `<button class="chip" data-psub="${x.id}" aria-pressed="${x.id === e.sub}">${esc(x.name)}</button>`).join("")}
@@ -765,7 +826,7 @@ function openCat(id, type){
   if (id && !c) return;
   const used = new Set(D.cats.filter(x => x.type === (type || "out")).map(x => x.color));
   const free = [0, 1, 2, 3, 4, 5, 6, 7].find(i => !used.has(i)) ?? 0;
-  S.cat = c ? { ...c, subs: c.subs.map(x => ({ ...x })) } : { id: null, name: "", color: free, type: type || "out", budget: null, subs: [], from: S.edit && $("#sTx").classList.contains("open") };
+  S.cat = c ? { ...c, subs: c.subs.map(x => ({ ...x })) } : { id: null, name: "", color: free, icon: (type || "out") === "out" ? "etichetta" : "monete", type: type || "out", budget: null, subs: [], from: S.edit && $("#sTx").classList.contains("open") };
   drawCat(); open("#sCat");
   if (!c) $("#catName").focus();
 }
@@ -785,8 +846,10 @@ function drawCat(){
   $("#sCat").innerHTML = `<div class="pbar"><button class="icon-btn" data-act="close" aria-label="Chiudi">${ICON_X}</button>
     <h3>${c.id ? esc(c.name) : "Nuova categoria"}</h3><button class="btn" data-act="saveCat">Salva</button></div>
     ${c.id ? "" : `<div class="seg" style="padding-bottom:14px"><button data-ctype="out" aria-pressed="${c.type === "out"}">Di spesa</button><button data-ctype="in" aria-pressed="${c.type === "in"}">Di entrata</button></div>`}
-    <div class="field" style="padding-top:8px"><label for="catName">Nome</label><input type="text" id="catName" value="${esc(c.name)}" placeholder="es. Palestra" autocomplete="off" maxlength="40"></div>
-    <div class="field"><label>Colore nei grafici</label><div class="swatches">${[0, 1, 2, 3, 4, 5, 6, 7, -1].map(i => `<button data-color="${i}" aria-pressed="${c.color === i}" style="background:${cvar(i)}" aria-label="Colore ${i + 2}"></button>`).join("")}</div></div>
+    <div class="catprev" id="catPrev">${cbadge(c, "lg")}<b>${esc(c.name || "Nuova categoria")}</b></div>
+    <div class="field"><label for="catName">Nome</label><input type="text" id="catName" value="${esc(c.name)}" placeholder="es. Palestra" autocomplete="off" maxlength="40"></div>
+    <div class="field"><label>Icona</label><div class="icons">${Object.entries(ICONS).map(([k, v]) => `<button data-icon="${k}" aria-pressed="${c.icon === k}" aria-label="Icona ${k}"${c.icon === k ? ` style="background:${cvar(c.color)}"` : ""}><svg viewBox="0 0 24 24">${v}</svg></button>`).join("")}</div></div>
+    <div class="field"><label>Colore</label><div class="swatches">${[0, 1, 2, 3, 4, 5, 6, 7, -1].map(i => `<button data-color="${i}" aria-pressed="${c.color === i}" style="background:${cvar(i)}" aria-label="Colore ${i + 2}"></button>`).join("")}</div></div>
     <div class="field"><label>Sottocategorie</label>
       ${c.subs.length ? `<div class="panel">${c.subs.map((x, i) => `<div class="subed"><input type="text" data-subname="${i}" value="${esc(x.name)}" maxlength="40" autocomplete="off" aria-label="Nome sottocategoria"><button class="icon-btn" data-subdel="${i}" aria-label="Elimina ${esc(x.name)}">${ICON_X}</button></div>`).join("")}</div>` : `<p class="help" style="margin:0">Nessuna sottocategoria: aggiungine una qui sotto.</p>`}
       <div class="subadd"><input type="text" id="newSub" placeholder="Nuova sottocategoria" maxlength="40" autocomplete="off" enterkeyhint="done"><button class="btn ghost" data-act="addSub">Aggiungi</button></div>
@@ -976,6 +1039,11 @@ document.addEventListener("click", e => {
   if (d.type && el.closest(".seg")){ readTx(); S.edit.type = d.type; drawTx(); return sizeAmt(); }
   if (d.ctype){ readCat(); S.cat.type = d.ctype; return drawCat(); }
   if (d.color !== undefined){ readCat(); S.cat.color = +d.color; return drawCat(); }
+  if (d.icon !== undefined){
+    S.cat.icon = d.icon;
+    document.querySelectorAll("[data-icon]").forEach(b => { const on = b === el; b.setAttribute("aria-pressed", on); b.style.background = on ? cvar(S.cat.color) : ""; });
+    $("#catPrev .cb").outerHTML = cbadge(S.cat, "lg"); return;
+  }
   if (d.themePick){ applyTheme(d.themePick); save(); document.querySelectorAll("[data-theme-pick]").forEach(b => b.setAttribute("aria-pressed", b === el)); return render(); }
   switch (d.act){
     case "add": return openTx();
@@ -1013,6 +1081,7 @@ document.addEventListener("pointerdown", e => {
 });
 const sizeAmt = () => { const a = $("#amt"); if (a) a.style.width = Math.max(2.2, (a.value || a.placeholder).length * .62 + .3) + "em"; };
 document.addEventListener("input", e => {
+  if (e.target.id === "catName"){ const b = $("#catPrev b"); if (b) b.textContent = e.target.value.trim() || "Nuova categoria"; const x = $("#catPrev .cb"); if (x && !ICONS[S.cat.icon]){ S.cat.name = e.target.value; x.outerHTML = cbadge(S.cat, "lg"); } }
   if (e.target.id === "amt") sizeAmt();
   if (e.target.id === "q"){ S.q = e.target.value; const pos = e.target.selectionStart; renderTx(); const q = $("#q"); q.focus(); q.setSelectionRange(pos, pos); }
 });
