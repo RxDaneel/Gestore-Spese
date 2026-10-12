@@ -1,7 +1,7 @@
 {
   "name": "Spese",
   "short_name": "Spese",
-  "start_url": "./",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#1a1a19",
