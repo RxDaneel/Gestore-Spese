@@ -176,6 +176,31 @@ nav .plus:active svg{opacity:.6}
 .chips.sub .chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);box-shadow:none}
 .catgrid.subs .chip{background:none;box-shadow:inset 0 0 0 1px var(--line)}
 .catgrid.subs .chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);box-shadow:none}
+/* calendario */
+.viewseg{padding:12px 16px 0}
+.cal{padding:8px 12px 0}
+.cal .wd,.cal .grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal .wd span{text-align:center;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:2px 0 4px}
+.cd{border:0;background:var(--surface);border-radius:10px;min-height:64px;padding:5px 1px 5px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--fg);min-width:0}
+.cd.blank{background:none;pointer-events:none}
+.cd.none{background:none}
+.cd.future{opacity:.35}
+.cd .n{font-size:13px;font-weight:500;line-height:20px;min-width:22px;padding:0 4px;border-radius:999px;font-variant-numeric:tabular-nums}
+.cd.today .n{background:var(--fg);color:var(--bg);font-weight:700}
+.cd[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--fg)}
+.cd .dots{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:3px;max-width:40px;min-height:7px}
+.cd .dots i{width:7px;height:7px;border-radius:50%;display:block}
+.cd .dots b{font-size:10px;line-height:7px;color:var(--muted);font-weight:700}
+.cd .amt{margin-top:auto;font-size:10.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;max-width:100%;overflow:hidden}
+.cd .amt.hi{color:var(--fg);font-weight:700}
+.cd .amt.in{color:var(--good)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;padding:12px 16px 0;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:8px;height:8px;border-radius:50%;display:block}
+.dayhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:18px 16px 6px}
+.dayhead b{font-size:16px;font-weight:600;display:block}
+.dayhead b::first-letter{text-transform:uppercase}
+.dayhead span{color:var(--muted);font-size:13px}
 .day{display:flex;justify-content:space-between;padding:16px 16px 6px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .tx{display:flex;align-items:center;gap:12px;padding:10px 16px;width:100%;border:0;background:none;text-align:left}
 .tx:active{background:var(--surface)}
@@ -305,7 +330,7 @@ nav .plus:active svg{opacity:.6}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261013003421";
+const BUILD = "20261013004058";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -457,7 +482,7 @@ function monthStats(m){
 }
 
 /* ---------- stato interfaccia ---------- */
-const S = { tab: "vHome", month: thisMonth(), filter: "all", sf: null, q: "", edit: null };
+const S = { tab: "vHome", month: thisMonth(), filter: "all", sf: null, q: "", edit: null, view: D.opt.txView === "cal" ? "cal" : "list", day: null };
 
 /* ---------- grafici ---------- */
 function donut(rows, total){
@@ -587,6 +612,35 @@ function renderHome(){
 }
 
 /* ---------- Movimenti ---------- */
+/* calendario del mese: per ogni giorno un pallino per categoria (dalla più costosa) e il totale speso */
+function calendar(list){
+  const m = S.month, dm = daysIn(m), lead = (pdate(m + "-01").getDay() + 6) % 7, td = today();
+  const byDay = {}; for (const t of list) (byDay[t.date] ||= []).push(t);
+  const outDays = Object.values(byDay).map(a => sum(a.filter(t => t.type === "out"))).filter(Boolean);
+  const avg = outDays.length ? outDays.reduce((a, b) => a + b, 0) / outDays.length : 0;
+  const short = c => { const e = Math.round(c / 100); return e >= 1000 ? (e / 1000).toFixed(1).replace(".", ",").replace(",0", "") + "k" : e + " €"; };
+  let cells = "";
+  for (let i = 0; i < lead; i++) cells += `<span class="cd blank"></span>`;
+  for (let d = 1; d <= dm; d++){
+    const date = `${m}-${pad(d)}`, txs = byDay[date] || [], out = txs.filter(t => t.type === "out");
+    const tot = sum(out), inc = sum(txs.filter(t => t.type === "in")), cats = byCat(out);
+    const dots = cats.slice(0, cats.length > 4 ? 3 : 4).map(c => `<i style="background:${cvar(c.cat.color)}"></i>`).join("") + (cats.length > 4 ? "<b>+</b>" : "");
+    const amt = tot ? `<span class="amt${tot > avg * 1.5 && outDays.length > 2 ? " hi" : ""}">${short(tot)}</span>` : inc ? `<span class="amt in">+${short(inc)}</span>` : "";
+    const cls = ["cd", date === td ? "today" : "", txs.length ? "" : "none", date > td ? "future" : ""].filter(Boolean).join(" ");
+    const lab = `${dLabel(date)}: ${tot ? "spesi " + eur(tot) + " in " + cats.map(c => c.cat.name).join(", ") : "nessuna spesa"}`;
+    cells += `<button class="${cls}" data-day="${date}" aria-pressed="${S.day === date}" aria-label="${esc(lab)}"><span class="n">${d}</span><span class="dots">${dots}</span>${amt}</button>`;
+  }
+  const used = byCat(list.filter(t => t.type === "out")).map(c => c.cat);
+  const legend = used.length ? `<div class="legend">${used.map(c => `<span><i style="background:${cvar(c.color)}"></i>${esc(c.name)}</span>`).join("")}</div>` : "";
+  let detail = "";
+  if (S.day){
+    const txs = (byDay[S.day] || []).sort((a, b) => b.ts - a.ts), tot = sum(txs.filter(t => t.type === "out"));
+    detail = `<div class="dayhead"><b>${dLabel(S.day)}</b><span class="num">${tot ? "−" + eur(tot) : txs.length ? "" : "nessuna spesa"}</span></div>
+      ${txs.map(txRow).join("")}
+      <div class="row-btns" style="margin-top:10px"><button class="btn ghost" data-act="addOn" data-day="${S.day}">+ Aggiungi in questo giorno</button></div>`;
+  } else detail = `<p class="help" style="padding:14px 16px 0;text-align:center">Tocca un giorno per vedere cosa hai speso.</p>`;
+  return `<div class="cal"><div class="wd">${["lun", "mar", "mer", "gio", "ven", "sab", "dom"].map(x => `<span>${x}</span>`).join("")}</div><div class="grid">${cells}</div></div>${legend}${detail}`;
+}
 function renderTx(){
   const v = $("#vTx"), all = txIn(S.month);
   if (!all.length){ v.innerHTML = emptyMonth(); return; }
@@ -602,7 +656,10 @@ function renderTx(){
     return true;
   }).sort((a, b) => b.date.localeCompare(a.date) || b.ts - a.ts);
   const chip = (k, label, c) => `<button class="chip" data-filter="${k}" aria-pressed="${S.filter === k}">${c ? cmark(c) : ""}${esc(label)}</button>`;
-  let html = `<div class="searchbar"><input type="search" id="q" placeholder="Cerca per nota, categoria o importo" value="${esc(S.q)}" enterkeyhint="search"></div>
+  if (S.day && !S.day.startsWith(S.month)) S.day = null;
+  if (!S.day && S.month === thisMonth()) S.day = today();
+  let html = `<div class="seg viewseg"><button data-view="list" aria-pressed="${S.view === "list"}">Lista</button><button data-view="cal" aria-pressed="${S.view === "cal"}">Calendario</button></div>
+    <div class="searchbar"><input type="search" id="q" placeholder="Cerca per nota, categoria o importo" value="${esc(S.q)}" enterkeyhint="search"></div>
     <div class="chips">${chip("all", "Tutti")}${chip("out", "Spese")}${chip("in", "Entrate")}${usedCats.map(c => chip("c:" + c.id, c.name, c)).join("")}</div>`;
   if (macro){
     const subs = bySub(all.filter(t => t.cat === macro));
@@ -610,6 +667,7 @@ function renderTx(){
     if (subs.some(x => x.sub)) html += `<div class="chips sub">${schip(null, "Tutte")}${subs.map(x => schip(x.key, x.name)).join("")}</div>`;
   }
   const tot = sum(list.filter(t => t.type === "out")), inc = sum(list.filter(t => t.type === "in"));
+  if (S.view === "cal"){ v.innerHTML = html + calendar(list); return; }
   html += `<div class="day" style="padding-top:10px"><span>${list.length} moviment${list.length === 1 ? "o" : "i"}</span><span class="num">${tot ? "−" + eur(tot) : ""}${tot && inc ? " · " : ""}${inc ? "+" + eur(inc) : ""}</span></div>`;
   let day = "";
   for (const t of list){
@@ -765,11 +823,11 @@ function renderCats(){
 }
 
 /* ---------- foglio movimento ---------- */
-function openTx(id){
+function openTx(id, day){
   const t = id ? D.tx.find(x => x.id === id) : null;
   const last = D.tx.length ? [...D.tx].sort((a, b) => b.ts - a.ts)[0] : null;
   const lastOut = last && last.type === "out";
-  S.edit = t ? { ...t, sub: t.sub || null } : { id: null, type: "out", amt: 0, cat: lastOut ? last.cat : D.cats.find(c => c.type === "out")?.id, sub: lastOut ? last.sub || null : null, date: S.month === thisMonth() ? today() : S.month + "-01", note: "" };
+  S.edit = t ? { ...t, sub: t.sub || null } : { id: null, type: "out", amt: 0, cat: lastOut ? last.cat : D.cats.find(c => c.type === "out")?.id, sub: lastOut ? last.sub || null : null, date: day || (S.month === thisMonth() ? today() : S.month + "-01"), note: "" };
   drawTx();
   open("#sTx"); sizeAmt();
   if (!t) $("#amt").focus();
@@ -1030,6 +1088,8 @@ document.addEventListener("click", e => {
   if (d.tab) return go(d.tab);
   if (d.tabgo) return go(d.tabgo);
   if (d.filter){ S.filter = d.filter; S.sf = null; return renderTx(); }
+  if (d.view){ S.view = d.view; D.opt.txView = d.view; save(); return renderTx(); }
+  if (d.day && el.classList.contains("cd")){ S.day = d.day; return renderTx(); }
   if (d.sfilter !== undefined){ S.sf = d.sfilter === "" ? null : d.sfilter; return renderTx(); }
   if (d.tx){ return openTx(d.tx); }
   if (d.cat && !el.closest("#sCat")) return openCat(d.cat);
@@ -1047,6 +1107,7 @@ document.addEventListener("click", e => {
   if (d.themePick){ applyTheme(d.themePick); save(); document.querySelectorAll("[data-theme-pick]").forEach(b => b.setAttribute("aria-pressed", b === el)); return render(); }
   switch (d.act){
     case "add": return openTx();
+    case "addOn": return openTx(null, d.day);
     case "close": return close();
     case "saveTx": return saveTx();
     case "delTx": return delTx();
