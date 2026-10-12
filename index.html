@@ -292,6 +292,7 @@ nav .plus:active svg{opacity:.6}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
+const BUILD = "20261013002827";
 const ICON_CHEV = `<svg class="chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>`;
 const ICON_X = `<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>`;
 
@@ -867,6 +868,7 @@ function openSettings(){
       ${n ? "" : `<button class="list-item" data-act="demo"><span>Carica dati di esempio<small>per provare grafici e report</small></span>${ICON_CHEV}</button>`}
       <button class="list-item danger" data-act="wipe"><span>Cancella tutti i movimenti</span></button>
     </div>
+    <p class="help">Versione ${BUILD.slice(6, 8)}/${BUILD.slice(4, 6)} ${BUILD.slice(8, 10)}:${BUILD.slice(10, 12)}</p>
     <p class="help">I dati restano solo su questo telefono, dentro l'app: nessun server, nessun account. Fai ogni tanto un backup, perché se cancelli l'app dalla schermata Home i dati vanno persi.</p>
   </div>`;
   open("#sSet");
@@ -1051,6 +1053,22 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden){ set
 
 applyTheme(D.opt.theme);
 render();
+
+/* aggiornamenti automatici come in YTG: se version.json indica una versione più nuova, ricarico la pagina */
+async function checkUpdate(){
+  try {
+    const r = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
+    const { v } = await r.json();
+    const slot = v + ":" + Math.floor(Date.now() / 300000);
+    if (v && v !== BUILD && sessionStorage.getItem("spese.upd") !== slot){
+      sessionStorage.setItem("spese.upd", slot);   // al massimo un tentativo ogni 5 minuti
+      await fetch(location.pathname, { cache: "reload" }).catch(() => {});
+      location.replace(location.pathname + "?v=" + v);
+    }
+  } catch {}
+}
+checkUpdate();
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkUpdate(); });
 </script>
 </body>
 </html>
