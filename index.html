@@ -86,6 +86,8 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font:15px/1.4 var(--font)}
 body{display:flex;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;height:auto}
+/* iOS 26: nelle web app sulla schermata Home l'altezza "100%" si ferma prima del fondo; 100dvh invece copre tutto lo schermo */
+@supports (height:100dvh){html{height:100dvh}body{bottom:auto;height:100dvh}}
 button,input,select,textarea{font:inherit;color:inherit}
 html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 input,select,textarea{font-size:16px!important}
@@ -442,7 +444,7 @@ nav .plus:active svg{opacity:.6}
 <body>
 
 <header>
-  <h1><button id="hMonth" aria-label="Torna al mese corrente"></button></h1>
+  <h1><button id="hMonth" aria-label="Apri il calendario del mese"></button></h1>
   <button class="icon-btn" id="btnPrev" aria-label="Mese precedente"><svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button>
   <button class="icon-btn" id="btnNext" aria-label="Mese successivo"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
   <button class="icon-btn" id="btnGear" aria-label="Impostazioni"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
@@ -473,7 +475,7 @@ nav .plus:active svg{opacity:.6}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261013122219";
+const BUILD = "20261013122620";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1690,7 +1692,8 @@ $("#fileIn").addEventListener("change", e => { if (e.target.files[0]) restore(e.
 const yStep = () => S.tab === "vReport" && S.rview === "year" ? 12 : 1;
 $("#btnPrev").onclick = () => { S.month = addMonth(S.month, -yStep()); render(); };
 $("#btnNext").onclick = () => { if (S.month < thisMonth()){ const m = addMonth(S.month, yStep()); S.month = m > thisMonth() ? thisMonth() : m; render(); } };
-$("#hMonth").onclick = () => { S.month = thisMonth(); render(); };
+/* toccando il mese in alto si apre il calendario di quel mese */
+$("#hMonth").onclick = () => { S.view = "cal"; D.opt.txView = "cal"; save(); if (!S.day || !S.day.startsWith(S.month)) S.day = S.month === thisMonth() ? today() : null; S.rview = "month"; go("vTx"); };
 $("#btnGear").onclick = openSettings;
 
 /* stessa regolazione dell'altezza di YTG: su iPhone la barra in basso arriva sempre fino al fondo */
@@ -1705,8 +1708,7 @@ function fitApp(){
   root.style.setProperty("--appH", hgt + "px");
   /* se l'area dell'app non arriva fino al bordo dello schermo (iOS recenti), lo spazio per la barra di sistema è già escluso:
      niente margine in più sotto la barra */
-  const vis = Math.round(vv ? vv.height : innerHeight);
-  root.style.setProperty("--bot", scr - vis > 4 ? "0px" : "env(safe-area-inset-bottom,0px)");
+
 }
 fitApp();
 addEventListener("resize", fitApp);
