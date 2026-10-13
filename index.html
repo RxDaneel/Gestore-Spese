@@ -475,7 +475,7 @@ nav .plus:active svg{opacity:.6}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261013123757";
+const BUILD = "20261013123812";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1355,7 +1355,7 @@ function openSettings(){
       ${n ? "" : `<button class="list-item" data-act="demo"><span>Carica dati di esempio<small>per provare grafici e report</small></span>${ICON_CHEV}</button>`}
       <button class="list-item danger" data-act="wipe"><span>Cancella tutti i movimenti</span></button>
     </div>
-    <p class="help">Versione ${BUILD.slice(6, 8)}/${BUILD.slice(4, 6)} ${BUILD.slice(8, 10)}:${BUILD.slice(10, 12)}</p>
+    <p class="help">Versione ${BUILD.slice(6, 8)}/${BUILD.slice(4, 6)} ${BUILD.slice(8, 10)}:${BUILD.slice(10, 12)} · schermo ${innerHeight}/${screen.height}</p>
     <p class="help">I dati stanno su questo telefono, dentro l'app. Con il backup su GitHub attivo, ogni modifica viene copiata anche nel tuo repository privato; senza, esporta ogni tanto un file, perché se il browser cancella i dati del sito vanno persi.</p>
   </div>`;
   open("#sSet");
@@ -1706,9 +1706,11 @@ function fitApp(){
   let hgt = Math.max(innerHeight, vv ? Math.round(vv.height) : 0);
   if (standalone && !typing && scr > hgt && scr - hgt < 200) hgt = scr;
   root.style.setProperty("--appH", hgt + "px");
-  /* se l'area dell'app non arriva fino al bordo dello schermo (iOS recenti), lo spazio per la barra di sistema è già escluso:
-     niente margine in più sotto la barra */
-
+  /* iOS 26 (web app dalla schermata Home): l'area disegnabile finisce prima del fondo dello schermo,
+     quindi la zona della barra di sistema è già fuori. In quel caso niente margine extra sotto la barra. */
+  const vis = Math.round(Math.max(innerHeight, vv ? vv.height : 0));
+  const cut = standalone && portrait && scr - vis > 20 && !typing;
+  root.style.setProperty("--bot", cut ? "6px" : "env(safe-area-inset-bottom,0px)");
 }
 fitApp();
 addEventListener("resize", fitApp);
