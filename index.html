@@ -530,7 +530,7 @@ nav .plus:active svg{transform:scale(.94)}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261013193049";
+const BUILD = "20261014092700";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -627,6 +627,8 @@ const wasV1 = !(D.v >= 2);
 D = migrate(D);
 function save(){ D.updated = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(D)); } catch { toast("Spazio pieno: esporta un backup"); } if (typeof scheduleBackup === "function") scheduleBackup(); }
 if (wasV1) save();
+/* scontrini già salvati con gli sconti come righe a parte: li unisco all'articolo */
+if (D.tx.some(t => t.items?.some(x => x.p < 0))){ D.tx.forEach(t => { if (t.items?.some(x => x.p < 0)) t.items = mergeDiscounts(t.items); }); try { localStorage.setItem(KEY, JSON.stringify(D)); } catch {} }
 try { navigator.storage?.persist?.(); } catch {}
 
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -1625,15 +1627,15 @@ const PC_RULES = [
   ["surgelati", /SURG|\bGELO\b|FROZEN|BASTONC|SOFFICIN|GELAT|4 ?SALTI|FINDUS|CUBETTI/],
   ["animali", /CROCCHET|LETTIERA|\bCANE\b|\bGATT|FRISKIES|WHISKAS|PURINA|MONGE|SHEBA|GOURMET PET/],
   ["alcolici", /\bVINO\b|BIRRA|PROSECCO|SPUMANT|AMARO|LIQUOR|VODKA|\bGIN\b|\bRUM\b|WHISK|APEROL|CAMPARI|CHIANTI|MERLOT|PERONI|MORETTI|HEINEKEN|LAMBRUSCO/],
-  ["igiene", /SHAMPOO|BALSAMO|BAGNOSCH|DOCCIA|DENTIFR|SPAZZOL|DEODOR|RASOI|BARBA|ASSORB|SALVASL|COTTON|FAZZOLETT|SAPONE MANI|PANNOLIN|SALVIETT|COLLUT|CEROTT/],
-  ["casa", /DETERS|DETERG|PIATTI|LAVATRIC|LAVASTOV|AMMORB|CANDEG|SGRASS|ANTICALC|SPUGN|SACCH|CARTA IGIEN|CARTA CUC|ROTOL|SCOTTEX|TOVAGLIOL|ALLUMIN|PELLICOL|PANNO|DIXAN|\bDASH\b|NELSEN|SVELTO|\bCIF\b|AJAX|LAMPADIN|\bPILE\b|SCOPA|CANDELA|FIAMMIF/],
+  ["igiene", /ARGAN|SHAMPOO|BALSAMO|BAGNOSCH|DOCCIA|DENTIFR|SPAZZOL|DEODOR|RASOI|BARBA|ASSORB|SALVASL|COTTON|FAZZOLETT|SAPONE MANI|PANNOLIN|SALVIETT|COLLUT|CEROTT/],
+  ["casa", /DETERS|DETERG|PIATTI|\bPIAT\b|\bDT\.?\s?LAV|LAV\.?\s?LIQ|LAVATRIC|LAVASTOV|AMMORB|CANDEG|SGRASS|ANTICALC|SPUGN|SACCH|CARTA IGIEN|CARTA CUC|ROTOL|SCOTTEX|TOVAGLIOL|ALLUMIN|PELLICOL|PANNO|DIXAN|\bDASH\b|NELSEN|SVELTO|\bCIF\b|AJAX|LAMPADIN|\bPILE\b|SCOPA|CANDELA|FIAMMIF/],
   ["bevande", /ACQUA|\bNATUR|FRIZZ|SUCCO|\bCOCA|\bCOLA\b|FANTA|SPRITE|ARANCIATA|ESTATHE|THE FREDDO|TE FREDDO|BIBITA|ENERGY|RED ?BULL|GATORADE|SAN PELLEGRINO|LEVISSIMA/],
   ["pesce", /PESCE|SALMON|MERLUZZ|ORATA|BRANZIN|GAMBER|COZZE|VONGOL|CALAMAR|POLPO|ALICI|ACCIUG|SGOMBR|BACCAL|SURIMI|SEPPI|TROTA/],
   ["carne", /POLLO|TACCHIN|MANZO|VITELL|MAIALE|SUINO|BOVINO|HAMBURG|MACINAT|SALSICC|BISTECC|FETTIN|PETTO|COSCE|ARROST|SPIEDIN|AGNELLO|CARNE|SCALOPP|COTOLET|CORDON/],
   ["salumi", /PROSC|SALAME|MORTADEL|BRESAOL|SPECK|PANCETT|WURST|\bCOTTO\b|\bCRUDO\b|MOZZ|PARMIG|GRANA|PECORIN|GORGONZ|STRACCH|RICOTT|FORMAG|PROVOL|SCAMORZ|EMMENT|FONTINA|ASIAGO|BURRATA|SOTTILET|FILADELF|MASCARP|CRESCENZ|TALEGG|SALUM/],
   ["latte", /LATTE|\bYOG|YOGURT|BURRO|PANNA|KEFIR|SKYR|\bUOVA\b|\bUOVO\b|BUDINO/],
   ["pane", /\bPANE\b|PANIN|FOCACC|GRISSIN|CRACKER|FETTE BISC|PIADIN|TOAST|BAGUET|CROISS|BRIOCH|PANCARR|TARALL|RUSTICH|PANBAUL/],
-  ["pasta", /PASTA|SPAGH|PENNE|FUSILL|RIGATON|LASAGN|TORTELL|GNOCCH|\bRISO\b|FARRO|\bORZO\b|CEREAL|CORN ?FLAK|MUESLI|FARINA|AVENA|COUS|LINGUIN|TAGLIAT|ORECCH|MACCHER|BARILLA|DE CECCO/],
+  ["pasta", /PASTA|CONCHIG|SPAGH|PENNE|FUSILL|RIGATON|LASAGN|TORTELL|GNOCCH|\bRISO\b|FARRO|\bORZO\b|CEREAL|CORN ?FLAK|MUESLI|FARINA|AVENA|COUS|LINGUIN|TAGLIAT|ORECCH|MACCHER|BARILLA|DE CECCO/],
   ["dolci", /BISCOT|MERENDIN|CIOCC|PATATIN|SNACK|WAFER|CARAMEL|CHEWING|GOMME|TORTA|DOLC|KINDER|BARRETT|POP ?CORN|NOCCIOL|MANDORL|PISTACCH|ARACHID|PRINGLES|MULINO BIANCO|NUTELLA|CREMA SPALM|GELATIN/],
   ["frutta", /\bMEL[AE]\b|BANAN|\bPER[AE]\b|ARANC|LIMON|KIWI|FRAGOL|\bUVA\b|ANANAS|PESCH|ALBICOC|MANDARIN|CLEMENTIN|FRUTTA|MIRTILL|LAMPON|MELON|ANGURI|CILIEG|AVOCAD|PRUGN|FICHI|CACHI|MANGO/],
   ["verdura", /INSALAT|LATTUG|POMOD|ZUCCH|CAROT|PATAT|CIPOLL|AGLIO|MELANZ|PEPERON|SPINAC|BROCC|CAVOL|FINOCC|SEDANO|RUCOLA|FUNGHI|VERDUR|ZUCCA|CETRIOL|BIETA|\bRAPA|CARCIOF|ASPARAG|FAGIOLIN|RADICCH|VALERIAN|BASILIC|PREZZEM|SONCINO|MINESTRON/],
@@ -1649,9 +1651,19 @@ function guessPc(name, raw, aiCat){
   for (const [id, re] of PC_RULES) if (re.test(up)) return id;
   return "altro";
 }
+/* le righe di sconto (prezzo negativo) si sommano all'articolo sopra: resta solo quanto hai pagato davvero */
+function mergeDiscounts(items){
+  const out = [];
+  for (const x of items){
+    const isDisc = x.p < 0 || /^\s*(sconto|promo|ribasso)/i.test(x.n) && x.p <= 0;
+    if (isDisc && out.length){ const prev = out[out.length - 1]; prev.p += x.p; prev.sc = (prev.sc || 0) - x.p; }
+    else if (x.p > 0) out.push({ sc: 0, ...x });
+  }
+  return out.filter(x => x.p > 0);
+}
 /* testo incollato (es. "Copia tutto" di Testo dal vivo) -> righe articolo/prezzo */
 function parseReceiptText(txt){
-  const SKIP = /TOTALE|SUBTOT|CONTANT|RESTO|\bIVA\b|CARTA|BANCOMAT|PAGAMENT|DOCUMENTO|SCONTRINO|ARTICOLI|P\.? ?IVA|TEL\.?|CASSA|OPERATORE|GRAZIE|ARRIVEDERCI|PUNTI|SALDO|RESTO|IMPORTO|DI CUI|ELETTRON|COMMERCIALE|NUMERO|^\s*N\.? ?\d/i;
+  const SKIP = /TOTALE|SUBTOT|CONTANT|RESTO|\bIVA\b|CARTA|\bCARD\b|MASTERCARD|\bVISA\b|MAESTRO|AMEX|SATISPAY|PAGATO|BANCOMAT|PAGAMENT|DOCUMENTO|SCONTRINO|ARTICOLI|P\.? ?IVA|TEL\.?|CASSA|OPERATORE|GRAZIE|ARRIVEDERCI|PUNTI|SALDO|RESTO|IMPORTO|DI CUI|ELETTRON|COMMERCIALE|NUMERO|^\s*N\.? ?\d/i;
   const items = []; let total = null;
   for (let line of String(txt).split(/\r?\n/)){
     line = line.trim(); if (!line) continue;
@@ -1661,12 +1673,12 @@ function parseReceiptText(txt){
     let name = m[1].replace(/\s+\d+([.,]\d+)?\s*%?\s*$/, "").replace(/[*#]+/g, " ").trim();
     let price = parseAmt(m[2].replace(/\s/g, ""));
     if (!name || !isFinite(price)) continue;
-    if (/SCONTO|PROMO|RIBASSO|-\s?\d/i.test(line) && price > 0 && /SCONTO|PROMO|RIBASSO/i.test(name)) price = -price;
+    if (price > 0 && /SCONTO|PROMO|RIBASSO/i.test(name)) price = -price;
     const raw = name, nice = name.toLowerCase().replace(/\b\w/, c => c.toUpperCase());
     const prev = items[items.length - 1];
     items.push({ n: nice, r: raw, p: price, c: price < 0 && prev ? prev.c : guessPc(nice, raw) });
   }
-  return { items, total };
+  return { items: mergeDiscounts(items), total };
 }
 
 /* lettura con l'IA (Claude) direttamente dal telefono; la chiave resta solo qui */
@@ -1710,22 +1722,23 @@ async function aiReceipt(images, text){
 - "nome": nome chiaro in italiano, senza abbreviazioni (es. "MOZZ.BUF.125G" → "Mozzarella di bufala"), iniziale maiuscola, senza peso se non serve.
 - "testo": la riga così com'è scritta sullo scontrino.
 - "prezzo": importo della riga in euro. Se c'è una quantità (es. 2 x 1,20) metti il totale della riga.
-- Sconti e promozioni: righe con prezzo negativo, subito dopo l'articolo a cui si riferiscono, con nome "Sconto ..." e la stessa categoria.
-- Ignora totale, subtotale, IVA, pagamento, resto, punti fedeltà, buste se non pagate.
+- SCONTI: le righe di sconto (es. "SCONTO 30.0% SOCI -0,71", "SCONTO 40.0% CLIENTI", "PROMO", importi negativi) NON sono articoli. Sottrai lo sconto all'articolo subito sopra e metti in "prezzo" solo quanto è stato pagato davvero (es. LENTICCHIE 1,77 con sconto -0,71 → un solo articolo "Lenticchie" a 1,06). Indica lo sconto applicato nel campo "sconto" (numero positivo, 0 se assente). Non restituire mai righe di sconto separate.
+- Ignora righe che non sono prodotti: intestazione del negozio, "Inizio/Fine Salvatempo", "Inizio sacc./Fine sacc.", "N. ART.", "NUMERO", "ARTICOLI", totale, subtotale, IVA, pagamento, resto, punti spesa o fedeltà, buste se non pagate.
+- La somma dei prezzi degli articoli deve tornare con il totale pagato.
 - "categoria": una tra ${PCATS.map(x => `${x.id} (${x.n})`).join(", ")}.
 ${learned ? "Categorie già scelte dall'utente per prodotti simili (seguile):\n" + learned : ""}`;
   const content = images.map(b => ({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: b } }));
   content.push({ type: "text", text: (text ? "Testo dello scontrino:\n" + text + "\n\n" : "") + prompt });
   const tool = { name: "scontrino", description: "Registra il contenuto dello scontrino", input_schema: { type: "object", properties: {
     negozio: { type: "string" }, data: { type: "string", description: "data dello scontrino AAAA-MM-GG, vuota se non leggibile" }, totale: { type: "number" },
-    articoli: { type: "array", items: { type: "object", properties: { nome: { type: "string" }, testo: { type: "string" }, prezzo: { type: "number" }, categoria: { type: "string", enum: PCATS.map(x => x.id) } }, required: ["nome", "prezzo", "categoria"] } } }, required: ["articoli"] } };
+    articoli: { type: "array", items: { type: "object", properties: { nome: { type: "string" }, testo: { type: "string" }, prezzo: { type: "number", description: "importo pagato, già scontato" }, sconto: { type: "number" }, categoria: { type: "string", enum: PCATS.map(x => x.id) } }, required: ["nome", "prezzo", "categoria"] } } }, required: ["articoli"] } };
   const j = await aiCall(content, { tools: [tool] });
   const out = j.content?.find(c => c.type === "tool_use")?.input;
   if (!out || !Array.isArray(out.articoli)) throw new Error("Non sono riuscito a leggere lo scontrino");
   return {
     shop: out.negozio || "", date: /^\d{4}-\d{2}-\d{2}$/.test(out.data || "") ? out.data : "",
     total: isFinite(out.totale) ? Math.round(out.totale * 100) : null,
-    items: out.articoli.filter(a => a && a.nome && isFinite(a.prezzo)).map(a => ({ n: String(a.nome).trim(), r: String(a.testo || "").trim(), p: Math.round(a.prezzo * 100), c: guessPc(a.nome, a.testo || "", a.categoria) }))
+    items: mergeDiscounts(out.articoli.filter(a => a && a.nome && isFinite(a.prezzo)).map(a => ({ n: String(a.nome).trim(), r: String(a.testo || "").trim(), p: Math.round(a.prezzo * 100), sc: a.sconto > 0 ? Math.round(a.sconto * 100) : 0, c: guessPc(a.nome, a.testo || "", a.categoria) })))
   };
 }
 /* applica il risultato alla spesa che si sta scrivendo */
@@ -1773,11 +1786,11 @@ function itemsBlock(e){
     <div class="rcbtns" style="margin-top:8px"><button class="btn" data-act="rcParse">Leggi il testo</button><button class="btn ghost" data-act="rcCancel">Annulla</button></div>`;
   const btns = `<div class="rcbtns"><label class="btn ghost">📷 ${e.items?.length ? "Rileggi" : "Foto scontrino"}<input type="file" id="rcFile" accept="image/*" multiple></label><button class="btn ghost" data-act="rcPaste">📋 Incolla testo</button></div>`;
   if (!e.items?.length) return btns + `<p class="help" style="margin:8px 2px 0">Facoltativo: leggo i prodotti dello scontrino, così vedi cosa compri di più.${AI.key ? "" : " Per le foto serve la chiave API (⚙️)."}</p>`;
-  const tot = e.items.reduce((s, x) => s + x.p, 0), amt = parseAmt(e.raw || "");
+  const tot = e.items.reduce((s, x) => s + x.p, 0), amt = parseAmt(e.raw || ""), saved = e.items.reduce((s, x) => s + (x.sc || 0), 0);
   const diff = isFinite(amt) && amt > 0 && Math.abs(amt - tot) >= 5;
   return btns + `<div class="items">${e.items.map((x, i) => `<div class="item" data-i="${i}"><button class="pc" data-pcpick="${i}" aria-label="Categoria: ${esc(pcat(x.c).n)}">${pcat(x.c).e}</button>
       <input type="text" class="in" value="${esc(x.n)}" aria-label="Prodotto"><input type="text" class="ip" inputmode="decimal" value="${fmtInput(x.p)}" aria-label="Prezzo"><button class="x" data-idel="${i}" aria-label="Togli">×</button></div>`).join("")}
-    <div class="itemfoot"><span>${e.items.length} articoli · <b class="num">${eur(tot)}</b>${diff ? ` <span class="warn">(importo ${eur(amt)})</span>` : ""}</span><span><button data-act="itAdd">+ Articolo</button>${diff ? ` · <button data-act="itUse">Usa il totale</button>` : ""}</span></div></div>`;
+    <div class="itemfoot"><span>${e.items.length} articoli · <b class="num">${eur(tot)}</b>${saved ? ` · sconti −${eur(saved)}` : ""}${diff ? ` <span class="warn">(importo ${eur(amt)})</span>` : ""}</span><span><button data-act="itAdd">+ Articolo</button>${diff ? ` · <button data-act="itUse">Usa il totale</button>` : ""}</span></div></div>`;
 }
 function openPcPick(i){
   closePcPick(); const cur = S.edit.items[i]?.c;
