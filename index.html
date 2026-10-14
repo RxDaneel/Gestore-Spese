@@ -530,7 +530,7 @@ nav .plus:active svg{transform:scale(.94)}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261014101230";
+const BUILD = "20261014110702";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1782,7 +1782,7 @@ async function aiReceiptSmart(images, text){
 }
 async function aiReceipt(images, text, model){
   const learned = Object.entries(D.learn || {}).slice(-40).map(([k, v]) => `${k} → ${v}`).join("\n");
-  const prompt = `Leggi questo scontrino della spesa${images.length > 1 ? ` (le ${images.length} immagini sono strisce consecutive dello stesso scontrino, dall'alto in basso, che si sovrappongono di poche righe: le righe che compaiono sia in fondo a una striscia sia in cima alla successiva vanno contate UNA sola volta)` : ""} ed elenca OGNI articolo acquistato, nell'ordine, senza saltarne nessuno.
+  const prompt = `Leggi questo scontrino della spesa${images.length > 1 ? ` (le ${images.length} immagini o pagine sono parti consecutive dello stesso scontrino, dall'alto in basso — strisce di una foto o screenshot di uno scontrino digitale — e possono sovrapporsi: le righe che compaiono sia in fondo a una parte sia in cima alla successiva vanno contate UNA sola volta)` : ""} ed elenca OGNI articolo acquistato, nell'ordine, senza saltarne nessuno.
 Leggi riga per riga, con attenzione alle cifre dei prezzi (non confondere 1 e 7, 3 e 8, 5 e 6, 0 e 8).
 - "nome": nome chiaro in italiano, senza abbreviazioni (es. "MOZZ.BUF.125G" → "Mozzarella di bufala"), iniziale maiuscola, senza peso se non serve.
 - "testo": la riga così com'è scritta sullo scontrino.
@@ -1792,7 +1792,8 @@ Leggi riga per riga, con attenzione alle cifre dei prezzi (non confondere 1 e 7,
 - Metti in "totale" il TOTALE pagato stampato sullo scontrino. Prima di rispondere somma i prezzi degli articoli: deve coincidere con il totale. Se non coincide, rileggi le righe e correggi gli errori.
 - "categoria": una tra ${PCATS.map(x => `${x.id} (${x.n})`).join(", ")}.
 ${learned ? "Categorie già scelte dall'utente per prodotti simili (seguile):\n" + learned : ""}`;
-  const content = images.map(b => ({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: b } }));
+  // immagini (stringhe base64 JPEG) oppure PDF (scontrino digitale scaricato dall'app del supermercato)
+  const content = images.map(b => b.pdf ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: b.pdf } } : { type: "image", source: { type: "base64", media_type: "image/jpeg", data: b } });
   content.push({ type: "text", text: (text ? "Testo dello scontrino:\n" + text + "\n\n" : "") + prompt });
   const tool = { name: "scontrino", description: "Registra il contenuto dello scontrino", input_schema: { type: "object", properties: {
     negozio: { type: "string" }, data: { type: "string", description: "data dello scontrino AAAA-MM-GG, vuota se non leggibile" }, totale: { type: "number" },
@@ -1825,7 +1826,14 @@ async function readReceiptPhotos(files){
   if (!AI.key){ toast("Per leggere le foto serve la chiave API: ⚙️ → Lettura scontrini. Intanto puoi incollare il testo."); return; }
   readTx(); S.rc = "wait"; drawTx();
   try {
-    const imgs = []; for (const f of [...files].slice(0, 3)) imgs.push(...await receiptTiles(f));
+    const imgs = [];
+    for (const f of [...files].slice(0, 4)){
+      if (f.type === "application/pdf" || /\.pdf$/i.test(f.name)){
+        if (f.size > 8e6) throw new Error("PDF troppo grande");
+        const b64 = await new Promise((ok, ko) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1]); r.onerror = ko; r.readAsDataURL(f); });
+        imgs.push({ pdf: b64 });
+      } else imgs.push(...await receiptTiles(f));
+    }
     applyReceipt(await aiReceiptSmart(imgs.slice(0, 10)), "con l'IA");
   } catch (err) { S.rc = null; S.rcMsg = null; drawTx(); toast(err.message || "Errore nella lettura"); }
 }
@@ -1851,7 +1859,7 @@ function itemsBlock(e){
   if (S.rc === "wait") return `<div class="rcwait"><i></i>${esc(S.rcMsg || "Leggo lo scontrino…")}</div>`;
   if (S.rc === "paste") return `<textarea id="rcText" placeholder="Incolla qui il testo dello scontrino: apri la foto, tieni premuto sul testo e scegli Copia tutto"></textarea>
     <div class="rcbtns" style="margin-top:8px"><button class="btn" data-act="rcParse">Leggi il testo</button><button class="btn ghost" data-act="rcCancel">Annulla</button></div>`;
-  const btns = `<div class="rcbtns"><label class="btn ghost">📷 ${e.items?.length ? "Rileggi" : "Foto scontrino"}<input type="file" id="rcFile" accept="image/*" multiple></label><button class="btn ghost" data-act="rcPaste">📋 Incolla testo</button></div>`;
+  const btns = `<div class="rcbtns"><label class="btn ghost">📷 ${e.items?.length ? "Rileggi" : "Foto o PDF"}<input type="file" id="rcFile" accept="image/*,application/pdf,.pdf" multiple></label><button class="btn ghost" data-act="rcPaste">📋 Incolla testo</button></div>`;
   if (!e.items?.length) return btns + `<p class="help" style="margin:8px 2px 0">Facoltativo: leggo i prodotti dello scontrino, così vedi cosa compri di più.${AI.key ? "" : " Per le foto serve la chiave API (⚙️)."}</p>`;
   const tot = e.items.reduce((s, x) => s + x.p, 0), amt = e.rcTotal || parseAmt(e.raw || ""), saved = e.items.reduce((s, x) => s + (x.sc || 0), 0);
   const diff = isFinite(amt) && amt > 0 && Math.abs(amt - tot) >= 5;
