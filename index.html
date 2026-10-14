@@ -530,7 +530,7 @@ nav .plus:active svg{transform:scale(.94)}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261014092700";
+const BUILD = "20261014101230";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1328,7 +1328,7 @@ function saveTx(){
   if (!(e.amt > 0)){ toast("Scrivi un importo"); showKp(true); $("#sTx").scrollTop = 0; return; }
   if (!e.cat){ toast("Scegli una categoria"); return; }
   if (e.items){ e.items = e.items.filter(x => x.n && isFinite(x.p) && x.p !== 0); if (!e.items.length || e.type !== "out") delete e.items; else learnItems(e.items); }
-  S.rc = null;
+  S.rc = null; delete e.rcTotal;
   if (e.id){ const i = D.tx.findIndex(t => t.id === e.id); D.tx[i] = { ...D.tx[i], ...e }; }
   else D.tx.push({ ...e, id: uid(), ts: Date.now() });
   save(); close();
@@ -1685,15 +1685,69 @@ function parseReceiptText(txt){
 const AIK = "spese.ai";
 var AI = {}; try { AI = JSON.parse(localStorage.getItem(AIK)) || {}; } catch {}
 const aiSave = () => { try { localStorage.setItem(AIK, JSON.stringify(AI)); } catch {} };
-const AI_MODEL = "claude-haiku-5-5";
-async function shrinkImage(file){
+const AI_MODELS = { eco: "claude-haiku-5-5", top: "claude-sonnet-5-5" };
+const AI_MODES = { auto: ["Automatica", "prima economica, se i conti non tornano rilegge con il modello più preciso"], eco: ["Economica", "Claude Haiku · meno di un centesimo a scontrino"], top: ["Massima precisione", "Claude Sonnet · qualche centesimo a scontrino"] };
+/* foto → strisce ad alta risoluzione dello scontrino:
+   1) ritaglio sulla carta bianca (lo sfondo non serve), 2) taglio in strisce tra una riga e l'altra,
+   così ogni striscia resta sotto i limiti dell'IA (2576 px per lato, ~3,6 MP) senza rimpicciolire il testo */
+async function receiptTiles(file){
   const url = URL.createObjectURL(file);
   try {
     const img = await new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ko; i.src = url; });
-    const k = Math.min(1, 1568 / Math.max(img.naturalWidth, img.naturalHeight));
-    const c = document.createElement("canvas"); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
-    const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
-    return c.toDataURL("image/jpeg", 0.85).split(",")[1];
+    const W = img.naturalWidth, H = img.naturalHeight;
+    // analisi su una copia piccola
+    const sw = 300, sh = Math.max(1, Math.round(H * sw / W));
+    const a = document.createElement("canvas"); a.width = sw; a.height = sh;
+    const ag = a.getContext("2d", { willReadFrequently: true }); ag.drawImage(img, 0, 0, sw, sh);
+    const px = ag.getImageData(0, 0, sw, sh).data;
+    const white = new Uint8Array(sw * sh), ink = new Uint8Array(sw * sh);
+    for (let k = 0; k < sw * sh; k++){
+      const r = px[k * 4], g = px[k * 4 + 1], b = px[k * 4 + 2], mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (r + g + b) / 3;
+      white[k] = l > 165 && mx - mn < 45 ? 1 : 0; ink[k] = l < 110 ? 1 : 0;
+    }
+    // colonne della carta: la fascia più ampia con molta "carta bianca"
+    const col = Array.from({ length: sw }, (_, x) => { let c = 0; for (let y = 0; y < sh; y++) c += white[y * sw + x]; return c / sh; });
+    let best = [0, sw - 1], bestSum = -1, st = -1, sum = 0;
+    for (let x = 0; x <= sw; x++){
+      if (x < sw && col[x] > 0.3){ if (st < 0){ st = x; sum = 0; } sum += col[x]; }
+      else if (st >= 0){ if (sum > bestSum){ bestSum = sum; best = [st, x - 1]; } st = -1; }
+    }
+    let [x0, x1] = best;
+    if (x1 - x0 < sw * 0.12){ x0 = 0; x1 = sw - 1; }
+    const padX = Math.round((x1 - x0) * 0.04); x0 = Math.max(0, x0 - padX); x1 = Math.min(sw - 1, x1 + padX);
+    // righe della carta dentro quelle colonne
+    const rowW = y => { let c = 0; for (let x = x0; x <= x1; x++) c += white[y * sw + x]; return c / (x1 - x0 + 1); };
+    let y0 = 0, y1 = sh - 1;
+    while (y0 < sh - 1 && rowW(y0) < 0.25) y0++;
+    while (y1 > y0 && rowW(y1) < 0.25) y1--;
+    if (y1 - y0 < sh * 0.2){ y0 = 0; y1 = sh - 1; }
+    y0 = Math.max(0, y0 - 3); y1 = Math.min(sh - 1, y1 + 3);
+    const inkRow = y => { let c = 0; for (let x = x0; x <= x1; x++) c += ink[y * sw + x]; return c; };
+    // ritaglio in coordinate della foto originale
+    const f = W / sw, cx = Math.round(x0 * f), cw = Math.round((x1 - x0 + 1) * f), cy = Math.round(y0 * f), ch = Math.round((y1 - y0 + 1) * f);
+    const MAXL = 2576, MAXP = 3.5e6;
+    const kOf = (w, h) => Math.min(1, MAXL / Math.max(w, h), Math.sqrt(MAXP / (w * h)));
+    // un'immagine sola se il testo resta abbastanza grande; altrimenti strisce (al massimo 4)
+    let n = 1; while (n < 4 && kOf(cw, ch / n) < 0.6) n++;
+    const ov = n > 1 ? Math.round(ch * 0.025) : 0;            // piccola sovrapposizione: nessuna riga va persa al taglio
+    const cuts = [cy];
+    for (let t = 1; t < n; t++){
+      const target = (cy + ch * t / n) / f, span = Math.max(3, Math.round(ch / n / f * 0.12));
+      let by = Math.round(target), bi = Infinity;
+      for (let y = Math.round(target - span); y <= target + span; y++) if (y > y0 && y < y1){ const v = inkRow(y); if (v < bi){ bi = v; by = y; } }
+      cuts.push(Math.round(by * f));
+    }
+    cuts.push(cy + ch);
+    const out = [];
+    for (let t = 0; t < n; t++){
+      const ty = Math.max(cy, cuts[t] - (t ? ov : 0)), th = Math.min(cy + ch, cuts[t + 1] + (t < n - 1 ? ov : 0)) - ty;
+      const k = Math.min(1, MAXL / Math.max(cw, th), Math.sqrt(MAXP / (cw * th)));
+      const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(cw * k)); c.height = Math.max(1, Math.round(th * k));
+      const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+      g.drawImage(img, cx, ty, cw, th, 0, 0, c.width, c.height);
+      out.push(c.toDataURL("image/jpeg", 0.9).split(",")[1]);
+    }
+    return out;
   } finally { URL.revokeObjectURL(url); }
 }
 function aiMsg(status, m){
@@ -1711,20 +1765,31 @@ async function aiCall(content, opts = {}){
   try {
     r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST",
       headers: { "content-type": "application/json", "x-api-key": AI.key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-      body: JSON.stringify({ model: AI_MODEL, max_tokens: opts.max || 4096, messages: [{ role: "user", content }], ...(opts.tools ? { tools: opts.tools, tool_choice: { type: "tool", name: opts.tools[0].name } } : {}) }) });
+      body: JSON.stringify({ model: opts.model || AI_MODELS.eco, max_tokens: opts.max || 8192, messages: [{ role: "user", content }], ...(opts.tools ? { tools: opts.tools, tool_choice: { type: "tool", name: opts.tools[0].name } } : {}) }) });
   } catch { throw new Error(navigator.onLine ? "Il servizio IA non risponde" : "Sei offline"); }
   if (!r.ok){ let m = ""; try { m = (await r.json()).error?.message; } catch {} throw new Error(aiMsg(r.status, m)); }
   return r.json();
 }
-async function aiReceipt(images, text){
+/* modalità automatica: se la somma degli articoli non torna con il totale, rilegge con il modello più preciso */
+async function aiReceiptSmart(images, text){
+  const mode = AI.mode || "auto";
+  if (mode !== "auto") return aiReceipt(images, text, AI_MODELS[mode]);
+  const off = r => r.total ? Math.abs(r.items.reduce((s, x) => s + x.p, 0) - r.total) : Infinity;
+  const a = await aiReceipt(images, text, AI_MODELS.eco);
+  if (a.total && off(a) <= Math.max(5, a.total * 0.005)) return a;
+  S.rcMsg = "Rileggo con il modello più preciso…"; drawTx();
+  try { const b = await aiReceipt(images, text, AI_MODELS.top); return off(b) <= off(a) ? b : a; } catch { return a; }
+}
+async function aiReceipt(images, text, model){
   const learned = Object.entries(D.learn || {}).slice(-40).map(([k, v]) => `${k} → ${v}`).join("\n");
-  const prompt = `Leggi questo scontrino della spesa${images.length > 1 ? " (le foto sono parti dello stesso scontrino, in ordine)" : ""} ed elenca ogni articolo acquistato con il suo importo.
+  const prompt = `Leggi questo scontrino della spesa${images.length > 1 ? ` (le ${images.length} immagini sono strisce consecutive dello stesso scontrino, dall'alto in basso, che si sovrappongono di poche righe: le righe che compaiono sia in fondo a una striscia sia in cima alla successiva vanno contate UNA sola volta)` : ""} ed elenca OGNI articolo acquistato, nell'ordine, senza saltarne nessuno.
+Leggi riga per riga, con attenzione alle cifre dei prezzi (non confondere 1 e 7, 3 e 8, 5 e 6, 0 e 8).
 - "nome": nome chiaro in italiano, senza abbreviazioni (es. "MOZZ.BUF.125G" → "Mozzarella di bufala"), iniziale maiuscola, senza peso se non serve.
 - "testo": la riga così com'è scritta sullo scontrino.
 - "prezzo": importo della riga in euro. Se c'è una quantità (es. 2 x 1,20) metti il totale della riga.
 - SCONTI: le righe di sconto (es. "SCONTO 30.0% SOCI -0,71", "SCONTO 40.0% CLIENTI", "PROMO", importi negativi) NON sono articoli. Sottrai lo sconto all'articolo subito sopra e metti in "prezzo" solo quanto è stato pagato davvero (es. LENTICCHIE 1,77 con sconto -0,71 → un solo articolo "Lenticchie" a 1,06). Indica lo sconto applicato nel campo "sconto" (numero positivo, 0 se assente). Non restituire mai righe di sconto separate.
 - Ignora righe che non sono prodotti: intestazione del negozio, "Inizio/Fine Salvatempo", "Inizio sacc./Fine sacc.", "N. ART.", "NUMERO", "ARTICOLI", totale, subtotale, IVA, pagamento, resto, punti spesa o fedeltà, buste se non pagate.
-- La somma dei prezzi degli articoli deve tornare con il totale pagato.
+- Metti in "totale" il TOTALE pagato stampato sullo scontrino. Prima di rispondere somma i prezzi degli articoli: deve coincidere con il totale. Se non coincide, rileggi le righe e correggi gli errori.
 - "categoria": una tra ${PCATS.map(x => `${x.id} (${x.n})`).join(", ")}.
 ${learned ? "Categorie già scelte dall'utente per prodotti simili (seguile):\n" + learned : ""}`;
   const content = images.map(b => ({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: b } }));
@@ -1732,7 +1797,7 @@ ${learned ? "Categorie già scelte dall'utente per prodotti simili (seguile):\n"
   const tool = { name: "scontrino", description: "Registra il contenuto dello scontrino", input_schema: { type: "object", properties: {
     negozio: { type: "string" }, data: { type: "string", description: "data dello scontrino AAAA-MM-GG, vuota se non leggibile" }, totale: { type: "number" },
     articoli: { type: "array", items: { type: "object", properties: { nome: { type: "string" }, testo: { type: "string" }, prezzo: { type: "number", description: "importo pagato, già scontato" }, sconto: { type: "number" }, categoria: { type: "string", enum: PCATS.map(x => x.id) } }, required: ["nome", "prezzo", "categoria"] } } }, required: ["articoli"] } };
-  const j = await aiCall(content, { tools: [tool] });
+  const j = await aiCall(content, { tools: [tool], model });
   const out = j.content?.find(c => c.type === "tool_use")?.input;
   if (!out || !Array.isArray(out.articoli)) throw new Error("Non sono riuscito a leggere lo scontrino");
   return {
@@ -1745,12 +1810,14 @@ ${learned ? "Categorie già scelte dall'utente per prodotti simili (seguile):\n"
 function applyReceipt(res, how){
   const e = S.edit; readTx();
   if (!res.items.length){ toast("Non ho trovato articoli: prova con una foto più nitida"); return; }
-  e.items = res.items;
+  e.items = res.items; e.rcTotal = res.total || null;
   const sumIt = e.items.reduce((s, x) => s + x.p, 0), tot = res.total && Math.abs(res.total - sumIt) < 5 ? res.total : sumIt;
   if (!(e.amt > 0)) e.raw = fmtInput(tot);
   if (!e.note && res.shop) e.note = res.shop.replace(/\b\w+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).slice(0, 40);
   if (res.date && res.date <= today() && res.date >= addMonth(today().slice(0, 7), -2) + "-01") e.date = res.date;
-  S.rc = null; S.kp = false; drawTx();
+  S.rc = null; S.rcMsg = null; S.kp = false; drawTx();
+  const diff = res.total ? res.total - sumIt : 0;
+  if (Math.abs(diff) >= 5){ toast(`Attenzione: la somma degli articoli differisce di ${eur(Math.abs(diff))} dal totale dello scontrino`); return; }
   toast(`${e.items.length} articoli letti${how ? " " + how : ""}: controlla le categorie`);
 }
 async function readReceiptPhotos(files){
@@ -1758,9 +1825,9 @@ async function readReceiptPhotos(files){
   if (!AI.key){ toast("Per leggere le foto serve la chiave API: ⚙️ → Lettura scontrini. Intanto puoi incollare il testo."); return; }
   readTx(); S.rc = "wait"; drawTx();
   try {
-    const imgs = []; for (const f of [...files].slice(0, 4)) imgs.push(await shrinkImage(f));
-    applyReceipt(await aiReceipt(imgs), "con l'IA");
-  } catch (err) { S.rc = null; drawTx(); toast(err.message || "Errore nella lettura"); }
+    const imgs = []; for (const f of [...files].slice(0, 3)) imgs.push(...await receiptTiles(f));
+    applyReceipt(await aiReceiptSmart(imgs.slice(0, 10)), "con l'IA");
+  } catch (err) { S.rc = null; S.rcMsg = null; drawTx(); toast(err.message || "Errore nella lettura"); }
 }
 async function readReceiptText(){
   const t = $("#rcText")?.value || "";
@@ -1768,7 +1835,7 @@ async function readReceiptText(){
   readTx();
   if (AI.key){
     S.rc = "wait"; drawTx();
-    try { applyReceipt(await aiReceipt([], t), "con l'IA"); return; } catch (err) { toast(err.message + " · uso la lettura semplice"); }
+    try { applyReceipt(await aiReceiptSmart([], t), "con l'IA"); return; } catch (err) { toast(err.message + " · uso la lettura semplice"); }
   }
   applyReceipt(parseReceiptText(t));
 }
@@ -1781,16 +1848,16 @@ function readItems(){
   });
 }
 function itemsBlock(e){
-  if (S.rc === "wait") return `<div class="rcwait"><i></i>Leggo lo scontrino…</div>`;
+  if (S.rc === "wait") return `<div class="rcwait"><i></i>${esc(S.rcMsg || "Leggo lo scontrino…")}</div>`;
   if (S.rc === "paste") return `<textarea id="rcText" placeholder="Incolla qui il testo dello scontrino: apri la foto, tieni premuto sul testo e scegli Copia tutto"></textarea>
     <div class="rcbtns" style="margin-top:8px"><button class="btn" data-act="rcParse">Leggi il testo</button><button class="btn ghost" data-act="rcCancel">Annulla</button></div>`;
   const btns = `<div class="rcbtns"><label class="btn ghost">📷 ${e.items?.length ? "Rileggi" : "Foto scontrino"}<input type="file" id="rcFile" accept="image/*" multiple></label><button class="btn ghost" data-act="rcPaste">📋 Incolla testo</button></div>`;
   if (!e.items?.length) return btns + `<p class="help" style="margin:8px 2px 0">Facoltativo: leggo i prodotti dello scontrino, così vedi cosa compri di più.${AI.key ? "" : " Per le foto serve la chiave API (⚙️)."}</p>`;
-  const tot = e.items.reduce((s, x) => s + x.p, 0), amt = parseAmt(e.raw || ""), saved = e.items.reduce((s, x) => s + (x.sc || 0), 0);
+  const tot = e.items.reduce((s, x) => s + x.p, 0), amt = e.rcTotal || parseAmt(e.raw || ""), saved = e.items.reduce((s, x) => s + (x.sc || 0), 0);
   const diff = isFinite(amt) && amt > 0 && Math.abs(amt - tot) >= 5;
   return btns + `<div class="items">${e.items.map((x, i) => `<div class="item" data-i="${i}"><button class="pc" data-pcpick="${i}" aria-label="Categoria: ${esc(pcat(x.c).n)}">${pcat(x.c).e}</button>
       <input type="text" class="in" value="${esc(x.n)}" aria-label="Prodotto"><input type="text" class="ip" inputmode="decimal" value="${fmtInput(x.p)}" aria-label="Prezzo"><button class="x" data-idel="${i}" aria-label="Togli">×</button></div>`).join("")}
-    <div class="itemfoot"><span>${e.items.length} articoli · <b class="num">${eur(tot)}</b>${saved ? ` · sconti −${eur(saved)}` : ""}${diff ? ` <span class="warn">(importo ${eur(amt)})</span>` : ""}</span><span><button data-act="itAdd">+ Articolo</button>${diff ? ` · <button data-act="itUse">Usa il totale</button>` : ""}</span></div></div>`;
+    <div class="itemfoot"><span>${e.items.length} articoli · <b class="num">${eur(tot)}</b>${saved ? ` · sconti −${eur(saved)}` : ""}${diff ? ` <span class="warn">(${e.rcTotal ? "totale scontrino" : "importo"} ${eur(amt)})</span>` : ""}</span><span><button data-act="itAdd">+ Articolo</button>${diff ? ` · <button data-act="itUse">Usa il totale</button>` : ""}</span></div></div>`;
 }
 function openPcPick(i){
   closePcPick(); const cur = S.edit.items[i]?.c;
@@ -1807,7 +1874,8 @@ function learnItems(items){
 }
 
 function aiBox(){
-  if (AI.key) return `<div class="panel"><div class="ghstat${AI.err ? " err" : ""}"><i></i><span>${AI.err ? "Chiave non funzionante" : "Lettura con l'IA attiva"}<small>${AI.err ? esc(AI.err) : "Chiave …" + esc(AI.key.slice(-4)) + " · modello Claude Haiku"}</small></span></div>
+  if (AI.key) return `<div class="panel"><div class="ghstat${AI.err ? " err" : ""}"><i></i><span>${AI.err ? "Chiave non funzionante" : "Lettura con l'IA attiva"}<small>${AI.err ? esc(AI.err) : "Chiave …" + esc(AI.key.slice(-4)) + " · lettura " + AI_MODES[AI.mode || "auto"][0].toLowerCase()}</small></span></div>
+    ${Object.entries(AI_MODES).map(([k, [n, d]]) => `<button class="list-item" data-aimode="${k}" style="border-top:1px solid var(--line)"><span>${n}<small>${d}</small></span>${(AI.mode || "auto") === k ? '<b style="color:var(--accent)">✓</b>' : ""}</button>`).join("")}
     <button class="list-item danger" data-act="aiOff" style="border-top:1px solid var(--line)"><span>Rimuovi la chiave</span></button></div>`;
   return `<div class="panel"><div class="ghform"><input type="password" id="aiKey" placeholder="Chiave API Anthropic (sk-ant-…)" autocomplete="off" autocapitalize="off" spellcheck="false">
     <button class="btn" data-act="aiSave">Salva e prova la chiave</button></div></div>
@@ -2020,6 +2088,7 @@ document.addEventListener("click", e => {
   if (d.pick){ readTx(); if (S.edit.cat !== d.pick){ S.edit.cat = d.pick; S.edit.sub = null; } drawTx(); return sizeAmt(); }
   if (d.psub !== undefined){ S.edit.sub = d.psub || null; document.querySelectorAll("[data-psub]").forEach(b => b.setAttribute("aria-pressed", b === el)); return; }
   if (d.subdel !== undefined) return delSub(+d.subdel);
+  if (d.aimode){ AI.mode = d.aimode; aiSave(); const box = $("#aiBox"); if (box) box.innerHTML = aiBox(); return; }
   if (d.pcpick !== undefined){ readTx(); return openPcPick(+d.pcpick); }
   if (d.setpc){ const it = S.edit?.items?.[+d.i]; if (it){ it.c = d.setpc; const row = document.querySelector(`#sTx .item[data-i="${d.i}"] .pc`); if (row) row.textContent = pcat(d.setpc).e; } return closePcPick(); }
   if (d.idel !== undefined){ readTx(); S.edit.items.splice(+d.idel, 1); return drawTx(); }
