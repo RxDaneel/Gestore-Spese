@@ -527,7 +527,7 @@ nav .plus:active svg{transform:scale(.94)}
   nav button{flex:none;height:64px}
   header{padding-left:104px}
   main{padding-left:88px}
-  #vHome{max-width:1180px}
+  #vReport{max-width:1180px}
   .toast{bottom:24px}
   .kp{left:88px}
   .hgrid .hside{display:block}
@@ -680,17 +680,17 @@ nav .plus:active svg{transform:scale(.94)}
 </header>
 
 <main id="main">
-  <div class="view" id="vHome"></div>
-  <div class="view" id="vTx" hidden></div>
+  <div class="view" id="vTx"></div>
   <div class="view" id="vReport" hidden></div>
+  <div class="view" id="vShop" hidden></div>
   <div class="view" id="vCats" hidden></div>
 </main>
 
 <nav id="nav">
-  <button data-tab="vHome"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg>Home</button>
   <button data-tab="vTx"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".6"/><circle cx="4" cy="12" r=".6"/><circle cx="4" cy="18" r=".6"/></svg>Movimenti</button>
-  <button class="plus" data-act="add" aria-label="Aggiungi movimento"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 8v8M8 12h8"/></svg></button>
   <button data-tab="vReport"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-5M12 16V6M17 16v-8"/></svg>Report</button>
+  <button class="plus" data-act="add" aria-label="Aggiungi movimento"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 8v8M8 12h8"/></svg></button>
+  <button data-tab="vShop"><svg viewBox="0 0 24 24"><path d="M3 4h2.2l2.3 11a1.2 1.2 0 0 0 1.2 1h8.9a1.2 1.2 0 0 0 1.2-.9L20.5 8H6.1"/><circle cx="9.5" cy="20" r="1.2"/><circle cx="17" cy="20" r="1.2"/></svg>Spesa</button>
   <button data-tab="vCats"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Categorie</button>
 </nav>
 
@@ -710,7 +710,7 @@ nav .plus:active svg{transform:scale(.94)}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261025174152";
+const BUILD = "20261025174835";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -870,7 +870,7 @@ function monthStats(m){
 }
 
 /* ---------- stato interfaccia ---------- */
-const S = { rview: "month", tab: "vHome", month: thisMonth(), filter: "all", sf: null, q: "", edit: null, view: D.opt.txView === "cal" ? "cal" : "list", day: null };
+const S = { rview: "month", tab: "vTx", month: thisMonth(), filter: "all", sf: null, q: "", edit: null, view: D.opt.txView === "cal" ? "cal" : "list", day: null };
 
 /* ---------- grafici ---------- */
 function donut(rows, total){
@@ -1008,7 +1008,7 @@ function statsCard(st){
   const pills = Array.from({ length: dm }, (_, i) => { const d = `${m}-${pad(i + 1)}`, wd = GIORNI[pdate(d).getDay()].slice(0, 3);
     return `<button class="dpill${d === (S.day || td) ? " on" : ""}${days.has(d) ? " has" : ""}${d > td ? " future" : ""}" data-goday="${d}" aria-label="${esc(dLabel(d))}"><b>${pad(i + 1)}</b><small>${wd}</small><i></i></button>`; }).join("");
   const labels = Array.from({ length: dm }, (_, i) => (i + 1) % 5 === 0 || i === 0 ? String(i + 1) : "");
-  return `<div class="card2"><div class="shead"><h2>Statistiche</h2><span class="help">spesa accumulata</span></div>
+  return `<div class="card2" style="margin-top:8px"><div class="shead"><h2>Spesa accumulata</h2><span class="help">giorno per giorno</span></div>
     <div class="dstrip" id="dstrip">${pills}</div>
     ${area("chHome", curV, prevV, labels, { h: 150, label: "Spesa accumulata nel mese, confrontata con il mese prima", tip: i => `Fino al ${dShort(`${m}-${pad(i + 1)}`)}`, curLabel: mName(m), prevLabel: `${mName(pm)} allo stesso giorno` })}
     <div class="alegend"><span><i></i>${mName(m)}</span>${prevV.some(Boolean) ? `<span><i class="dot"></i>${mName(pm)}</span>` : ""}</div></div>`;
@@ -1028,8 +1028,9 @@ function catCards(st){
       <div class="dots20" aria-hidden="true">${Array.from({ length: 20 }, (_, k) => `<i${k < fill ? ` style="background:${col}"` : ""}></i>`).join("")}</div>${foot}</button>`;
   }).join("")}</div>`;
 }
-function renderHome(){
-  const v = $("#vHome"), st = monthStats(S.month), cur = S.month === thisMonth();
+/* in cima ai Movimenti: avvisi e la card con il totale del mese */
+function topCard(st){
+  const cur = S.month === thisMonth();
   let banner = "";
   const pm = addMonth(thisMonth(), -1);
   if (D.opt.seenReport !== pm && txIn(pm).length)
@@ -1038,8 +1039,7 @@ function renderHome(){
   if (GH.repo && GH.err && (!GH.last || Date.now() - GH.last > 864e5))
     banner = `<button class="banner warn" data-act="settings"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
       <div><b>Backup su GitHub non riuscito</b><small>${esc(GH.err)}</small></div></button>` + banner;
-  if (!st.out.length && !st.inc.length){ v.innerHTML = banner + emptyMonth(); return; }
-
+  if (!st.out.length && !st.inc.length) return { banner, hero: "" };
   // confronto: mese in corso contro gli stessi giorni del mese prima
   const prev = addMonth(S.month, -1);
   let cmp, prevTot;
@@ -1047,17 +1047,9 @@ function renderHome(){
   else { prevTot = sum(txIn(prev, "out")); cmp = `rispetto a ${mName(prev)}`; }
   let delta = "";
   if (prevTot > 0){ const p = pct(st.tot - prevTot, prevTot); delta = `<div class="delta ${p > 0 ? "up" : "down"}"><i>${p > 0 ? "▲" : "▼"}</i>${Math.abs(p)}% ${p > 0 ? "in più" : "in meno"} ${cmp}</div>`; }
-  const recent = [...st.out, ...st.inc].sort((a, b) => b.date.localeCompare(a.date) || b.ts - a.ts).slice(0, 6);
   const hero = `<div class="hero"><small>Spese di ${mName(S.month)}${cur ? " (finora)" : ""}</small><b class="num">${eur(st.tot)}</b>
     <div class="sub"><span>Entrate <b class="num">${eur(st.income)}</b></span><span>Saldo <b class="num">${st.income - st.tot >= 0 ? "+" : "−"}${eur(Math.abs(st.income - st.tot))}</b></span></div>${delta}</div>`;
-  v.innerHTML = banner + `<div class="hgrid">
-    <div class="hside">${hero}<div class="section"><div class="shead"><h2>Ultimi movimenti</h2><button data-tabgo="vTx">Vedi tutti</button></div>
-      <div class="panel">${recent.map(txRow).join("")}</div></div></div>
-    <div class="hmain"><div class="section">${statsCard(st)}
-      ${st.tot ? `<div class="shead"><h2>Dove spendi</h2><button data-act="openReport" data-m="${S.month}">Report completo</button></div>${catCards(st)}` : ""}</div></div>
-  </div>`;
-  const strip = $("#dstrip"), on = strip?.querySelector(".dpill.on");
-  if (strip && on) strip.scrollLeft = on.offsetLeft - strip.clientWidth / 2 + on.offsetWidth / 2;
+  return { banner, hero };
 }
 
 /* ---------- Movimenti ---------- */
@@ -1091,8 +1083,8 @@ function calendar(list){
   return `<div class="cal"><div class="wd">${["lun", "mar", "mer", "gio", "ven", "sab", "dom"].map(x => `<span>${x}</span>`).join("")}</div><div class="grid">${cells}</div></div>${legend}${detail}`;
 }
 function renderTx(){
-  const v = $("#vTx"), all = txIn(S.month);
-  if (!all.length){ v.innerHTML = emptyMonth(); return; }
+  const v = $("#vTx"), all = txIn(S.month), top = topCard(monthStats(S.month));
+  if (!all.length){ v.innerHTML = top.banner + emptyMonth(); return; }
   const usedCats = byCat(all.filter(t => t.type === "out")).map(c => c.cat);
   const q = S.q.trim().toLowerCase();
   const macro = S.filter.startsWith("c:") ? S.filter.slice(2) : null;
@@ -1107,7 +1099,7 @@ function renderTx(){
   const chip = (k, label, c) => `<button class="chip" data-filter="${k}" aria-pressed="${S.filter === k}">${c ? cmark(c) : ""}${esc(label)}</button>`;
   if (S.day && !S.day.startsWith(S.month)) S.day = null;
   if (!S.day && S.month === thisMonth()) S.day = today();
-  let html = `<div class="seg viewseg"><button data-view="list" aria-pressed="${S.view === "list"}">Lista</button><button data-view="cal" aria-pressed="${S.view === "cal"}">Calendario</button></div>
+  let html = top.banner + top.hero + `<div class="seg viewseg"><button data-view="list" aria-pressed="${S.view === "list"}">Lista</button><button data-view="cal" aria-pressed="${S.view === "cal"}">Calendario</button></div>
     <div class="searchbar"><input type="search" id="q" placeholder="Cerca per nota, categoria o importo" value="${esc(S.q)}" enterkeyhint="search"></div>
     <div class="chips">${chip("all", "Tutti")}${chip("out", "Spese")}${chip("in", "Entrate")}${usedCats.map(c => chip("c:" + c.id, c.name, c)).join("")}</div>`;
   if (macro){
@@ -1132,14 +1124,13 @@ function renderTx(){
 }
 
 /* ---------- Report ---------- */
-const rToggle = () => `<div class="seg viewseg noprint"><button data-rview="month" aria-pressed="${S.rview === "month"}">Mese</button><button data-rview="year" aria-pressed="${S.rview === "year"}">Anno</button><button data-rview="prod" aria-pressed="${S.rview === "prod"}">Prodotti</button></div>`;
+const rToggle = () => `<div class="seg viewseg noprint"><button data-rview="month" aria-pressed="${S.rview !== "year"}">Mese</button><button data-rview="year" aria-pressed="${S.rview === "year"}">Anno</button></div>`;
 /* righe "in breve": poche frasi corte con un'icona, al posto del testo lungo */
 const insights = list => list.length ? `<div class="panel">${list.slice(0, 4).map(([e, t]) => `<div class="ins"><span class="ie">${e}</span><p>${t}</p></div>`).join("")}</div>` : "";
 const dTag = (d, ref) => !ref ? "nuova" : Math.abs(d) < 100 ? "= stabile" : `${d > 0 ? "▲ +" : "▼ −"}${eur0(Math.abs(d))}`;
 const chartSeg = (key, opts, cur) => `<div class="chartseg">${opts.map(([k, l]) => `<button data-${key}="${k}" aria-pressed="${k === cur}">${l}</button>`).join("")}</div>`;
 function renderReport(){
   if (S.rview === "year") return renderYear();
-  if (S.rview === "prod") return renderProd();
   const v = $("#vReport"), st = monthStats(S.month), pst = monthStats(addMonth(S.month, -1)), cur = S.month === thisMonth();
   if (!st.out.length && !st.inc.length){ v.innerHTML = rToggle() + emptyMonth(); return; }
   if (S.month === addMonth(thisMonth(), -1) && D.opt.seenReport !== S.month){ D.opt.seenReport = S.month; save(); }
@@ -1181,6 +1172,7 @@ function renderReport(){
   v.innerHTML = rToggle() + `<div class="hero"><small>Spese di ${mName(S.month)}${cur ? ` <span class="pill-status">in corso</span>` : ""}</small><b class="num">${eur(st.tot)}</b>
       <div class="sub"><span>Entrate <b class="num">${eur0(st.income)}</b></span><span>Saldo <b class="num">${saldo >= 0 ? "+" : "−"}${eur0(Math.abs(saldo))}</b></span><span>Al giorno <b class="num">${eur0(st.tot / dd)}</b></span></div></div>
   <div class="section">
+    ${st.out.length ? statsCard(st) : ""}
     ${ins.length ? `<div class="shead"><h2>In breve</h2></div>${insights(ins)}` : ""}
 
     ${st.cats.length ? `<div class="shead"><h2>Dove hai speso</h2><span class="help">tocca per il dettaglio</span></div>
@@ -1201,6 +1193,8 @@ function renderReport(){
 
     <div class="row-btns noprint"><button class="btn ghost" data-act="print">Salva in PDF</button><button class="btn ghost" data-act="csvMonth">Esporta CSV</button></div>
   </div>`;
+  const strip = $("#dstrip"), on = strip?.querySelector(".dpill.on");
+  if (strip && on) strip.scrollLeft = on.offsetLeft - strip.clientWidth / 2 + on.offsetWidth / 2;
 }
 
 /* ---------- Cosa compri: statistiche sugli articoli degli scontrini ---------- */
@@ -1246,14 +1240,14 @@ function saveCard(rtx, prtx, n){
     </div>`;
 }
 function renderProd(){
-  const v = $("#vReport"), per = S.pper || "m", n = PPER[per][1];
+  const v = $("#vShop"), per = S.pper || "m", n = PPER[per][1];
   const months = prodMonths(), prevM = months.map(m => addMonth(m, -n));
   const items = itemsIn(months), st = prodStats(items), pst = prodStats(itemsIn(prevM));
   const rtx = receiptTx(months), prtx = receiptTx(prevM);
   const seg = chartSeg("pper", Object.entries(PPER).map(([k, [lab]]) => [k, lab]), per).replace('class="chartseg"', 'class="chartseg top"');
   const label = n === 1 ? mLabel(S.month) : `${mShort(months[0])} – ${mShort(months[n - 1])} ${S.month.slice(0, 4)}`;
   if (!items.length && !rtx.length){
-    v.innerHTML = rToggle() + seg + `<div class="empty"><h2>Nessuno scontrino ${n === 1 ? "in " + mName(S.month) : "in questo periodo"}</h2>
+    v.innerHTML = seg + `<div class="empty"><h2>Nessuno scontrino ${n === 1 ? "in " + mName(S.month) : "in questo periodo"}</h2>
       <p>Quando registri una spesa al supermercato, in fondo trovi <b>Scontrino</b>: aggiungi i prodotti da una foto, dal PDF, incollando lo scontrino digitale o a mano. Qui vedrai cosa compri e quanto risparmi.</p>
       <div class="row-btns"><button class="btn" data-act="add">Aggiungi una spesa</button></div></div>`;
     return;
@@ -1273,7 +1267,7 @@ function renderProd(){
   if (sc) ins.push(["💸", `Con gli sconti hai risparmiato <b>${eur(sc)}</b>, il ${pct1(sc, paid + sc)}%`]);
   const prow = (x, right) => `<button class="prow" data-prod="${esc(x.k)}"><span class="em">${pcat(x.c).e}</span><div class="mid"><div class="t">${esc(x.n)}</div><div class="s">${esc(pcat(x.c).n)}</div></div><div class="a">${right}</div></button>`;
   const gone = pst.prods.length ? (() => { const curK = new Set(st.prods.map(x => x.k)); return pst.prods.filter(x => !curK.has(x.k) && x.cnt >= 2).sort((a, b) => b.cnt - a.cnt).slice(0, 5); })() : [];
-  v.innerHTML = rToggle() + seg + `<div class="hero"><small>Spesa al supermercato · ${esc(label)}</small><b class="num">${eur(paid || st.tot)}</b>
+  v.innerHTML = seg + `<div class="hero"><small>Spesa al supermercato · ${esc(label)}</small><b class="num">${eur(paid || st.tot)}</b>
       <div class="sub"><span>Scontrini <b class="num">${rtx.length}</b></span><span>Prodotti <b class="num">${items.filter(x => x.p > 0).length}</b></span>${sc ? `<span>Sconti <b class="num">−${eur0(sc)}</b></span>` : ""}</div></div>
     <div class="section">
       ${ins.length ? `<div class="shead"><h2>In breve</h2></div>${insights(ins)}` : ""}
@@ -2449,7 +2443,7 @@ function render(){
   $("#btnNext").disabled = yearMode ? S.month.slice(0, 4) >= thisMonth().slice(0, 4) : S.month >= thisMonth();
   document.querySelectorAll("nav [data-tab]").forEach(b => b.setAttribute("aria-current", b.dataset.tab === S.tab));
   document.querySelectorAll(".view").forEach(v => v.hidden = v.id !== S.tab);
-  ({ vHome: renderHome, vTx: renderTx, vReport: renderReport, vCats: renderCats })[S.tab]();
+  ({ vTx: renderTx, vReport: renderReport, vShop: renderProd, vCats: renderCats })[S.tab]();
 }
 function go(tab){ if (S.tab !== tab){ S.tab = tab; $("#main").scrollTop = 0; } render(); }
 
