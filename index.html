@@ -545,7 +545,7 @@ nav .plus:active svg{transform:scale(.94)}
 .sumbudget .bar{margin-top:8px}
 /* scontrino: pulsanti, elenco articoli, scelta categoria prodotto */
 .rcbtns{display:flex;gap:8px;flex-wrap:wrap}
-.rcbtns .btn{flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;position:relative;overflow:hidden}
+.rcbtns .btn{display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .field .rcbtns label.btn{display:flex;font-size:15px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--fg);margin:0}
 .rcbtns input[type=file]{position:absolute;inset:0;opacity:0;width:100%;height:100%}
 .rcwait{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;padding:10px 2px}
@@ -595,6 +595,33 @@ nav .plus:active svg{transform:scale(.94)}
 .askdone{text-align:center;padding:40px 24px 10px}
 .askdone div{font-size:52px}
 .askdone h2{margin:8px 0 6px;font:700 22px/1.25 var(--font)}
+/* report: righe "in breve", scelta del grafico */
+.ins{display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid var(--line)}
+.ins:first-child{border-top:0}
+.ins .ie{width:34px;height:34px;border-radius:11px;background:var(--raised);display:grid;place-items:center;font-size:17px;flex:none}
+.ins p{margin:0;font-size:14px;line-height:1.4;flex:1;min-width:0}
+.ins b{font-weight:700}
+.chartseg{display:flex;gap:6px;padding:12px 12px 0}
+.chartseg.top{padding:12px 16px 0}
+.chartseg button{flex:1;border:0;border-radius:999px;padding:7px 8px;background:var(--raised);color:var(--muted);font-size:13px;font-weight:600}
+.chartseg button[aria-pressed="true"]{background:var(--sel,var(--fg));color:var(--on-sel,var(--bg))}
+:root[data-theme="pastello"] .chartseg button{border-radius:10px}
+.chcap{margin:0;padding:0 14px 12px;text-align:center}
+.chcap b{color:var(--fg)}
+.crow .chev,.prow .chev{margin-left:-4px}
+.hero .sub{row-gap:4px}
+:root:is([data-theme="verde"]) .hero .sub{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:1fr}
+.field>label .opt{text-transform:none;letter-spacing:0;font-weight:400;opacity:.8;margin-left:4px}
+/* tre modi per lo scontrino, affiancati */
+.rcbtns .btn{flex:1;min-width:0;flex-direction:column;gap:3px;padding:10px 4px;font-size:13px}
+.rcbtns .btn span{font-size:20px;line-height:1}
+.field .rcbtns label.btn{font-size:13px}
+.manform label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:14px 0 6px}
+.manform label:first-child{margin-top:0}
+.manform input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);outline:none;min-height:46px;-webkit-appearance:none;appearance:none}
+.manform input:focus{border-color:var(--accent)}
+.manform .asksug:empty{display:none}
+.prow .x{flex:none;width:30px;height:34px;border:0;background:none;color:var(--muted);font-size:20px;padding:0}
 /* risparmio con gli sconti */
 .savebar{display:flex;height:12px;border-radius:7px;overflow:hidden;gap:2px;margin:12px 0 6px}
 .savebar i{display:block}
@@ -671,6 +698,7 @@ nav .plus:active svg{transform:scale(.94)}
 <section class="sheet" id="sTx" aria-label="Movimento"></section>
 <section class="sheet" id="sCat" aria-label="Categoria"></section>
 <section class="sheet" id="sAsk" aria-label="Prodotti da chiarire"></section>
+<section class="sheet" id="sMan" aria-label="Prodotti a mano"></section>
 <section class="sheet" id="sSet" aria-label="Impostazioni"></section>
 <input type="file" id="fileIn" accept=".json,application/json" hidden>
 
@@ -679,7 +707,7 @@ nav .plus:active svg{transform:scale(.94)}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261025135103";
+const BUILD = "20261025142516";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1101,132 +1129,79 @@ function renderTx(){
 }
 
 /* ---------- Report ---------- */
-function reportStory(st, pst){
-  const M = mName(st.m), P = mName(pst.m), cur = st.m === thisMonth(), ps = [];
-  const n = st.out.length;
-  let p1 = `A ${M} hai speso <b>${eur(st.tot)}</b> in ${n} moviment${n === 1 ? "o" : "i"}`;
-  if (pst.tot){ const p = pct(st.tot - pst.tot, pst.tot); p1 += p === 0 ? `, praticamente come a ${P}` : `, <b>il ${Math.abs(p)}% ${p > 0 ? "in più" : "in meno"}</b> rispetto a ${P} (${eur(pst.tot)})`; }
-  p1 += ".";
-  if (cur){
-    const dd = +today().slice(8), dm = daysIn(st.m), left = dm - dd;
-    if (left > 0 && dd >= 3) p1 += ` Il mese è ancora in corso (mancano ${left} giorni): a questo ritmo chiuderesti intorno a <b>${eur0(st.tot / dd * dm)}</b>.`;
-  }
-  ps.push(p1);
-  if (st.cats.length){
-    const [a, b, c] = st.cats;
-    let p2 = `La voce più pesante è <b>${esc(a.cat.name)}</b> con ${eur(a.amt)}, cioè il ${pct(a.amt, st.tot)}% del totale.`;
-    if (b) p2 += ` Seguono ${esc(b.cat.name)} (${eur0(b.amt)})${c ? ` e ${esc(c.cat.name)} (${eur0(c.amt)})` : ""}.`;
-    const top3 = st.cats.slice(0, 3).reduce((s, x) => s + x.amt, 0);
-    if (st.cats.length > 3) p2 += ` Queste tre categorie da sole fanno il ${pct(top3, st.tot)}% delle tue spese.`;
-    ps.push(p2);
-    const lv = leaves(st);
-    if (lv.length){
-      const [x, y] = lv;
-      let p3 = `Scendendo nel dettaglio, la voce che pesa di più è <b>${esc(x.s.name)}</b> (${esc(x.c.name)}) con ${eur(x.s.amt)} in ${movs(x.s.n)}`;
-      p3 += y ? `, seguita da ${esc(y.s.name)} (${eur0(y.s.amt)}).` : ".";
-      const freq = [...lv].sort((a, b) => b.s.n - a.s.n)[0];
-      if (freq.s.n >= 5 && freq !== x) p3 += ` La più frequente è ${esc(freq.s.name)}: ${freq.s.n} volte, in media ${eur(freq.s.amt / freq.s.n)} ciascuna.`;
-      ps.push(p3);
-    }
-  }
-  if (pst.tot){
-    const prevMap = new Map(pst.cats.map(c => [c.cat.id, c.amt]));
-    const ids = new Set([...st.cats.map(c => c.cat.id), ...pst.cats.map(c => c.cat.id)]);
-    const ch = [...ids].map(id => ({ cat: cat(id), d: (st.cats.find(c => c.cat.id === id)?.amt || 0) - (prevMap.get(id) || 0) }));
-    const up = ch.filter(x => x.d >= 500).sort((a, b) => b.d - a.d)[0], dn = ch.filter(x => x.d <= -500).sort((a, b) => a.d - b.d)[0];
-    const bits = [];
-    if (up) bits.push(`la categoria cresciuta di più è <b>${esc(up.cat.name)}</b> (+${eur0(up.d)})`);
-    if (dn) bits.push(`hai tagliato di più su <b>${esc(dn.cat.name)}</b> (−${eur0(-dn.d)})`);
-    if (bits.length) ps.push(`Rispetto a ${P}, ${bits.join(", mentre ")}.`);
-  }
-  const withB = st.cats.filter(c => c.cat.budget);
-  const anyB = D.cats.some(c => c.type === "out" && c.budget);
-  if (anyB){
-    const over = withB.filter(c => c.amt > c.cat.budget);
-    ps.push(over.length ? `Budget superato in: ${over.map(c => `<b>${esc(c.cat.name)}</b> (+${eur0(c.amt - c.cat.budget)})`).join(", ")}.` : `Hai rispettato tutti i budget che hai impostato.`);
-  }
-  if (st.income){
-    const r = st.income - st.tot;
-    ps.push(r >= 0 ? `Sono entrati ${eur(st.income)}: ti restano <b>${eur(r)}</b>, il ${pct(r, st.income)}% delle entrate.`
-      : `Sono entrati ${eur(st.income)}, quindi hai speso <b>${eur(-r)} più di quanto è entrato</b>.`);
-  }
-  if (st.out.length){
-    const big = st.out.reduce((a, b) => b.amt > a.amt ? b : a);
-    const wd = Array(7).fill(0); st.out.forEach(t => wd[pdate(t.date).getDay()] += t.amt);
-    const wmax = wd.indexOf(Math.max(...wd));
-    ps.push(`La spesa singola più alta è stata ${esc(big.note || catLabel(big))} da <b>${eur(big.amt)}</b> (${dShort(big.date)}). Il giorno della settimana in cui spendi di più è il <b>${GIORNI[wmax]}</b>.`);
-  }
-  return ps.map(p => `<p>${p}</p>`).join("");
-}
 const rToggle = () => `<div class="seg viewseg noprint"><button data-rview="month" aria-pressed="${S.rview === "month"}">Mese</button><button data-rview="year" aria-pressed="${S.rview === "year"}">Anno</button><button data-rview="prod" aria-pressed="${S.rview === "prod"}">Prodotti</button></div>`;
+/* righe "in breve": poche frasi corte con un'icona, al posto del testo lungo */
+const insights = list => list.length ? `<div class="panel">${list.slice(0, 4).map(([e, t]) => `<div class="ins"><span class="ie">${e}</span><p>${t}</p></div>`).join("")}</div>` : "";
+const dTag = (d, ref) => !ref ? "nuova" : Math.abs(d) < 100 ? "= stabile" : `${d > 0 ? "▲ +" : "▼ −"}${eur0(Math.abs(d))}`;
+const chartSeg = (key, opts, cur) => `<div class="chartseg">${opts.map(([k, l]) => `<button data-${key}="${k}" aria-pressed="${k === cur}">${l}</button>`).join("")}</div>`;
 function renderReport(){
   if (S.rview === "year") return renderYear();
   if (S.rview === "prod") return renderProd();
   const v = $("#vReport"), st = monthStats(S.month), pst = monthStats(addMonth(S.month, -1)), cur = S.month === thisMonth();
   if (!st.out.length && !st.inc.length){ v.innerHTML = rToggle() + emptyMonth(); return; }
   if (S.month === addMonth(thisMonth(), -1) && D.opt.seenReport !== S.month){ D.opt.seenReport = S.month; save(); }
-  const dm = daysIn(S.month), dd = cur ? +today().slice(8) : dm;
-  // andamento giornaliero
-  const daily = Array.from({ length: dm }, (_, i) => {
-    const d = `${S.month}-${pad(i + 1)}`, v = sum(st.out.filter(t => t.date === d));
-    return { v, tip: dShort(d), lab: (i + 1) % 5 === 0 || i === 0 ? String(i + 1) : "" };
-  });
-  // ultimi 6 mesi
-  const months = Array.from({ length: 6 }, (_, i) => addMonth(S.month, i - 5));
-  const mvals = months.map(m => { const t = sum(txIn(m, "out")); return { v: t, lab: mShort(m), tip: mLabel(m), top: t ? eur0(t) : "", color: m === S.month ? "var(--accent)" : "color-mix(in srgb,var(--accent) 35%,transparent)" }; });
-  const prevMap = new Map(pst.cats.map(c => [c.cat.id, c.amt]));
-  const wd = Array(7).fill(0); st.out.forEach(t => wd[pdate(t.date).getDay()] += t.amt);
-  const order = [1, 2, 3, 4, 5, 6, 0], wmax = Math.max(1, ...wd);
+  const P = mName(pst.m), dm = daysIn(S.month), dd = cur ? +today().slice(8) : dm, saldo = st.income - st.tot;
+  // confronto giusto: il mese in corso contro gli stessi giorni del mese prima
+  const pout = cur ? pst.out.filter(t => +t.date.slice(8) <= dd) : pst.out, prevRef = sum(pout), prevCats = new Map(byCat(pout).map(c => [c.cat.id, c.amt]));
+  const vsTxt = cur ? `ai primi ${dd} giorni di ${P}` : P;
+
+  const ins = [];
+  if (prevRef){ const p = pct(st.tot - prevRef, prevRef); ins.push([p > 0 ? "📈" : "📉", p === 0 ? `Come ${cur ? "nei primi " + dd + " giorni di " + P : "a " + P}` : `<b>${Math.abs(p)}% ${p > 0 ? "in più" : "in meno"}</b> rispetto ${cur ? "ai primi " + dd + " giorni di " + P : "a " + P} (${eur0(prevRef)})`]); }
+  if (cur && dd >= 3 && dm > dd) ins.push(["🔮", `A questo ritmo chiudi il mese intorno a <b>${eur0(st.tot / dd * dm)}</b>`]);
+  const over = st.cats.filter(c => c.cat.budget && c.amt > c.cat.budget);
+  if (over.length) ins.push(["⚠️", `Oltre il budget: ${over.map(c => `<b>${esc(c.cat.name)}</b> (+${eur0(c.amt - c.cat.budget)})`).join(", ")}`]);
+  if (st.cats[0]) ins.push(["🏷️", `La voce più grande è <b>${esc(st.cats[0].cat.name)}</b>: ${pct(st.cats[0].amt, st.tot)}% delle spese`]);
+  if (prevRef){
+    const ch = st.cats.map(c => ({ c: c.cat, d: c.amt - (prevCats.get(c.cat.id) || 0) })).sort((a, b) => b.d - a.d);
+    if (ch[0] && ch[0].d >= 500) ins.push(["↗️", `Cresce di più <b>${esc(ch[0].c.name)}</b>: +${eur0(ch[0].d)} rispetto ${vsTxt.startsWith("ai") ? vsTxt : "a " + vsTxt}`]);
+  }
+  if (!over.length && st.cats.some(c => c.cat.budget)) ins.push(["✅", "Tutti i budget sono rispettati"]);
+
+  // andamento: un solo grafico, scegli tu cosa vedere
+  const rc = S.rchart || "days";
+  let chart = "", cap = "";
+  if (rc === "days"){
+    const daily = Array.from({ length: dm }, (_, i) => { const d = `${S.month}-${pad(i + 1)}`; return { v: sum(st.out.filter(t => t.date === d)), tip: dShort(d), lab: (i + 1) % 5 === 0 || i === 0 ? String(i + 1) : "" }; });
+    chart = bars("chDaily", daily, { h: 150, maxW: 9, avg: st.tot / dd, label: "Spese giornaliere" }); cap = `In media <b>${eur0(st.tot / dd)}</b> al giorno · la linea è la media`;
+  } else if (rc === "months"){
+    const months = Array.from({ length: 6 }, (_, i) => addMonth(S.month, i - 5));
+    const mv = months.map(m => { const t = sum(txIn(m, "out")); return { v: t, lab: mShort(m), tip: mLabel(m), top: t ? eur0(t) : "", color: m === S.month ? "var(--accent)" : "color-mix(in srgb,var(--accent) 35%,transparent)" }; });
+    chart = bars("chMonths", mv, { h: 160, maxW: 34, label: "Spese degli ultimi sei mesi" }); cap = "Ultimi 6 mesi · tocca una barra";
+  } else {
+    const wd = Array(7).fill(0); st.out.forEach(t => wd[pdate(t.date).getDay()] += t.amt);
+    const order = [1, 2, 3, 4, 5, 6, 0], wmax = Math.max(1, ...wd), top = wd.indexOf(Math.max(...wd));
+    chart = `<div style="padding:12px 0 4px">${order.map(i => `<div class="wk"><span>${GIORNI[i].slice(0, 3)}</span><div class="bar"><i style="width:${Math.max(wd[i] ? 2 : 0, wd[i] / wmax * 100)}%"></i></div><em class="num">${eur0(wd[i])}</em></div>`).join("")}</div>`;
+    cap = st.out.length ? `Spendi di più il <b>${GIORNI[top]}</b>` : "";
+  }
   const top5 = [...st.out].sort((a, b) => b.amt - a.amt).slice(0, 5);
-  const lv = leaves(st);
-  const saved = st.income - st.tot;
 
-  v.innerHTML = rToggle() + `<div class="hero"><small>Report di ${mLabel(S.month)}${cur ? ` <span class="pill-status">in corso</span>` : ""}</small></div>
-  <div class="section" style="padding-top:0">
-    <div class="panel pad story">${reportStory(st, pst)}</div>
-    <div class="tiles" style="margin-top:10px">
-      <div class="tile"><small>Spese</small><b class="num">${eur(st.tot)}</b><span>${movs(st.out.length)}</span></div>
-      <div class="tile"><small>Entrate</small><b class="num">${eur(st.income)}</b><span>${movs(st.inc.length)}</span></div>
-      <div class="tile"><small>${saved >= 0 ? "Risparmio" : "Disavanzo"}</small><b class="num">${eur(Math.abs(saved))}</b><span>${st.income ? pct(Math.abs(saved), st.income) + "% delle entrate" : "nessuna entrata"}</span></div>
-      <div class="tile"><small>Media al giorno</small><b class="num">${eur(st.tot / dd)}</b><span>su ${dd} giorni</span></div>
-    </div>
+  v.innerHTML = rToggle() + `<div class="hero"><small>Spese di ${mName(S.month)}${cur ? ` <span class="pill-status">in corso</span>` : ""}</small><b class="num">${eur(st.tot)}</b>
+      <div class="sub"><span>Entrate <b class="num">${eur0(st.income)}</b></span><span>Saldo <b class="num">${saldo >= 0 ? "+" : "−"}${eur0(Math.abs(saldo))}</b></span><span>Al giorno <b class="num">${eur0(st.tot / dd)}</b></span></div></div>
+  <div class="section">
+    ${ins.length ? `<div class="shead"><h2>In breve</h2></div>${insights(ins)}` : ""}
 
-    ${st.cats.length ? `<div class="shead"><h2>Dove hai speso</h2></div>
-    <div class="panel">${st.cats.map(c => {
-      const p = prevMap.get(c.cat.id) || 0, d = c.amt - p;
-      const dtxt = !pst.tot ? "" : p === 0 ? "nuova" : Math.abs(d) < 100 ? "= stabile" : `${d > 0 ? "▲ +" : "▼ −"}${eur0(Math.abs(d))}`;
+    ${st.cats.length ? `<div class="shead"><h2>Dove hai speso</h2><span class="help">tocca per il dettaglio</span></div>
+    <div class="panel">${donut(foldRows(st.cats, st.tot), st.tot)}${st.cats.map(c => {
+      const p = prevCats.get(c.cat.id) || 0, dt = prevRef ? dTag(c.amt - p, p) : "";
       return `<button class="crow" data-cat="${c.cat.id}">${cbadge(c.cat)}<div class="mid">
         <div class="nm"><span>${esc(c.cat.name)}</span><span class="num">${eur(c.amt)}</span></div>
-        <div class="meta"><span>${pct(c.amt, st.tot)}% · ${c.n} mov. · media ${eur0(c.amt / c.n)}</span><span class="num">${dtxt}${dtxt && pst.tot ? ` vs ${mShort(pst.m)}` : ""}</span></div>
-        <div class="bar"><i style="width:${Math.max(2, c.amt / st.cats[0].amt * 100)}%;background:${cvar(c.cat.color)}"></i></div></div></button>
-        ${hasSubs(c) ? `<div class="nest">${c.subs.map(x => `<div class="srow"><div><span>${esc(x.name)}</span><span class="num">${eur(x.amt)}</span></div><small>${movs(x.n)} · ${pct(x.amt, c.amt)}% di ${esc(c.cat.name)}</small></div>`).join("")}</div>` : ""}`;
-    }).join("")}${pst.cats.filter(c => !st.cats.some(x => x.cat.id === c.cat.id)).map(c => `<div class="crow">${cbadge(c.cat)}<div class="mid">
-      <div class="nm"><span>${esc(c.cat.name)}</span><span class="num">${eur(0)}</span></div><div class="meta"><span>nessuna spesa questo mese</span><span>▼ −${eur0(c.amt)} vs ${mShort(pst.m)}</span></div></div></div>`).join("")}</div>` : ""}
+        <div class="meta"><span>${pct(c.amt, st.tot)}% · ${movs(c.n)}</span><span class="num">${dt}</span></div>
+        <div class="bar"><i style="width:${Math.max(2, c.amt / st.cats[0].amt * 100)}%;background:${cvar(c.cat.color)}"></i></div></div>${ICON_CHEV}</button>`;
+    }).join("")}</div>
+    ${prevRef ? `<p class="help" style="margin:8px 4px 0">▲▼ = differenza rispetto ${cur ? "ai primi " + dd + " giorni di " + P : "a " + P}.</p>` : ""}` : ""}
 
-    ${lv.length ? `<div class="shead"><h2>Le voci più costose</h2></div>
-    <div class="panel">${lv.slice(0, 6).map(x => `<div class="leaf">${cbadge(x.c, "sm")}<div class="mid">
-      <div class="nm" style="display:flex;justify-content:space-between;gap:10px;font-size:14.5px;font-weight:500"><span>${esc(x.s.name)}</span><span class="num">${eur(x.s.amt)}</span></div>
-      <div class="meta" style="display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:2px"><span>${esc(x.c.name)} · ${movs(x.s.n)}</span><span class="num">${pct(x.s.amt, st.tot)}%</span></div>
-      <div class="bar"><i style="width:${Math.max(2, x.s.amt / lv[0].s.amt * 100)}%;background:${cvar(x.c.color)}"></i></div></div></div>`).join("")}</div>` : ""}
-
-    <div class="shead"><h2>Giorno per giorno</h2><span class="help">tocca una barra</span></div>
-    <div class="panel">${bars("chDaily", daily, { h: 140, maxW: 9, avg: st.tot / dd, label: "Spese giornaliere" })}</div>
-
-    <div class="shead"><h2>Ultimi 6 mesi</h2></div>
-    <div class="panel">${bars("chMonths", mvals, { h: 150, maxW: 34, label: "Spese degli ultimi sei mesi" })}</div>
-
-    ${st.out.length ? `<div class="shead"><h2>Giorni della settimana</h2></div>
-    <div class="panel" style="padding:8px 0">${order.map(i => `<div class="wk"><span>${GIORNI[i].slice(0, 3)}</span><div class="bar"><i style="width:${Math.max(wd[i] ? 2 : 0, wd[i] / wmax * 100)}%"></i></div><em class="num">${eur0(wd[i])}</em></div>`).join("")}</div>
+    ${st.out.length ? `<div class="shead"><h2>Andamento</h2></div>
+    <div class="panel">${chartSeg("rchart", [["days", "Giorni"], ["months", "6 mesi"], ["week", "Settimana"]], rc)}${chart}${cap ? `<p class="help chcap">${cap}</p>` : ""}</div>
 
     <div class="shead"><h2>Le spese più grandi</h2></div>
     <div class="panel">${top5.map(txRow).join("")}</div>` : ""}
 
-    <div class="row-btns noprint"><button class="btn" data-act="print">Salva in PDF</button><button class="btn ghost" data-act="csvMonth">Esporta CSV del mese</button></div>
+    <div class="row-btns noprint"><button class="btn ghost" data-act="print">Salva in PDF</button><button class="btn ghost" data-act="csvMonth">Esporta CSV</button></div>
   </div>`;
 }
 
 /* ---------- Cosa compri: statistiche sugli articoli degli scontrini ---------- */
-const PPER = { m: ["Mese", 1], q: ["3 mesi", 3], y: ["12 mesi", 12] };
+const PPER = { m: ["1 mese", 1], q: ["3 mesi", 3], y: ["12 mesi", 12] };
 function itemsIn(months){
   const set = new Set(months), out = [];
   for (const t of D.tx) if (t.items?.length && set.has(t.date.slice(0, 7))) for (const x of t.items) out.push({ ...x, date: t.date, tx: t.id, shop: t.note || "" });
@@ -1245,81 +1220,81 @@ function prodStats(items){
 }
 const prodMonths = () => { const n = PPER[S.pper || "m"][1]; return Array.from({ length: n }, (_, i) => addMonth(S.month, i - n + 1)); };
 const pct1 = (a, b) => b ? (a / b * 100).toFixed(1).replace(".", ",").replace(",0", "") : "0";
-/* quanto ti fanno risparmiare gli sconti: speso, sconto, percentuale, quanto avresti speso senza */
-function saveCard(st, pst, n){
-  const full = st.tot + st.sc, per = n === 1 ? "questo mese" : "in questo periodo";
-  if (!st.sc) return `<div class="shead"><h2>Risparmio con gli sconti</h2></div><div class="panel pad help">Negli scontrini ${per} non ci sono sconti.</div>`;
-  const top = [...st.prods].filter(x => x.sc > 0).sort((a, b) => b.sc - a.sc).slice(0, 5);
-  const prevFull = pst.tot + pst.sc, prevP = prevFull ? pst.sc / prevFull * 100 : null, curP = st.sc / full * 100;
-  const cmp = prevP === null || !pst.sc ? "" : Math.abs(curP - prevP) < 1 ? `, come ${n === 1 ? "il mese prima" : "nel periodo prima"}` : `, ${curP > prevP ? "più" : "meno"} di ${n === 1 ? "il mese prima" : "nel periodo prima"} (${pct1(pst.sc, prevFull)}%)`;
+/* le spese con lo scontrino (prodotti o sconti scritti da te) nei mesi scelti */
+const receiptTx = months => { const set = new Set(months); return D.tx.filter(t => t.type === "out" && (t.items?.length || t.sc > 0) && set.has(t.date.slice(0, 7))); };
+const scOf = list => list.reduce((s, t) => s + (t.sc || 0), 0);
+/* quanto ti fanno risparmiare gli sconti: usa il totale e gli sconti che scrivi tu, non quelli letti dallo scontrino */
+function saveCard(rtx, prtx, n){
+  const per = n === 1 ? "questo mese" : "in questo periodo", paid = sum(rtx), sc = scOf(rtx);
+  if (!sc) return `<div class="shead"><h2>Risparmio con gli sconti</h2></div><div class="panel pad help">Nessuno sconto registrato ${per}. Quando salvi la spesa scrivi il totale degli sconti nel campo <b>Sconti</b> dello scontrino.</div>`;
+  const full = paid + sc, psc = scOf(prtx), pfull = sum(prtx) + psc, nsc = rtx.filter(t => t.sc > 0).length;
+  const cmp = !psc ? "" : Math.abs(sc / full - psc / pfull) * 100 < 1 ? `, come ${n === 1 ? "il mese prima" : "nel periodo prima"}` : `: ${n === 1 ? "il mese prima" : "nel periodo prima"} era il ${pct1(psc, pfull)}%`;
   return `<div class="shead"><h2>Risparmio con gli sconti</h2></div>
     <div class="tiles">
-      <div class="tile"><small>Hai speso</small><b class="num">${eur(st.tot)}</b><span>quello che hai pagato</span></div>
-      <div class="tile"><small>Sconti</small><b class="num good">−${eur(st.sc)}</b><span>su ${st.nsc} ${st.nsc === 1 ? "articolo" : "articoli"}</span></div>
+      <div class="tile"><small>Hai speso</small><b class="num">${eur(paid)}</b><span>${rtx.length} ${rtx.length === 1 ? "scontrino" : "scontrini"}</span></div>
+      <div class="tile"><small>Sconti</small><b class="num good">−${eur(sc)}</b><span>su ${nsc} ${nsc === 1 ? "scontrino" : "scontrini"}</span></div>
       <div class="tile"><small>Senza sconti</small><b class="num">${eur(full)}</b><span>avresti speso</span></div>
-      <div class="tile"><small>Risparmio</small><b class="num good">${pct1(st.sc, full)}%</b><span>del prezzo pieno</span></div>
+      <div class="tile"><small>Risparmio</small><b class="num good">${pct1(sc, full)}%</b><span>del prezzo pieno</span></div>
     </div>
     <div class="panel pad" style="margin-top:10px">
-      <div class="help" style="color:var(--fg)">Su ${eur(full)} di prezzo pieno ne hai risparmiati <b>${eur(st.sc)}</b>, il <b>${pct1(st.sc, full)}%</b>${cmp}.</div>
-      <div class="savebar" role="img" aria-label="Pagato ${eur(st.tot)}, risparmiato ${eur(st.sc)}"><i style="flex:${st.tot};background:var(--muted);opacity:.45"></i><i style="flex:${st.sc};background:var(--good)"></i></div>
+      <div class="savebar" role="img" aria-label="Pagato ${eur(paid)}, risparmiato ${eur(sc)}" style="margin-top:0"><i style="flex:${paid};background:var(--muted);opacity:.45"></i><i style="flex:${sc};background:var(--good)"></i></div>
       <div class="savelg"><span><i style="background:var(--muted);opacity:.45"></i>Pagato</span><span><i style="background:var(--good)"></i>Risparmiato</span></div>
-    </div>
-    ${top.length ? `<div class="shead"><h2>Dove hai risparmiato di più</h2></div><div class="panel">${top.map(x => `<button class="prow" data-prod="${esc(x.k)}"><span class="em">${pcat(x.c).e}</span><div class="mid"><div class="t">${esc(x.n)}</div><div class="s">pagato ${eur(x.amt)} · ${x.cnt} ${x.cnt === 1 ? "volta" : "volte"}</div></div><div class="a" style="color:var(--good)">−${eur(x.sc)}<small>${pct1(x.sc, x.amt + x.sc)}%</small></div></button>`).join("")}</div>` : ""}`;
+      ${cmp ? `<p class="help" style="margin:10px 0 0">Hai risparmiato il <b>${pct1(sc, full)}%</b>${cmp}.</p>` : ""}
+    </div>`;
 }
 function renderProd(){
   const v = $("#vReport"), per = S.pper || "m", n = PPER[per][1];
   const months = prodMonths(), prevM = months.map(m => addMonth(m, -n));
   const items = itemsIn(months), st = prodStats(items), pst = prodStats(itemsIn(prevM));
-  const receipts = new Set(items.map(x => x.tx)).size;
-  const seg = `<div class="seg" style="padding:12px 16px 0">${Object.entries(PPER).map(([k, [lab]]) => `<button data-pper="${k}" aria-pressed="${k === per}">${lab}</button>`).join("")}</div>`;
+  const rtx = receiptTx(months), prtx = receiptTx(prevM);
+  const seg = chartSeg("pper", Object.entries(PPER).map(([k, [lab]]) => [k, lab]), per).replace('class="chartseg"', 'class="chartseg top"');
   const label = n === 1 ? mLabel(S.month) : `${mShort(months[0])} – ${mShort(months[n - 1])} ${S.month.slice(0, 4)}`;
-  if (!items.length){
-    v.innerHTML = rToggle() + seg + `<div class="empty"><h2>Nessuno scontrino in ${n === 1 ? mName(S.month) : "questo periodo"}</h2>
-      <p>Quando registri una spesa al supermercato tocca <b>📷 Foto o PDF</b> o <b>📋 Incolla scontrino</b>: qui vedrai cosa compri di più, per categoria e per prodotto, e quanto risparmi con gli sconti.</p>
+  if (!items.length && !rtx.length){
+    v.innerHTML = rToggle() + seg + `<div class="empty"><h2>Nessuno scontrino ${n === 1 ? "in " + mName(S.month) : "in questo periodo"}</h2>
+      <p>Quando registri una spesa al supermercato, in fondo trovi <b>Scontrino</b>: aggiungi i prodotti da una foto, dal PDF, incollando lo scontrino digitale o a mano. Qui vedrai cosa compri e quanto risparmi.</p>
       <div class="row-btns"><button class="btn" data-act="add">Aggiungi una spesa</button></div></div>`;
     return;
   }
+  const paid = sum(rtx), sc = scOf(rtx);
   const pmap = new Map(pst.cats.map(x => [x.c, x.amt])), max = st.cats[0]?.amt || 1;
-  const byCnt = [...st.prods].sort((a, b) => b.cnt - a.cnt || b.amt - a.amt).slice(0, 8);
-  const byAmt = [...st.prods].sort((a, b) => b.amt - a.amt).slice(0, 8);
-  // cosa è cambiato rispetto al periodo prima
-  const ch = pst.tot ? PCATS.map(c => ({ c, d: (st.cats.find(x => x.c === c.id)?.amt || 0) - (pmap.get(c.id) || 0) })).filter(x => Math.abs(x.d) >= 300).sort((a, b) => b.d - a.d) : [];
-  const story = [];
-  if (st.cats[0]) story.push(`Su ${receipts} ${receipts === 1 ? "scontrino" : "scontrini"} (${eur(st.tot)}), la categoria che pesa di più è <b>${pcat(st.cats[0].c).e} ${pcat(st.cats[0].c).n}</b> con ${eur(st.cats[0].amt)}, il ${pct(st.cats[0].amt, st.tot)}%.`);
-  if (byCnt[0] && byCnt[0].cnt > 1) story.push(`Il prodotto che compri più spesso è <b>${esc(byCnt[0].n)}</b> (${byCnt[0].cnt} volte).`);
-  if (ch.length){ const up = ch[0], dn = ch[ch.length - 1]; const bits = [];
-    if (up.d > 0) bits.push(`spendi di più in <b>${up.c.e} ${up.c.n}</b> (+${eur0(up.d)})`); if (dn.d < 0) bits.push(`di meno in <b>${dn.c.e} ${dn.c.n}</b> (−${eur0(-dn.d)})`);
-    if (bits.length) story.push(`Rispetto ${n === 1 ? "al mese prima" : "al periodo prima"} ${bits.join(" e ")}.`); }
+  const pt = S.ptop || "cnt";
+  const tops = [...st.prods].sort(pt === "cnt" ? (a, b) => b.cnt - a.cnt || b.amt - a.amt : (a, b) => b.amt - a.amt).slice(0, 10);
+  const ins = [];
+  if (st.cats[0]) ins.push([pcat(st.cats[0].c).e, `<b>${pcat(st.cats[0].c).n}</b> è la categoria più grande: ${pct(st.cats[0].amt, st.tot)}% dei prodotti`]);
+  const often = [...st.prods].sort((a, b) => b.cnt - a.cnt)[0];
+  if (often && often.cnt > 1) ins.push(["🔁", `Compri più spesso <b>${esc(often.n)}</b>: ${often.cnt} volte`]);
+  if (pst.tot){
+    const ch = PCATS.map(c => ({ c, d: (st.cats.find(x => x.c === c.id)?.amt || 0) - (pmap.get(c.id) || 0) })).filter(x => Math.abs(x.d) >= 300).sort((a, b) => b.d - a.d);
+    if (ch[0] && ch[0].d > 0) ins.push(["↗️", `Spendi di più in <b>${ch[0].c.n}</b>: +${eur0(ch[0].d)} rispetto ${n === 1 ? "al mese prima" : "al periodo prima"}`]);
+  }
+  if (sc) ins.push(["💸", `Con gli sconti hai risparmiato <b>${eur(sc)}</b>, il ${pct1(sc, paid + sc)}%`]);
   const prow = (x, right) => `<button class="prow" data-prod="${esc(x.k)}"><span class="em">${pcat(x.c).e}</span><div class="mid"><div class="t">${esc(x.n)}</div><div class="s">${esc(pcat(x.c).n)}</div></div><div class="a">${right}</div></button>`;
-  v.innerHTML = rToggle() + seg + `<div class="hero"><small>Cosa compri · ${esc(label)}</small><b class="num">${eur(st.tot)}</b>
-      <div class="sub"><span>Scontrini <b class="num">${receipts}</b></span><span>Articoli <b class="num">${items.filter(x => x.p > 0).length}</b></span></div></div>
+  const gone = pst.prods.length ? (() => { const curK = new Set(st.prods.map(x => x.k)); return pst.prods.filter(x => !curK.has(x.k) && x.cnt >= 2).sort((a, b) => b.cnt - a.cnt).slice(0, 5); })() : [];
+  v.innerHTML = rToggle() + seg + `<div class="hero"><small>Spesa al supermercato · ${esc(label)}</small><b class="num">${eur(paid || st.tot)}</b>
+      <div class="sub"><span>Scontrini <b class="num">${rtx.length}</b></span><span>Prodotti <b class="num">${items.filter(x => x.p > 0).length}</b></span>${sc ? `<span>Sconti <b class="num">−${eur0(sc)}</b></span>` : ""}</div></div>
     <div class="section">
-      ${story.length ? `<div class="panel pad story">${story.map(x => `<p>${x}</p>`).join("")}</div>` : ""}
-      <div class="shead"><h2>Per categoria</h2><span class="help">tocca per vedere i prodotti</span></div>
-      <div class="stack">${st.cats.map(x => `<i style="flex:${x.amt};background:${pcat(x.c).col}"></i>`).join("")}</div>
-      <div class="panel">${st.cats.map(x => { const pc = pcat(x.c), pv = pmap.get(x.c) || 0, d = x.amt - pv;
-        const dt = !pst.tot ? "" : !pv ? "nuova" : Math.abs(d) < 100 ? "= stabile" : `${d > 0 ? "▲ +" : "▼ −"}${eur0(Math.abs(d))}`;
-        const np = st.prods.filter(p => p.c === x.c).length;
+      ${ins.length ? `<div class="shead"><h2>In breve</h2></div>${insights(ins)}` : ""}
+      ${st.cats.length ? `<div class="shead"><h2>Per categoria</h2><span class="help">tocca per vedere i prodotti</span></div>
+      <div class="panel"><div class="stack" style="margin:14px 14px 4px">${st.cats.map(x => `<i style="flex:${x.amt};background:${pcat(x.c).col}"></i>`).join("")}</div>
+      ${st.cats.map(x => { const pc = pcat(x.c), pv = pmap.get(x.c) || 0, np = st.prods.filter(p => p.c === x.c).length;
+        const dt = pst.tot ? dTag(x.amt - pv, pv) : "";
         return `<button class="prow" data-pccat="${x.c}"><span class="em">${pc.e}</span><div class="mid"><div class="t">${esc(pc.n)}</div><div class="s">${np} ${np === 1 ? "prodotto" : "prodotti"} · ${pct(x.amt, st.tot)}%${dt ? " · " + dt : ""}</div>
-          <div class="bar"><i style="width:${Math.max(2, x.amt / max * 100)}%;background:${pc.col}"></i></div></div><div class="a">${eur(x.amt)}</div>${ICON_CHEV}</button>`; }).join("")}</div>
-      ${saveCard(st, pst, n)}
-      <div class="shead"><h2>Compri più spesso</h2><span class="help">tocca un prodotto</span></div>
-      <div class="panel">${byCnt.map(x => prow(x, `×${x.cnt}<small>${eur(x.amt / x.cnt)} in media</small>`)).join("")}</div>
-      <div class="shead"><h2>Dove va più spesa</h2></div>
-      <div class="panel">${byAmt.map(x => prow(x, `${eur(x.amt)}<small>${x.cnt} ${x.cnt === 1 ? "volta" : "volte"}</small>`)).join("")}</div>
-      ${pst.prods.length ? (() => { const cur = new Set(st.prods.map(x => x.k)); const gone = pst.prods.filter(x => !cur.has(x.k) && x.cnt >= 2).sort((a, b) => b.cnt - a.cnt).slice(0, 5);
-        return gone.length ? `<div class="shead"><h2>Non li hai più comprati</h2></div><div class="panel">${gone.map(x => prow(x, `<small>${x.cnt} volte prima</small>`)).join("")}</div>` : ""; })() : ""}
+          <div class="bar"><i style="width:${Math.max(2, x.amt / max * 100)}%;background:${pc.col}"></i></div></div><div class="a">${eur(x.amt)}</div>${ICON_CHEV}</button>`; }).join("")}</div>` : ""}
+      ${saveCard(rtx, prtx, n)}
+      ${tops.length ? `<div class="shead"><h2>I prodotti</h2><span class="help">tocca un prodotto</span></div>
+      <div class="panel">${chartSeg("ptop", [["cnt", "Più comprati"], ["amt", "Più spesa"]], pt)}<div style="margin-top:8px">${tops.map(x => pt === "cnt" ? prow(x, `×${x.cnt}<small>${eur(x.amt / x.cnt)} l'uno</small>`) : prow(x, `${eur(x.amt)}<small>${x.cnt} ${x.cnt === 1 ? "volta" : "volte"}</small>`)).join("")}</div></div>` : ""}
+      ${gone.length ? `<div class="shead"><h2>Non li hai più comprati</h2></div><div class="panel">${gone.map(x => prow(x, `<small>${x.cnt} volte prima</small>`)).join("")}</div>` : ""}
     </div>`;
 }
 /* una categoria dei prodotti (es. Dispensa): cosa c'è dentro, per controllare */
 function openPcat(c){ S.pcat = c; drawPcat(); open("#sPcat"); }
 function drawPcat(){
   const c = S.pcat, pc = pcat(c), months = prodMonths(), n = months.length, items = itemsIn(months), st = prodStats(items);
-  const list = st.prods.filter(x => x.c === c).sort((a, b) => b.amt - a.amt), tot = list.reduce((s, x) => s + x.amt, 0), sc = list.reduce((s, x) => s + x.sc, 0);
+  const list = st.prods.filter(x => x.c === c).sort((a, b) => b.amt - a.amt), tot = list.reduce((s, x) => s + x.amt, 0);
   const label = n === 1 ? mLabel(S.month) : `${mShort(months[0])} – ${mShort(months[n - 1])} ${S.month.slice(0, 4)}`;
   $("#sPcat").innerHTML = `<div class="pbar"><button class="icon-btn" data-act="pcatBack" aria-label="Chiudi">${ICON_X}</button><h3>${pc.e} ${esc(pc.n)}</h3></div>
     <div class="sumhead"><span class="cb lg" style="background:${pc.col};font-size:24px">${pc.e}</span><div><small>${esc(label)} · ${list.length} ${list.length === 1 ? "prodotto" : "prodotti"}</small><b>${eur(tot)}</b></div></div>
-    <div class="sumfacts"><span><b>${pct(tot, st.tot)}%</b> della spesa al supermercato</span>${sc ? `<span>sconti <b style="color:var(--good)">−${eur(sc)}</b></span>` : ""}</div>
+    <div class="sumfacts"><span><b>${pct(tot, st.tot)}%</b> della spesa al supermercato</span></div>
     <div class="section"><div class="shead"><h2>Prodotti</h2><span class="help">tocca per i dettagli o per spostarlo</span></div>
       ${list.length ? `<div class="panel">${list.map(x => `<button class="prow" data-prod="${esc(x.k)}"><span class="em">${pc.e}</span><div class="mid"><div class="t">${esc(x.n)}</div>
         ${x.r && normRaw(x.r) !== normRaw(x.n) ? `<code class="rawc">${esc(x.r)}</code>` : ""}<div class="s">${x.cnt} ${x.cnt === 1 ? "volta" : "volte"} · ${eur(x.amt / x.cnt)} in media</div></div><div class="a">${eur(x.amt)}</div>${ICON_CHEV}</button>`).join("")}</div>`
@@ -1354,7 +1329,6 @@ function drawProd(){
     <div class="sumhead"><span class="cb lg" style="background:var(--raised);font-size:24px">${pc.e}</span><div><small>${list.length} ${list.length === 1 ? "acquisto" : "acquisti"}</small><b>${eur(ps.reduce((a, b) => a + b, 0))}</b>
       <button class="pcbtn" data-act="prodPc" data-c="${pc.id}">${pc.e} ${esc(pc.n)} · Cambia categoria</button></div></div>
     <div class="sumfacts"><span>prezzo medio <b>${eur(avg)}</b></span><span>min <b>${eur(Math.min(...ps))}</b></span><span>max <b>${eur(Math.max(...ps))}</b></span>
-      ${list.some(x => x.sc) ? `<span>sconti <b style="color:var(--good)">−${eur(list.reduce((t, x) => t + (x.sc || 0), 0))}</b></span>` : ""}
       ${list.length > 1 && Math.abs(ch) >= 3 ? `<span>dalla prima volta <b>${ch > 0 ? "▲ +" : "▼ −"}${Math.abs(ch)}%</b></span>` : ""}</div>
     <div class="section"><div class="shead"><h2>Spesa negli ultimi 6 mesi</h2></div><div class="panel">${bars("chProd", vals, { h: 130, maxW: 34, label: "Spesa per questo prodotto" })}</div>
       <div class="shead"><h2>Acquisti</h2></div><div class="panel">${list.slice(0, 40).map(x => `<div class="prow" style="cursor:default"><span class="em" style="font-size:13px;font-weight:600">${pdate(x.date).getDate()}</span><div class="mid"><div class="t">${dLabel(x.date)}</div><div class="s">${esc(x.shop || x.r || "")}</div></div><div class="a">${eur(x.p)}</div></div>`).join("")}</div></div>`;
@@ -1376,34 +1350,18 @@ function renderYear(){
   const live = ms.slice(firstIdx, cur ? lastIdx : lastIdx + 1).filter(x => x.out);   // il mese in corso non conta: è incompleto
   const hi = live.reduce((a, b) => b.out > (a?.out ?? -1) ? b : a, null), lo = live.reduce((a, b) => b.out < (a?.out ?? Infinity) ? b : a, null);
 
-  // racconto dell'anno
-  const ps = [];
-  let p1 = `Nel ${Y}${cur ? " (finora)" : ""} hai speso <b>${eur(st.tot)}</b> in ${movs(st.out.length)}, in media <b>${eur(avg)}</b> al mese.`;
+  // in breve
+  const ins = [];
   if (pst.tot){
     // per un anno in corso confronto gli stessi mesi dell'anno prima
     const prevSame = cur ? sum(D.tx.filter(t => t.type === "out" && t.date.startsWith(PY) && +t.date.slice(5, 7) <= lastIdx + 1)) : pst.tot;
-    if (prevSame){ const p = pct(st.tot - prevSame, prevSame); p1 += ` Rispetto ${cur ? "agli stessi mesi del" : "al"} ${PY} (${eur0(prevSame)}) è ${p === 0 ? "praticamente uguale" : `<b>il ${Math.abs(p)}% ${p > 0 ? "in più" : "in meno"}</b>`}.`; }
+    if (prevSame){ const p = pct(st.tot - prevSame, prevSame); ins.push([p > 0 ? "📈" : "📉", p === 0 ? `Come ${cur ? "negli stessi mesi del" : "nel"} ${PY}` : `<b>${Math.abs(p)}% ${p > 0 ? "in più" : "in meno"}</b> rispetto ${cur ? "agli stessi mesi del" : "al"} ${PY} (${eur0(prevSame)})`]); }
   }
-  if (cur && lastIdx < 11 && span >= 2) p1 += ` A questo ritmo chiuderesti l'anno intorno a <b>${eur0(st.tot + avg * (11 - lastIdx))}</b>.`;
-  ps.push(p1);
-  if (hi && lo && hi !== lo) ps.push(`Il mese più caro è stato <b>${mName(hi.m)}</b> (${eur0(hi.out)}), il più leggero ${mName(lo.m)} (${eur0(lo.out)}).`);
-  if (st.cats.length){
-    const [a, b, c] = st.cats;
-    let p3 = `La voce più pesante dell'anno è <b>${esc(a.cat.name)}</b>: ${eur0(a.amt)}, il ${pct(a.amt, st.tot)}% del totale, circa ${eur0(a.amt / span)} al mese.`;
-    if (b) p3 += ` Seguono ${esc(b.cat.name)} (${pct(b.amt, st.tot)}%)${c ? ` e ${esc(c.cat.name)} (${pct(c.amt, st.tot)}%)` : ""}.`;
-    const lv = leaves(st);
-    if (lv.length) p3 += ` Nel dettaglio, la sottocategoria che pesa di più è ${esc(lv[0].s.name)} (${esc(lv[0].c.name)}) con ${eur0(lv[0].s.amt)}.`;
-    ps.push(p3);
-  }
-  if (pst.cats.length && st.cats.length && !cur){
-    const pm = new Map(pst.cats.map(c => [c.cat.id, c.amt]));
-    const ch = st.cats.map(c => ({ c: c.cat, d: c.amt - (pm.get(c.cat.id) || 0) })).sort((a, b) => b.d - a.d);
-    if (ch[0].d >= 5000) ps.push(`Rispetto al ${PY} è cresciuta soprattutto <b>${esc(ch[0].c.name)}</b> (+${eur0(ch[0].d)}).`);
-  }
-  if (st.income) ps.push(saved >= 0 ? `Sono entrati ${eur(st.income)}: hai messo da parte <b>${eur(saved)}</b>, il ${pct(saved, st.income)}% delle entrate.`
-    : `Sono entrati ${eur(st.income)}: hai speso <b>${eur(-saved)} più di quanto è entrato</b>.`);
+  if (cur && lastIdx < 11 && span >= 2) ins.push(["🔮", `A questo ritmo chiudi l'anno intorno a <b>${eur0(st.tot + avg * (11 - lastIdx))}</b>`]);
+  if (hi && lo && hi !== lo) ins.push(["📅", `Mese più caro <b>${mName(hi.m)}</b> (${eur0(hi.out)}), più leggero ${mName(lo.m)} (${eur0(lo.out)})`]);
+  if (st.cats[0]) ins.push(["🏷️", `La voce più grande è <b>${esc(st.cats[0].cat.name)}</b>: ${pct(st.cats[0].amt, st.tot)}%, circa ${eur0(st.cats[0].amt / span)} al mese`]);
   const big = st.out.length ? st.out.reduce((a, b) => b.amt > a.amt ? b : a) : null;
-  if (big) ps.push(`La spesa singola più alta dell'anno: ${esc(big.note || catLabel(big))}, <b>${eur(big.amt)}</b> il ${dShort(big.date)}.`);
+  if (big) ins.push(["🧾", `La spesa più alta: ${esc(big.note || catLabel(big))}, <b>${eur(big.amt)}</b> il ${dShort(big.date)}`]);
 
   // andamento di ogni categoria mese per mese
   const perCat = new Map(st.cats.map(c => [c.cat.id, Array(12).fill(0)]));
@@ -1411,20 +1369,15 @@ function renderYear(){
   const prevMap = new Map(pst.cats.map(c => [c.cat.id, c.amt]));
   const mvals = ms.map((x, i) => ({ v: x.out, lab: mShort(x.m), tip: mLabel(x.m), color: i > lastIdx ? "var(--line)" : "var(--accent)" }));
 
-  v.innerHTML = rToggle() + `<div class="hero"><small>Report del ${Y}${cur ? ` <span class="pill-status">in corso</span>` : ""}</small></div>
-  <div class="section" style="padding-top:0">
-    <div class="panel pad story">${ps.map(x => `<p>${x}</p>`).join("")}</div>
-    <div class="tiles" style="margin-top:10px">
-      <div class="tile"><small>Spese</small><b class="num">${eur0(st.tot)}</b><span>${movs(st.out.length)}</span></div>
-      <div class="tile"><small>Entrate</small><b class="num">${eur0(st.income)}</b><span>${movs(st.inc.length)}</span></div>
-      <div class="tile"><small>${saved >= 0 ? "Risparmio" : "Disavanzo"}</small><b class="num">${eur0(Math.abs(saved))}</b><span>${st.income ? pct(Math.abs(saved), st.income) + "% delle entrate" : "nessuna entrata"}</span></div>
-      <div class="tile"><small>Media al mese</small><b class="num">${eur0(avg)}</b><span>su ${span} ${span === 1 ? "mese" : "mesi"}</span></div>
-    </div>
+  v.innerHTML = rToggle() + `<div class="hero"><small>Spese del ${Y}${cur ? ` <span class="pill-status">in corso</span>` : ""}</small><b class="num">${eur0(st.tot)}</b>
+      <div class="sub"><span>Entrate <b class="num">${eur0(st.income)}</b></span><span>Saldo <b class="num">${saved >= 0 ? "+" : "−"}${eur0(Math.abs(saved))}</b></span><span>Al mese <b class="num">${eur0(avg)}</b></span></div></div>
+  <div class="section">
+    ${ins.length ? `<div class="shead"><h2>In breve</h2></div>${insights(ins)}` : ""}
 
-    <div class="shead"><h2>Spese mese per mese</h2><span class="help">tocca una barra</span></div>
+    <div class="shead"><h2>Mese per mese</h2><span class="help">tocca una barra</span></div>
     <div class="panel">${bars("chYear", mvals, { h: 150, maxW: 20, avg, label: "Spese di ogni mese dell'anno" })}</div>
 
-    ${st.cats.length ? `<div class="shead"><h2>Dove hai speso nell'anno</h2></div>
+    ${st.cats.length ? `<div class="shead"><h2>Dove hai speso</h2><span class="help">tocca per il dettaglio</span></div>
     <div class="panel">${st.cats.map(c => {
       const arr = perCat.get(c.cat.id), mx = Math.max(1, ...arr), p = prevMap.get(c.cat.id) || 0, d = c.amt - p;
       const dtxt = !pst.tot || cur ? "" : !p ? "nuova" : `${d >= 0 ? "▲ +" : "▼ −"}${eur0(Math.abs(d))} vs ${PY}`;
@@ -1432,15 +1385,15 @@ function renderYear(){
         <div class="nm"><span>${esc(c.cat.name)}</span><span class="num">${eur(c.amt)}</span></div>
         <div class="meta"><span>${pct(c.amt, st.tot)}% · ${eur0(c.amt / span)} al mese</span><span class="num">${dtxt}</span></div>
         <div class="spark" aria-label="Andamento mensile di ${esc(c.cat.name)}">${arr.map((x, i) => `<i class="${x ? "" : "z"}" title="${mName(months[i])}: ${eur(x)}" style="height:${x ? Math.max(8, x / mx * 100) : 0}%;background:${cvar(c.cat.color)}${i > lastIdx ? ";opacity:.3" : ""}"></i>`).join("")}</div>
-      </div></button>${hasSubs(c) ? `<div class="nest">${c.subs.slice(0, 5).map(x => `<div class="srow"><div><span>${esc(x.name)}</span><span class="num">${eur(x.amt)}</span></div><small>${movs(x.n)} · ${pct(x.amt, c.amt)}% di ${esc(c.cat.name)}</small></div>`).join("")}${c.subs.length > 5 ? `<div class="srow"><small>e altre ${c.subs.length - 5} sottocategorie</small></div>` : ""}</div>` : ""}`;
+      </div>${ICON_CHEV}</button>`;
     }).join("")}</div>` : ""}
 
-    <div class="shead"><h2>Riepilogo dei mesi</h2><span class="help">tocca un mese</span></div>
+    <div class="shead"><h2>Tabella dei mesi</h2><span class="help">tocca un mese</span></div>
     <div class="panel"><table class="mtab"><thead><tr><th>Mese</th><th>Spese</th><th>Entrate</th><th>Saldo</th></tr></thead><tbody>
       ${ms.map((x, i) => { const sd = x.inc - x.out, empty = !x.out && !x.inc; return `<tr${empty ? ' class="off"' : ` data-mrep="${x.m}"`}><td>${mName(x.m)}</td><td>${x.out ? eur0(x.out) : "–"}</td><td>${x.inc ? eur0(x.inc) : "–"}</td><td class="${empty ? "" : sd >= 0 ? "pos" : "neg"}">${empty ? "–" : (sd >= 0 ? "+" : "−") + eur0(Math.abs(sd))}</td></tr>`; }).join("")}
     </tbody><tfoot><tr><td>Totale</td><td>${eur0(st.tot)}</td><td>${eur0(st.income)}</td><td class="${saved >= 0 ? "pos" : "neg"}">${(saved >= 0 ? "+" : "−") + eur0(Math.abs(saved))}</td></tr></tfoot></table></div>
 
-    <div class="row-btns noprint"><button class="btn" data-act="print">Salva in PDF</button><button class="btn ghost" data-act="csvYear">Esporta CSV dell'anno</button></div>
+    <div class="row-btns noprint"><button class="btn ghost" data-act="print">Salva in PDF</button><button class="btn ghost" data-act="csvYear">Esporta CSV</button></div>
   </div>`;
 }
 
@@ -1486,9 +1439,11 @@ function drawTx(){
     ${e.cat ? `<div class="field"><label>Sottocategoria di ${esc(mc.name)}</label><div class="catgrid subs">
       <button class="chip" data-psub="" aria-pressed="${!e.sub}">Nessuna</button>${subs.map(x => `<button class="chip" data-psub="${x.id}" aria-pressed="${x.id === e.sub}">${esc(x.name)}</button>`).join("")}
       <button class="chip" data-act="newSubTx">+ Nuova</button></div></div>` : ""}
-    ${e.type === "out" ? `<div class="field"><label>Scontrino</label>${itemsBlock(e)}</div>` : ""}
     <div class="field"><label for="txDate">Data</label><input type="date" id="txDate" value="${e.date}"></div>
     <div class="field"><label for="txNote">Nota</label><input type="text" id="txNote" placeholder="${e.type === "out" ? "es. Esselunga, cena con amici" : "es. stipendio di ottobre"}" value="${esc(e.note)}" autocomplete="off"></div>
+    ${e.type === "out" ? `<div class="field"><label>Scontrino <small class="opt">facoltativo</small></label>${itemsBlock(e)}</div>
+    ${e.items?.length || e.sc ? `<div class="field"><label for="txSc">Sconti sullo scontrino</label><input type="text" id="txSc" inputmode="decimal" placeholder="0,00" value="${e.sc ? fmtInput(e.sc) : ""}" autocomplete="off">
+      <p class="help" style="margin:6px 2px 0">Il totale degli sconti scritto in fondo allo scontrino («Totale sconti», «Hai risparmiato»). Serve per il report del risparmio.</p></div>` : ""}` : ""}
     ${e.id ? `<div class="field"><button class="btn danger wide" data-act="delTx">Elimina movimento</button></div>` : ""}
     <div class="kp" id="kp"${S.kp ? "" : " hidden"}>${["1", "2", "3", "del", "4", "5", "6", ",", "7", "8", "9", "ok", "0"].map(k =>
       k === "del" ? `<button data-k="del" aria-label="Cancella"><svg viewBox="0 0 24 24"><path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="m12 9 5 6M17 9l-5 6"/></svg></button>`
@@ -1526,13 +1481,14 @@ function newSubTx(){
 function readTx(){
   readItems();
   const e = S.edit; e.amt = parseAmt(e.raw || ""); e.date = $("#txDate").value || today(); e.note = $("#txNote").value.trim();
+  const sci = $("#txSc"); if (sci){ const v = parseAmt(sci.value); e.sc = v > 0 ? v : 0; }
 }
 function saveTx(){
   readTx(); const e = S.edit;
   if (!(e.amt > 0)){ toast("Scrivi un importo"); showKp(true); $("#sTx").scrollTop = 0; return; }
   if (!e.cat){ toast("Scegli una categoria"); return; }
   if (e.items){ e.items = e.items.filter(x => x.n && isFinite(x.p) && x.p !== 0); if (!e.items.length || e.type !== "out") delete e.items; else { learnItems(e.items); rememberNames(e.items); } }
-  S.rc = null; delete e.rcTotal;
+  S.rc = null; delete e.rcTotal; if (!(e.sc > 0) || e.type !== "out") delete e.sc;
   if (e.id){ const i = D.tx.findIndex(t => t.id === e.id); D.tx[i] = { ...D.tx[i], ...e }; }
   else D.tx.push({ ...e, id: uid(), ts: Date.now() });
   save(); close();
@@ -2034,17 +1990,11 @@ ${(() => { const kn = Object.entries(D.names || {}).slice(-80).map(([k, v]) => `
 function applyReceipt(res, how){
   const e = S.edit; readTx();
   if (!res.items.length){ toast("Non ho trovato articoli: prova con una foto più nitida"); return; }
-  e.items = res.items; e.rcTotal = res.total || null;
-  const sumIt = e.items.reduce((s, x) => s + x.p, 0), tot = res.total && Math.abs(res.total - sumIt) < 5 ? res.total : sumIt;
-  if (!(e.amt > 0)) e.raw = fmtInput(tot);
+  e.items = res.items;
   if (!e.note && res.shop) e.note = res.shop.replace(/\b\w+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).slice(0, 40);
   if (res.date && res.date <= today() && res.date >= addMonth(today().slice(0, 7), -2) + "-01") e.date = res.date;
   S.rc = null; S.rcMsg = null; S.kp = false; drawTx();
-  const diff = res.total ? res.total - sumIt : 0;
-  if (Math.abs(diff) >= 5){ toast(`Attenzione: la somma degli articoli differisce di ${eur(Math.abs(diff))} dal totale dello scontrino`); return; }
-  const nAsk = e.items.filter(x => x.ask).length;
-  if (nAsk) return openAsk();
-  toast(`${e.items.length} articoli letti${how ? " " + how : ""}: controlla le categorie`);
+  openAsk(true);   // prodotti poco chiari, poi totale e sconti: li scrivi tu
 }
 async function readReceiptPhotos(files){
   if (!files.length) return;
@@ -2087,16 +2037,17 @@ function itemsBlock(e){
   if (S.rc === "paste") return `<div class="rczone" id="rcZone" contenteditable="true" inputmode="none" autocorrect="off" spellcheck="false" aria-label="Tieni premuto qui e scegli Incolla"></div>
     <p class="help" style="margin:8px 2px 0">Va bene il PDF dello scontrino digitale (copialo dall'app Coop), una foto o il testo.</p>
     <div class="rcbtns" style="margin-top:8px"><button class="btn ghost" data-act="rcCancel">Annulla</button></div>`;
-  const btns = `<div class="rcbtns"><label class="btn ghost">📷 ${e.items?.length ? "Rileggi" : "Foto o PDF"}<input type="file" id="rcFile" accept="image/*,application/pdf,.pdf" multiple></label><button class="btn ghost" data-act="rcPaste">📋 Incolla scontrino</button></div>`;
-  if (!e.items?.length) return btns + `<p class="help" style="margin:8px 2px 0">Facoltativo: leggo i prodotti dello scontrino, così vedi cosa compri di più.${AI.key ? "" : " Per le foto serve la chiave API (⚙️)."}</p>`;
-  const tot = e.items.reduce((s, x) => s + x.p, 0), amt = e.rcTotal || parseAmt(e.raw || ""), saved = e.items.reduce((s, x) => s + (x.sc || 0), 0);
+  const has = e.items?.length;
+  const btns = `<div class="rcbtns"><label class="btn ghost"><span>📷</span>${has ? "Rileggi" : "Foto o PDF"}<input type="file" id="rcFile" accept="image/*,application/pdf,.pdf" multiple></label><button class="btn ghost" data-act="rcPaste"><span>📋</span>Incolla</button><button class="btn ghost" data-act="manOpen"><span>✏️</span>${has ? "Aggiungi" : "A mano"}</button></div>`;
+  if (!has) return btns + `<p class="help" style="margin:8px 2px 0">Aggiungi i prodotti per vedere cosa compri e quanto risparmi: da una foto o dal PDF, incollando lo scontrino digitale o scrivendoli a mano.${AI.key ? "" : " Per foto e PDF serve la chiave API (⚙️)."}</p>`;
+  const tot = e.items.reduce((s, x) => s + x.p, 0), amt = parseAmt(e.raw || "");
   const diff = isFinite(amt) && amt > 0 && Math.abs(amt - tot) >= 5;
   const nAsk = e.items.filter(x => x.ask).length;
   const ask = nAsk ? `<button class="askbar" data-act="askOpen" style="width:100%;border:0;text-align:left;color:inherit"><span>❓</span><span style="flex:1"><b>${nAsk} ${nAsk === 1 ? "prodotto da chiarire" : "prodotti da chiarire"}</b><br>Tocca qui: te li mostro uno alla volta. Me li ricordo per le prossime volte.</span>${ICON_CHEV}</button>` : "";
   return btns + ask + `<div class="items">${e.items.map((x, i) => `<div class="item${x.ask ? " ask" : ""}" data-i="${i}"><button class="pc" data-pcpick="${i}" aria-label="Categoria: ${esc(pcat(x.c).n)}">${pcat(x.c).e}</button>
       <div class="nm2"><input type="text" class="in" value="${x.ask ? "" : esc(x.n)}" placeholder="${x.ask ? "Cos'è? (forse: " + esc(x.n) + ")" : ""}" data-guess="${x.ask ? esc(x.n) : ""}" aria-label="Prodotto">${x.r && (x.ask || normRaw(x.r) !== normRaw(x.n)) ? `<small class="raw">${esc(x.r)}</small>` : ""}</div>
       <input type="text" class="ip" inputmode="decimal" value="${fmtInput(x.p)}" aria-label="Prezzo"><button class="x" data-idel="${i}" aria-label="Togli">×</button></div>`).join("")}
-    <div class="itemfoot"><span>${e.items.length} articoli · <b class="num">${eur(tot)}</b>${saved ? ` · sconti −${eur(saved)}` : ""}${diff ? ` <span class="warn">(${e.rcTotal ? "totale scontrino" : "importo"} ${eur(amt)})</span>` : ""}</span><span><button data-act="itAdd">+ Articolo</button>${diff ? ` · <button data-act="itUse">Usa il totale</button>` : ""}</span></div></div>`;
+    <div class="itemfoot"><span>${e.items.length} prodotti · <b class="num">${eur(tot)}</b>${diff ? `<br><span class="warn">diverso dall'importo (${eur(amt)})</span>` : ""}</span><span><button data-act="askTot">Totale e sconti</button></span></div></div>`;
 }
 function openPcPick(i){
   closePcPick(); const cur = S.edit.items[i]?.c;
@@ -2179,11 +2130,11 @@ document.addEventListener("input", async e => {
 });
 
 /* ---------- procedura guidata: i prodotti dello scontrino che non ho capito, uno alla volta ---------- */
-function openAsk(){
+function openAsk(tot, onlyTot){
   if ($("#amt")) readTx();
-  const e = S.edit, idx = (e?.items || []).map((x, i) => x.ask ? i : -1).filter(i => i >= 0);
-  if (!idx.length) return;
-  S.ask = { idx, i: 0, ok: 0 }; drawAsk(); open("#sAsk");
+  const e = S.edit, idx = onlyTot ? [] : (e?.items || []).map((x, i) => x.ask ? i : -1).filter(i => i >= 0);
+  if (!idx.length && !tot) return;
+  S.ask = { idx, i: 0, tot: !!tot }; drawAsk(); open("#sAsk");
 }
 /* nomi già usati che assomigliano al testo dello scontrino: "P.SEM.ZUCCA" → "Pane ai semi di zucca" */
 function askSuggest(it){
@@ -2197,6 +2148,18 @@ function askSuggest(it){
 function drawAsk(){
   const A = S.ask, e = S.edit, el = $("#sAsk"); if (!A || !e) return;
   const n = A.idx.length;
+  if (A.i >= n && A.tot){
+    const sumIt = (e.items || []).reduce((s, x) => s + x.p, 0), amt = parseAmt(e.raw || "");
+    el.innerHTML = `<div class="pbar"><button class="icon-btn" data-act="askEnd" aria-label="Chiudi">${ICON_X}</button><h3>Totale e sconti</h3></div>
+      <div class="askprog"><i style="width:100%"></i></div>
+      <div class="askcard"><small>Guarda in fondo allo scontrino</small><div class="askraw" style="font-size:18px">🧾</div>
+        <div class="askp">${e.items?.length ? `Ho letto <b>${e.items.length} prodotti</b> per <b>${eur(sumIt)}</b>` : ""}</div></div>
+      <div class="field"><label for="askTotIn">Totale pagato</label><input type="text" id="askTotIn" inputmode="decimal" value="${amt > 0 ? fmtInput(amt) : ""}" placeholder="es. 68,97" autocomplete="off" enterkeyhint="next"></div>
+      <div class="field"><label for="askScIn">Sconti</label><input type="text" id="askScIn" inputmode="decimal" value="${e.sc ? fmtInput(e.sc) : ""}" placeholder="0,00" autocomplete="off" enterkeyhint="done">
+        <p class="help" style="margin:6px 2px 0">La riga «Totale sconti» o «Hai risparmiato». Lascia vuoto se non ci sono.</p></div>
+      <div class="asknav">${n ? `<button class="btn ghost" data-act="askBack" style="flex:.6">Indietro</button>` : ""}<button class="btn" data-act="askTotOk">Conferma</button></div>`;
+    el.scrollTop = 0; return;
+  }
   if (A.i >= n){
     const left = A.idx.filter(i => e.items[i]?.ask).length;
     el.innerHTML = `<div class="pbar"><button class="icon-btn" data-act="askEnd" aria-label="Chiudi">${ICON_X}</button><h3>Prodotti da chiarire</h3></div>
@@ -2212,7 +2175,7 @@ function drawAsk(){
   el.innerHTML = `<div class="pbar"><button class="icon-btn" data-act="askEnd" aria-label="Finisci dopo">${ICON_X}</button><h3>Prodotto ${A.i + 1} di ${n}</h3></div>
     <div class="askprog"><i style="width:${A.i / n * 100}%"></i></div>
     <div class="askcard"><small>Sullo scontrino c'è scritto</small><code class="askraw">${esc(it.r || it.guess)}</code>
-      <div class="askp">pagato <b>${eur(it.p)}</b>${it.sc ? ` · sconto −${eur(it.sc)}` : ""}</div></div>
+      <div class="askp">pagato <b>${eur(it.p)}</b></div></div>
     <div class="field"><label for="askName">Cos'è?</label><input type="text" id="askName" value="${it.ask ? "" : esc(it.n)}" placeholder="es. ${esc(it.guess)}" autocomplete="off" enterkeyhint="next">
       <div class="asksug"><button class="g" data-asksug="${esc(it.guess)}">💡 ${esc(it.guess)}</button>${sug.map(x => `<button data-asksug="${esc(x)}">${esc(x)}</button>`).join("")}</div></div>
     <div class="field"><label>Categoria</label><div class="askpcs">${PCATS.map(x => `<button data-askpc="${x.id}" aria-pressed="${x.id === pc}"><span>${x.e}</span>${esc(x.n)}</button>`).join("")}</div></div>
@@ -2231,10 +2194,81 @@ document.addEventListener("input", e => {
   const c = guessPc(v, ""); if (c === "altro" || c === it.c) return;
   it.c = c; document.querySelectorAll("[data-askpc]").forEach(b => b.setAttribute("aria-pressed", b.dataset.askpc === c));
 });
-document.addEventListener("keydown", e => { if (e.target.id === "askName" && e.key === "Enter"){ e.preventDefault(); askNext(); } });
+document.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  const id = e.target.id;
+  if (id === "askName"){ e.preventDefault(); askNext(); }
+  else if (id === "askTotIn"){ e.preventDefault(); $("#askScIn").focus(); }
+  else if (id === "askScIn"){ e.preventDefault(); askTotOk(); }
+  else if (id === "manName"){ e.preventDefault(); $("#manPrice").focus(); }
+  else if (id === "manPrice"){ e.preventDefault(); manAdd(); }
+});
+function askTotOk(){
+  const e = S.edit, tot = parseAmt($("#askTotIn").value), sc = parseAmt($("#askScIn").value);
+  if (!(tot > 0)){ toast("Scrivi il totale pagato"); $("#askTotIn").focus(); return; }
+  e.raw = fmtInput(tot); e.amt = tot; e.sc = sc > 0 ? sc : 0;
+  const left = S.ask.idx.filter(i => e.items[i]?.ask).length, sumIt = (e.items || []).reduce((s, x) => s + x.p, 0);
+  askEnd();
+  if (e.items?.length && Math.abs(sumIt - tot) >= 5) toast(`La somma dei prodotti (${eur(sumIt)}) è diversa dal totale: controlla i prezzi`);
+  else toast(left ? `Pronto. ${left} ${left === 1 ? "prodotto saltato resta" : "prodotti saltati restano"} da chiarire` : "Tutto pronto: tocca Salva");
+}
 function askEnd(){
   for (const x of S.edit?.items || []){ delete x.guess; delete x.pcManual; }
   S.ask = null; $("#sAsk").classList.remove("open"); if (S.edit) drawTx();
+}
+
+/* ---------- prodotti a mano (quando non hai lo scontrino digitale) ---------- */
+function knownProducts(){
+  const m = new Map();
+  for (const t of [...D.tx].sort((a, b) => a.date.localeCompare(b.date))) if (t.items) for (const x of t.items) if (x.n && x.p > 0){
+    const k = normName(x.n); if (!k) continue; const o = m.get(k) || { cnt: 0 }; Object.assign(o, { n: x.n, c: x.c, p: x.p }); o.cnt++; m.set(k, o);
+  }
+  return m;
+}
+function openMan(){
+  if ($("#amt")) readTx(); S.edit.items ||= []; S.man = { c: null, manual: false };
+  $("#sMan").innerHTML = `<div class="pbar"><button class="icon-btn" data-act="manEnd" aria-label="Chiudi">${ICON_X}</button><h3>Prodotti a mano</h3><button class="btn" data-act="manEnd">Fine</button></div>
+    <div class="section" style="padding-top:4px">
+      <div class="panel pad manform">
+        <label for="manName">Prodotto</label><input type="text" id="manName" placeholder="es. Latte parzialmente scremato" autocomplete="off" autocapitalize="sentences" enterkeyhint="next">
+        <div class="asksug" id="manSug"></div>
+        <label for="manPrice">Prezzo pagato</label><input type="text" id="manPrice" inputmode="decimal" placeholder="0,00" autocomplete="off" enterkeyhint="done">
+        <label>Categoria</label><div class="askpcs">${PCATS.map(x => `<button data-manpc="${x.id}" aria-pressed="false"><span>${x.e}</span>${esc(x.n)}</button>`).join("")}</div>
+        <button class="btn wide" data-act="manAdd" style="margin-top:16px">Aggiungi</button>
+      </div>
+      <div id="manList"></div>
+    </div>`;
+  drawManList(); open("#sMan"); setTimeout(() => $("#manName")?.focus(), 320);
+}
+function drawManList(){
+  const it = S.edit.items, tot = it.reduce((s, x) => s + x.p, 0);
+  $("#manList").innerHTML = `<div class="shead"><h2>Nello scontrino</h2><span class="help num">${it.length} · ${eur(tot)}</span></div>
+    ${it.length ? `<div class="panel">${it.map((x, i) => `<div class="prow"><span class="em">${pcat(x.c).e}</span><div class="mid"><div class="t">${esc(x.n)}</div><div class="s">${esc(pcat(x.c).n)}</div></div><div class="a">${eur(x.p)}</div><button class="x" data-mandel="${i}" aria-label="Togli">×</button></div>`).reverse().join("")}</div>`
+      : `<p class="help">Ancora nessun prodotto. Mentre scrivi ti suggerisco quelli che hai già comprato, con la categoria e l'ultimo prezzo.</p>`}`;
+}
+function manSetPc(c){ S.man.c = c; document.querySelectorAll("[data-manpc]").forEach(b => b.setAttribute("aria-pressed", b.dataset.manpc === c)); }
+document.addEventListener("input", e => {
+  if (e.target.id !== "manName" || !S.man) return;
+  const q = normName(e.target.value), box = $("#manSug");
+  if (!S.man.manual){ const c = q.length >= 3 ? guessPc(e.target.value, "") : null; manSetPc(c && c !== "altro" ? c : null); }
+  if (q.length < 2){ box.innerHTML = ""; return; }
+  const list = [...knownProducts()].filter(([k]) => k !== q && (k.startsWith(q) || k.includes(" " + q))).sort((a, b) => b[1].cnt - a[1].cnt).slice(0, 5);
+  box.innerHTML = list.map(([k, o]) => `<button data-mansug="${esc(k)}">${pcat(o.c).e} ${esc(o.n)} · ${eur(o.p)}</button>`).join("");
+});
+function manAdd(){
+  const n = $("#manName").value.trim(), p = parseAmt($("#manPrice").value);
+  if (!n){ toast("Scrivi il nome del prodotto"); return $("#manName").focus(); }
+  if (!(p > 0)){ toast("Scrivi il prezzo"); return $("#manPrice").focus(); }
+  const k = knownProducts().get(normName(n));
+  S.edit.items.push({ n: n.charAt(0).toUpperCase() + n.slice(1), r: "", p, sc: 0, c: S.man.c || k?.c || guessPc(n, "") });
+  $("#manName").value = ""; $("#manPrice").value = ""; $("#manSug").innerHTML = ""; S.man = { c: null, manual: false }; manSetPc(null);
+  drawManList(); $("#manName").focus();
+}
+function manEnd(){
+  const e = S.edit; S.man = null; $("#sMan").classList.remove("open");
+  if (e.items?.length && !(parseAmt(e.raw || "") > 0)) e.raw = fmtInput(e.items.reduce((s, x) => s + x.p, 0));
+  if (!e.items?.length) delete e.items;
+  drawTx();
 }
 
 /* ---------- prodotti ricordati (righe dello scontrino → nome) ---------- */
@@ -2440,6 +2474,8 @@ document.addEventListener("click", e => {
   if (d.tabgo) return go(d.tabgo);
   if (d.filter){ S.filter = d.filter; S.sf = null; return renderTx(); }
   if (d.pper){ S.pper = d.pper; return renderReport(); }
+  if (d.rchart){ S.rchart = d.rchart; return renderReport(); }
+  if (d.ptop){ S.ptop = d.ptop; return renderReport(); }
   if (d.rview){ S.rview = d.rview; $("#main").scrollTop = 0; return render(); }
   if (d.goday){ S.day = d.goday; S.view = "cal"; D.opt.txView = "cal"; save(); return go("vTx"); }
   if (d.view){ S.view = d.view; D.opt.txView = d.view; save(); return renderTx(); }
@@ -2461,6 +2497,9 @@ document.addEventListener("click", e => {
   if (d.prod){ return openProd(d.prod); }
   if (d.pccat){ return openPcat(d.pccat); }
   if (d.asksug !== undefined){ const i = $("#askName"); i.value = d.asksug; i.dispatchEvent(new Event("input", { bubbles: true })); return; }
+  if (d.manpc){ S.man.c = d.manpc; S.man.manual = true; document.querySelectorAll("[data-manpc]").forEach(b => b.setAttribute("aria-pressed", b === el)); return; }
+  if (d.mansug !== undefined){ const o = knownProducts().get(d.mansug); if (!o) return; $("#manName").value = o.n; $("#manPrice").value = fmtInput(o.p); manSetPc(o.c); $("#manSug").innerHTML = ""; return $("#manPrice").focus(); }
+  if (d.mandel !== undefined){ S.edit.items.splice(+d.mandel, 1); return drawManList(); }
   if (d.askpc){ const it = S.edit.items[S.ask.idx[S.ask.i]]; it.c = d.askpc; it.pcManual = true; document.querySelectorAll("[data-askpc]").forEach(b => b.setAttribute("aria-pressed", b === el)); return; }
   if (d.type && el.closest(".seg")){ readTx(); S.edit.type = d.type; drawTx(); return sizeAmt(); }
   if (d.ctype){ readCat(); S.cat.type = d.ctype; return drawCat(); }
@@ -2477,10 +2516,13 @@ document.addEventListener("click", e => {
     case "rcPaste": return pasteReceipt();
     case "rcCancel": readTx(); S.rc = null; return drawTx();
     case "rcParse": return readReceiptText();
-    case "itAdd": readTx(); S.edit.items.push({ n: "", r: "", p: 0, c: "altro" }); drawTx(); setTimeout(() => [...document.querySelectorAll("#sTx .item .in")].pop()?.focus(), 50); return;
-    case "itUse": readTx(); S.edit.raw = fmtInput(S.edit.items.reduce((s, x) => s + x.p, 0)); return drawTx();
     case "pcClose": S.npc = null; S.pcmove = null; return closePcPick();
-    case "askOpen": return openAsk();
+    case "askOpen": return openAsk(false);
+    case "askTot": return openAsk(true, true);
+    case "askTotOk": return askTotOk();
+    case "manOpen": return openMan();
+    case "manAdd": return manAdd();
+    case "manEnd": return manEnd();
     case "askNext": return askNext();
     case "askSkip": S.ask.i++; return drawAsk();
     case "askBack": S.ask.i = Math.max(0, S.ask.i - 1); return drawAsk();
