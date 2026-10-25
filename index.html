@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Spese">
 <meta name="theme-color" content="#1a1a19">
-<script>try{var t=localStorage.getItem("spese.theme");if(!/^(verde|aurora|oled|carta)$/.test(t))t="verde";document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme="verde";}</script>
+<script>try{var t=localStorage.getItem("spese.theme");if(!/^(verde|aurora|oled|carta)$/.test(t))t="verde";document.documentElement.dataset.theme=t;var l=localStorage.getItem("spese.look");if(l)document.documentElement.dataset.look=l;}catch(e){document.documentElement.dataset.theme="verde";}</script>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=3">
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png?v=3">
 <link rel="apple-touch-icon" href="icon-180.png?v=3">
@@ -658,6 +658,85 @@ nav .plus:active svg{transform:scale(.94)}
 .prow .bar{height:4px;margin-top:6px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--bot) + var(--nav-h) + 14px);background:var(--fg);color:var(--bg);padding:10px 12px 10px 16px;border-radius:12px;z-index:9000;font-size:14px;max-width:calc(100% - 32px);display:flex;align-items:center;gap:14px}
 .toast button{border:0;background:none;color:var(--bg);font-weight:700;padding:2px 4px;text-decoration:underline}
+/* ===== PROPOSTE DI STILE (in prova): testo più grande + un carattere diverso per ciascuna ===== */
+/* base comune a tutte le proposte: tutto un po' più grande e più contrastato */
+:root[data-look]{--muted:#a6a6b2}
+:root[data-look] body{font-size:16px}
+:root[data-look] #hMonth{font-size:25px}
+:root[data-look] :is(.section>h2,.group,.shead h2){font-size:21px!important}
+:root[data-look] .shead .help,:root[data-look] .shead button{font-size:14px}
+:root[data-look] .help{font-size:14px}
+:root[data-look] .hero small{font-size:14.5px}
+:root[data-look] .hero>b{font-size:46px!important}
+:root[data-look] .hero .sub span{font-size:13px!important;padding:10px 13px!important}
+:root[data-look] .hero .sub span b{font-size:17px!important}
+:root[data-look] .hero .delta{font-size:14px}
+:root[data-look] .tx{padding:12px 16px;gap:14px}
+:root[data-look] .tx .t{font-size:16.5px;font-weight:600}
+:root[data-look] .tx .s{font-size:13.5px;margin-top:1px}
+:root[data-look] .tx .a{font-size:16.5px}
+:root[data-look] .cb.lg{width:42px;height:42px}:root[data-look] .cb.lg svg{width:22px;height:22px}
+:root[data-look] .day{font-size:13px;padding-top:20px}
+:root[data-look] .chip{font-size:14.5px;padding:9px 15px}
+:root[data-look] .seg button{font-size:15.5px;padding:10px 12px}
+:root[data-look] .chartseg button{font-size:14px;padding:8px}
+:root[data-look] .searchbar input{padding:13px 16px}
+:root[data-look] .crow{padding:13px 14px}
+:root[data-look] .crow .nm{font-size:16.5px;font-weight:600}
+:root[data-look] .crow .meta{font-size:13.5px}
+:root[data-look] .prow .t{font-size:16px;font-weight:600}
+:root[data-look] .prow .s{font-size:13.5px}
+:root[data-look] .prow .a{font-size:16px}
+:root[data-look] .ins p{font-size:15.5px}
+:root[data-look] .ins .ie{width:38px;height:38px;font-size:19px}
+:root[data-look] .tile small,:root[data-look] .tile span{font-size:13.5px}
+:root[data-look] .tile b{font-size:24px}
+:root[data-look] .list-item{font-size:16.5px}
+:root[data-look] .list-item small{font-size:13.5px}
+:root[data-look] .field>label{font-size:14.5px!important}
+:root[data-look] .cd .n{font-size:14.5px}
+:root[data-look] .cd .amt{font-size:11.5px}
+:root[data-look] .dpill b{font-size:17px}
+:root[data-look] .dpill small{font-size:11.5px}
+:root[data-look] .chart text{font-size:12.5px}
+:root[data-look] .wk{font-size:14.5px}
+:root[data-look] .toast{font-size:15px}
+:root[data-look] nav button svg{width:26px;height:26px}
+/* 1 · CHIARO — Manrope: arrotondato e moderno, più carattere di Inter */
+:root[data-look="chiaro"]{--font:Manrope,-apple-system,sans-serif}
+:root[data-look="chiaro"] :is(.hero>b,#hMonth,.shead h2,.tile b,.amount #amt,.sumhead b){font-weight:800;letter-spacing:-.035em}
+/* 2 · EDITORIALE — titoli e cifre in Fraunces (serif da rivista), testo in Inter */
+:root[data-look="editoriale"]{--font:Inter,-apple-system,sans-serif;--disp:Fraunces,Georgia,serif}
+:root[data-look="editoriale"] :is(.hero>b,#hMonth,.section>h2,.shead h2,.pbar h3,.tile b,.amount #amt,.sumhead b,.empty h2,.askdone h2){font-family:var(--disp)!important;font-weight:600!important;letter-spacing:-.02em!important;font-variation-settings:"opsz" 96,"SOFT" 50}
+:root[data-look="editoriale"] .hero>b{font-size:50px!important}
+:root[data-look="editoriale"] .shead h2{font-size:23px!important}
+:root[data-look="editoriale"] :is(.tx .a,.crow .nm .num,.prow .a){font-family:var(--disp);font-weight:600;font-size:17px}
+/* 3 · TECNICO — Space Grotesk per il testo, cifre in JetBrains Mono, etichette maiuscole */
+:root[data-look="tecnico"]{--font:"Space Grotesk",-apple-system,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
+:root[data-look="tecnico"] :is(.hero>b,.tile b,.amount #amt,.sumhead b,.tx .a,.crow .nm .num,.prow .a,.cd .amt,.dpill b,.hero .sub span b){font-family:var(--mono)!important;font-weight:700!important;letter-spacing:-.04em!important}
+:root[data-look="tecnico"] .hero>b{font-size:42px!important}
+:root[data-look="tecnico"] :is(.hero small,.hero .sub span,.tile small,.day,.field>label){text-transform:uppercase;letter-spacing:.08em!important;font-size:12px!important;font-weight:600}
+:root[data-look="tecnico"] .hero .sub span b{text-transform:none;letter-spacing:-.04em!important}
+:root[data-look="tecnico"] :is(#hMonth,.shead h2){font-weight:700;letter-spacing:-.03em!important}
+:root[data-look="tecnico"] :is(.panel,.tile,.card2,.items){border-radius:16px!important}
+/* 4 · MORBIDO — Nunito, tutto più tondo e grande, icone più grandi */
+:root[data-look="morbido"]{--font:Nunito,-apple-system,sans-serif}
+:root[data-look="morbido"] body{font-size:16.5px;font-weight:600}
+:root[data-look="morbido"] :is(.hero>b,#hMonth,.shead h2,.tile b,.amount #amt,.sumhead b,.pbar h3){font-weight:900!important;letter-spacing:-.02em!important}
+:root[data-look="morbido"] .tx .t,:root[data-look="morbido"] .crow .nm,:root[data-look="morbido"] .prow .t{font-weight:800;font-size:17px}
+:root[data-look="morbido"] :is(.tx .s,.crow .meta,.prow .s){font-weight:600}
+:root[data-look="morbido"] :is(.panel,.card2,.ccard,.items){border-radius:30px!important}
+:root[data-look="morbido"] .hero{border-radius:34px!important}
+:root[data-look="morbido"] .cb.lg{width:46px;height:46px;border-radius:16px}
+:root[data-look="morbido"] .tx .ic,:root[data-look="morbido"] .crow .cb{border-radius:16px}
+/* 5 · DECISO — Bricolage Grotesque: cifre e titoli grandi e larghi, gerarchia forte */
+:root[data-look="deciso"]{--font:Inter,-apple-system,sans-serif;--disp:"Bricolage Grotesque",Inter,sans-serif}
+:root[data-look="deciso"] :is(.hero>b,#hMonth,.section>h2,.shead h2,.pbar h3,.tile b,.amount #amt,.sumhead b,.empty h2,.askdone h2,.tx .a,.crow .nm .num,.prow .a){font-family:var(--disp)!important;font-weight:800!important;font-variation-settings:"wdth" 90,"opsz" 96}
+:root[data-look="deciso"] .hero>b{font-size:54px!important;letter-spacing:-.025em!important;line-height:1.05}
+:root[data-look="deciso"] #hMonth{font-size:28px!important;letter-spacing:-.02em}
+:root[data-look="deciso"] .shead h2{font-size:24px!important;letter-spacing:-.03em!important}
+:root[data-look="deciso"] .tx .a{font-size:18px}
+:root[data-look="deciso"] .tx .t{font-weight:500}
 @media (prefers-reduced-motion:reduce){.sheet{transition:none}}
 
 /* stampa / PDF del report: solo il contenuto */
@@ -710,7 +789,7 @@ nav .plus:active svg{transform:scale(.94)}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261025174835";
+const BUILD = "20261025210027";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1653,6 +1732,25 @@ function delCat(){
   D.cats = D.cats.filter(x => x.id !== c.id); save(); close(); toast("Categoria eliminata"); render();
 }
 
+/* ---------- proposte di stile (in prova) ---------- */
+const LOOKS = {
+  "": { name: "Attuale", d: "Inter, testo come ora", f: "Inter" },
+  chiaro: { name: "1 · Chiaro", d: "Manrope, testo più grande", f: "Manrope", css: "Manrope:wght@400;500;600;700;800" },
+  editoriale: { name: "2 · Editoriale", d: "cifre e titoli in serif", f: "Fraunces", css: "Fraunces:opsz,wght,SOFT@9..144,500..700,50" },
+  tecnico: { name: "3 · Tecnico", d: "Space Grotesk + cifre mono", f: "Space Grotesk", css: "Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700" },
+  morbido: { name: "4 · Morbido", d: "Nunito, tondo e grande", f: "Nunito", css: "Nunito:wght@500;600;700;800;900" },
+  deciso: { name: "5 · Deciso", d: "Bricolage, cifre enormi", f: "Bricolage Grotesque", css: "Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800" }
+};
+function lookFonts(k){
+  const L = LOOKS[k]; if (!L?.css || document.getElementById("lf-" + k)) return;
+  const l = document.createElement("link"); l.id = "lf-" + k; l.rel = "stylesheet"; l.href = "https://fonts.googleapis.com/css2?family=" + L.css + "&display=swap"; document.head.appendChild(l);
+}
+function applyLook(k){
+  k = LOOKS[k] ? k : ""; D.opt.look = k; lookFonts(k);
+  if (k) document.documentElement.dataset.look = k; else delete document.documentElement.dataset.look;
+  try { k ? localStorage.setItem("spese.look", k) : localStorage.removeItem("spese.look"); } catch {}
+}
+
 /* ---------- impostazioni ---------- */
 const THEMES = {
   verde: { name: "Verde", bg: "#050906", card: "linear-gradient(140deg,#d2fcbf,#9df796 38%,#5ad66d)", ink: "#06230a", fg: "#f1f8f0", font: "Inter", r: 10, pill: "#8ef58a" },
@@ -1675,6 +1773,8 @@ function openSettings(){
     <h2>Tema</h2>
     <div class="panel"><div class="themes">${Object.entries(THEMES).map(([k, t]) => `<button data-theme-pick="${k}" aria-pressed="${k === cur}">
       <span class="tprev" style="background:${t.bg};color:${t.fg};font-family:'${t.font}',sans-serif"><b style="background:${t.card};color:${t.ink};border-radius:${t.r}px">Aa 124 €</b><i style="background:${t.pill}"></i><i style="background:${t.pill};opacity:.35"></i></span>${t.name}</button>`).join("")}</div></div>
+    <h2>Stile del testo (proposte in prova)</h2>
+    <div class="panel">${Object.entries(LOOKS).map(([k, L]) => { lookFonts(k); return `<button class="list-item" data-look-pick="${k}"><span style="font-family:'${L.f}',sans-serif;font-size:17px;font-weight:700">${L.name} <span style="font-weight:600">1.805,98 €</span><small style="font-family:var(--font)">${L.d}</small></span>${(D.opt.look || "") === k ? '<b style="color:var(--accent)">✓</b>' : ""}</button>`; }).join("")}</div>
     <h2>Lettura scontrini (IA)</h2>
     <div id="aiBox">${aiBox()}</div>
     <div class="panel" style="margin-top:10px"><button class="list-item" data-act="names"><span>Prodotti ricordati<small>${Object.keys(D.names || {}).length} righe di scontrino riconosciute in automatico</small></span>${ICON_CHEV}</button></div>
@@ -2506,6 +2606,7 @@ document.addEventListener("click", e => {
     document.querySelectorAll("[data-icon]").forEach(b => { const on = b === el; b.setAttribute("aria-pressed", on); b.style.background = on ? cvar(S.cat.color) : ""; b.style.color = on ? ink(S.cat.color) : ""; });
     $("#catPrev .cb").outerHTML = cbadge(S.cat, "lg"); return;
   }
+  if (d.lookPick !== undefined){ applyLook(d.lookPick); save(); const sy = $("#sSet").scrollTop; openSettings(); $("#sSet").scrollTop = sy; return render(); }
   if (d.themePick){ applyTheme(d.themePick); save(); document.querySelectorAll("[data-theme-pick]").forEach(b => b.setAttribute("aria-pressed", b === el)); return render(); }
   switch (d.act){
     case "add": return openTx();
@@ -2633,6 +2734,7 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden){ set
 
 if (!THEMES[D.opt.theme]) D.opt.theme = "verde";   // i temi tolti passano al nuovo tema verde
 applyTheme(D.opt.theme);
+applyLook(D.opt.look || "");
 render();
 
 /* aggiornamenti automatici come in YTG: se version.json indica una versione più nuova, ricarico la pagina */
