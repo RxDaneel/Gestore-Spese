@@ -9,13 +9,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Spese">
 <meta name="theme-color" content="#1a1a19">
-<script>try{var t=localStorage.getItem("spese.theme");document.documentElement.dataset.theme=t||"viola";}catch(e){document.documentElement.dataset.theme="viola";}</script>
+<script>try{var t=localStorage.getItem("spese.theme");if(!/^(verde|pastello|oled|carta)$/.test(t))t="verde";document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme="verde";}</script>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=3">
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png?v=3">
 <link rel="apple-touch-icon" href="icon-180.png?v=3">
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
 <style>
 /* Stessa base di YTG: barra in alto, contenuto che scorre, tab bar al fondo. Stessi temi, stesso font. */
 :root{
@@ -33,54 +33,153 @@
   color-scheme:dark;
   --c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#d55181;--c6:#008300;--c7:#9085e9;--c8:#e66767;--cx:#6f6d66;
 }}
-:root[data-theme="viola"]{--bg:#0b0b0f;--surface:#17161d;--raised:#24222d;--line:#2a2833;--fg:#f5f3fa;--muted:#8e8a9c;--accent:#a78bfa;--on-accent:#150f26;
-  --danger:#f87171;--good:#4ade80;--hl:#facc15;--sel:#e9ddff;--on-sel:#1b1230;
-  --grad:linear-gradient(135deg,#6d28d9 0%,#a855f7 42%,#e879f9 70%,#fb923c 100%);
-  --font:"Plus Jakarta Sans",Roboto,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color-scheme:dark;
-  --c1:#60a5fa;--c2:#fb923c;--c3:#34d399;--c4:#facc15;--c5:#f472b6;--c6:#4ade80;--c7:#a78bfa;--c8:#f87171;--cx:#7c7889}
-:root[data-theme="viola"] .panel,:root[data-theme="viola"] .tile,:root[data-theme="viola"] .card2{border-radius:22px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
-:root[data-theme="viola"] header,:root[data-theme="viola"] nav{border-color:transparent}
-:root[data-theme="viola"] .logo{color:var(--accent)}
-:root[data-theme="viola"] .seg{background:none}
-:root[data-theme="viola"] .seg button{background:var(--surface);color:var(--muted)}
-:root[data-theme="viola"] .seg button[aria-pressed="true"],:root[data-theme="viola"] .chip[aria-pressed="true"],:root[data-theme="viola"] .catgrid.subs .chip[aria-pressed="true"],
-:root[data-theme="viola"] .chips.sub .chip[aria-pressed="true"]{background:var(--sel);color:var(--on-sel)}
-:root[data-theme="viola"] .chip{background:var(--surface)}
-:root[data-theme="viola"] .btn{border-radius:14px}
-:root[data-theme="viola"] .btn:not(.ghost):not(.danger){background:var(--accent);color:var(--on-accent)}
-:root[data-theme="viola"] .cd.today .n{background:var(--sel);color:var(--on-sel)}
-:root[data-theme="viola"] .cd[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--accent)}
-:root[data-theme="viola"] nav button[aria-current="true"]{color:var(--fg)}
-:root[data-theme="viola"] nav button[aria-current="true"] svg{stroke:#d8c8ff;background:rgba(167,139,250,.2);border-radius:999px;padding:3px 14px;box-sizing:content-box;margin:-3px 0}
-:root[data-theme="viola"] nav .plus svg{background:var(--grad);stroke:#fff}
-:root[data-theme="viola"] nav .plus svg circle{stroke:none}
-:root[data-theme="viola"] .hero{margin:14px 16px 4px;padding:20px 20px 18px;border-radius:26px;background:var(--grad);color:#fff;position:relative;overflow:hidden}
-:root[data-theme="viola"] .hero::after{content:"";position:absolute;right:-40px;top:-50px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.12)}
-:root[data-theme="viola"] .hero small,:root[data-theme="viola"] .hero .sub,:root[data-theme="viola"] .hero .delta{color:rgba(255,255,255,.82)}
-:root[data-theme="viola"] .hero .sub span b{color:#fff}
-:root[data-theme="viola"] .hero .delta i{color:#fff}
-:root[data-theme="viola"] .hero .pill-status{background:rgba(255,255,255,.22);color:#fff}
-:root[data-theme="viola"] .banner{border-radius:20px;background:var(--raised);color:var(--fg)}
-:root[data-theme="viola"] .banner svg{stroke:var(--accent)}
-:root[data-theme="viola"] .banner.warn{background:var(--danger);color:#fff}
-:root[data-theme="viola"] .banner.warn svg{stroke:#fff}
-:root[data-theme="viola"] .kp .ok{background:var(--grad);color:#fff}
-:root[data-theme="grafite"]{--bg:#1a1a19;--surface:#242422;--raised:#2e2e2b;--line:#353532;--fg:#f5f4ef;--muted:#9c9a92;--accent:#d9d7d1;--on-accent:#1a1a19;--danger:#e06060;--good:#5cb860;color-scheme:dark}
 :root[data-theme="carta"]{--bg:#f3f1ea;--surface:#e9e6dc;--raised:#dfdbcf;--line:#d6d1c4;--fg:#141413;--muted:#65635c;--accent:#3b3b38;--on-accent:#f5f4ef;--danger:#c43c3c;--good:#2f7d32;color-scheme:light;
   --c1:#2a78d6;--c2:#eb6834;--c3:#1baf7a;--c4:#eda100;--c5:#e87ba4;--c6:#008300;--c7:#6250d6;--c8:#e34948;--cx:#9c9a92}
 :root[data-theme="oled"]{--bg:#000000;--surface:#0e0e0e;--raised:#1a1a1a;--line:#232323;--fg:#f2f2f2;--muted:#8c8c8c;--accent:#e6e6e6;--on-accent:#000000;--danger:#e06060;--good:#5cb860;color-scheme:dark}
-:root[data-theme="neon"]{--bg:#12062a;--surface:#1e0c42;--raised:#2b1260;--line:#3e1a85;--fg:#fdf0ff;--muted:#b896e0;--accent:#ff2bd6;--on-accent:#12062a;--danger:#ffcc00;--good:#00f0ff;color-scheme:dark}
-:root[data-theme="neon"] body{background:radial-gradient(130% 70% at 50% -10%,#4a1490 0%,#12062a 55%) fixed,#12062a}
-:root[data-theme="neon"] main,:root[data-theme="neon"] header,:root[data-theme="neon"] nav{background:transparent}
-:root[data-theme="neon"] h2,:root[data-theme="neon"] .hero b{text-shadow:0 0 10px rgba(255,43,214,.45)}
-:root[data-theme="neon"] .btn:not(.ghost),:root[data-theme="neon"] .seg button[aria-pressed="true"]{box-shadow:0 0 14px rgba(255,43,214,.7),0 0 2px #fff inset}
-:root[data-theme="neon"] nav [aria-current="true"]{color:#00f0ff;filter:drop-shadow(0 0 6px #00f0ff)}
-:root[data-theme="term"]{--bg:#020a03;--surface:#061408;--raised:#0b2210;--line:#124a1c;--fg:#41ff74;--muted:#22a845;--accent:#41ff74;--on-accent:#020a03;--danger:#ffb000;--good:#41ff74;--font:"SF Mono",ui-monospace,Menlo,"Courier New",monospace;color-scheme:dark}
-:root[data-theme="term"] body{text-shadow:0 0 6px rgba(65,255,116,.45)}
-:root[data-theme="term"] main::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px)}
-:root[data-theme="term"] .panel,:root[data-theme="term"] .btn,:root[data-theme="term"] .tile{border-radius:0 !important}
-/* nei temi scuri scelti a mano i grafici usano i colori per lo sfondo scuro */
-:root[data-theme="grafite"],:root[data-theme="oled"],:root[data-theme="neon"],:root[data-theme="term"]{
+/* ===== tema VERDE: vetro scuro e verde lime luminoso (font Inter, tutto a pillola) ===== */
+:root[data-theme="verde"]{--bg:#050906;--surface:#0c140d;--raised:#152017;--line:rgba(150,255,150,.10);--fg:#f1f8f0;--muted:#8da291;--accent:#8ef58a;--on-accent:#06230a;
+  --danger:#ff7a7a;--good:#8ef58a;--hl:#f2d45c;--sel:#8ef58a;--on-sel:#06230a;
+  --grad:linear-gradient(140deg,#d2fcbf 0%,#9df796 38%,#5ad66d 100%);
+  --glass:linear-gradient(180deg,rgba(170,255,170,.075),rgba(170,255,170,.012));
+  --font:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color-scheme:dark;
+  --c1:#8ef58a;--c2:#f5a35c;--c3:#4fd1c5;--c4:#f2d45c;--c5:#f47ea8;--c6:#5aa9f5;--c7:#b18cf5;--c8:#ff7a7a;--cx:#5d6e60}
+:root[data-theme="verde"] body,:root[data-theme="verde"] .sheet{background:radial-gradient(120% 50% at 50% -6%,#1e4a21 0%,#0a170b 46%,#050906 74%) no-repeat,#050906}
+:root[data-theme="verde"] body{letter-spacing:-.01em}
+:root[data-theme="verde"] header,:root[data-theme="verde"] main{background:transparent}
+:root[data-theme="verde"] header{border-color:transparent}
+:root[data-theme="verde"] #hMonth{font-weight:800;letter-spacing:-.035em;font-size:23px}
+:root[data-theme="verde"] .icon-btn{background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px var(--line);margin-left:6px;width:38px;height:38px}
+:root[data-theme="verde"] .icon-btn svg{width:19px;height:19px}
+:root[data-theme="verde"] .pbar{background:rgba(5,9,6,.72);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+:root[data-theme="verde"] .pbar .icon-btn{margin-left:0}
+:root[data-theme="verde"] :is(.panel,.tile,.card2,.ccard,.items,.sumbudget,.cd:not(.blank):not(.none)){background:var(--glass),#0a120b;box-shadow:inset 0 0 0 1px var(--line)}
+:root[data-theme="verde"] :is(.panel,.card2,.ccard,.items){border-radius:24px}
+:root[data-theme="verde"] :is(.tile,.sumbudget){border-radius:20px}
+:root[data-theme="verde"] .cd{border-radius:14px}
+:root[data-theme="verde"] .ccard:active,:root[data-theme="verde"] .tx:active{background:#152017}
+:root[data-theme="verde"] .panel .tx{background:transparent}
+:root[data-theme="verde"] .tx{background:transparent}
+:root[data-theme="verde"] .swipe .tx{background:#070d08}
+:root[data-theme="verde"] .panel .swipe .tx{background:#0b130c}
+:root[data-theme="verde"] .hero{margin:12px 16px 4px;padding:18px 18px 16px;border-radius:28px;background:var(--grad);color:#06230a;position:relative;overflow:hidden;
+  box-shadow:0 22px 50px -18px rgba(120,240,110,.6),inset 0 1px 0 rgba(255,255,255,.6)}
+:root[data-theme="verde"] .hero::after{content:"";position:absolute;right:-60px;top:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.55),rgba(255,255,255,0) 70%);pointer-events:none}
+:root[data-theme="verde"] .hero small{color:rgba(6,35,10,.72);font-weight:600}
+:root[data-theme="verde"] .hero>b{font-weight:800;letter-spacing:-.045em;font-size:42px}
+:root[data-theme="verde"] .hero .sub{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;position:relative;z-index:1}
+:root[data-theme="verde"] .hero .sub span{display:flex;flex-direction:column;gap:1px;background:#08160b;color:#9fbca3;border-radius:16px;padding:9px 12px;font-size:11.5px;font-weight:500}
+:root[data-theme="verde"] .hero .sub span b{color:#f1f8f0;font-size:15px;font-weight:700}
+:root[data-theme="verde"] .hero .delta{color:rgba(6,35,10,.8);font-weight:600}
+:root[data-theme="verde"] .hero .delta i{color:#06230a}
+:root[data-theme="verde"] .hero .pill-status{background:rgba(6,35,10,.14);color:#06230a}
+:root[data-theme="verde"] .shead button{color:var(--accent)}
+:root[data-theme="verde"] .shead button::after{content:" →"}
+:root[data-theme="verde"] .chip{background:#0c150d;box-shadow:inset 0 0 0 1px var(--line);color:var(--fg)}
+:root[data-theme="verde"] :is(.chip,.seg button,.chips.sub .chip,.catgrid.subs .chip)[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);box-shadow:0 0 18px -2px rgba(142,245,138,.55)}
+:root[data-theme="verde"] .seg button{background:#0c150d;box-shadow:inset 0 0 0 1px var(--line)}
+:root[data-theme="verde"] .btn{border-radius:999px}
+:root[data-theme="verde"] .btn:not(.ghost):not(.danger){background:var(--accent);color:var(--on-accent);box-shadow:0 10px 26px -8px rgba(142,245,138,.7)}
+:root[data-theme="verde"] .btn.ghost{background:#0e180f;box-shadow:inset 0 0 0 1px var(--line)}
+:root[data-theme="verde"] :is(.field input[type=text],.field input[type=date],.field input[inputmode],.searchbar input,.field textarea,.ghform input){border-radius:18px;background:var(--glass),#0a120b;border-color:var(--line)}
+:root[data-theme="verde"] .amount{margin:12px 16px 4px;width:calc(100% - 32px);border-radius:26px;background:var(--glass),#0a120b;box-shadow:inset 0 0 0 1px var(--line);padding:26px 16px}
+:root[data-theme="verde"] .amount #amt{font-weight:800;letter-spacing:-.04em}
+:root[data-theme="verde"] .amount .caret{background:var(--accent)}
+:root[data-theme="verde"] .kp{background:rgba(8,14,9,.94);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:0;border-radius:26px 26px 0 0;box-shadow:inset 0 1px 0 var(--line),0 -16px 40px rgba(0,0,0,.55)}
+:root[data-theme="verde"] .kp button{background:#111c13;border-radius:18px;box-shadow:inset 0 0 0 1px var(--line)}
+:root[data-theme="verde"] .kp .ok{background:var(--accent);color:var(--on-accent);box-shadow:0 0 24px -4px rgba(142,245,138,.7)}
+:root[data-theme="verde"] .cd.today .n,:root[data-theme="verde"] .dpill.on{background:var(--accent);color:var(--on-accent)}
+:root[data-theme="verde"] .cd[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--accent)}
+:root[data-theme="verde"] .dpill{background:#0c150d;box-shadow:inset 0 0 0 1px var(--line);border-radius:999px}
+:root[data-theme="verde"] .bar{background:#16221a;border-radius:4px}
+:root[data-theme="verde"] .bar i{border-radius:4px}
+:root[data-theme="verde"] .bar.budget i{background:var(--accent)}
+:root[data-theme="verde"] .banner{border-radius:22px;background:var(--glass),#0d170e;color:var(--fg);box-shadow:inset 0 0 0 1px var(--line)}
+:root[data-theme="verde"] .banner svg{stroke:var(--accent)}
+:root[data-theme="verde"] .banner.warn{background:var(--danger);color:#fff}
+:root[data-theme="verde"] .banner.warn svg{stroke:#fff}
+:root[data-theme="verde"] .cb{box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 16px -4px currentColor}
+:root[data-theme="verde"] .toast{border-radius:20px;background:var(--accent);color:var(--on-accent);font-weight:600}
+:root[data-theme="verde"] .toast button{color:var(--on-accent)}
+/* barra in basso: una pillola di vetro che galleggia, solo icone */
+:root[data-theme="verde"] nav{margin:0 14px calc(var(--bot) + 6px);padding:0 4px;border:0;border-radius:32px;background:rgba(14,24,15,.84);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  box-shadow:inset 0 0 0 1px var(--line),0 12px 32px rgba(0,0,0,.55)}
+:root[data-theme="verde"] nav button{font-size:0;gap:0}
+:root[data-theme="verde"] nav button svg{padding:9px;box-sizing:content-box;border-radius:50%;margin:-9px}
+:root[data-theme="verde"] nav button[aria-current="true"] svg{stroke:var(--accent);background:rgba(142,245,138,.16);box-shadow:inset 0 0 0 1px rgba(142,245,138,.3)}
+:root[data-theme="verde"] nav .plus svg{width:28px;height:28px;padding:12px;margin:0;background:var(--accent);stroke:var(--on-accent);box-shadow:0 0 26px -2px rgba(142,245,138,.75)}
+:root[data-theme="verde"] .pcpick{background:#0d170e;box-shadow:inset 0 0 0 1px var(--line),0 12px 50px rgba(0,0,0,.6)}
+:root[data-theme="verde"] .askbar{background:rgba(142,245,138,.10);box-shadow:inset 0 0 0 1px rgba(142,245,138,.25)}
+@media (min-width:900px){:root[data-theme="verde"] nav{margin:0;border-radius:0}}
+
+/* ===== tema PASTELLO: grafite caldo, sfumature pastello, riquadri squadrati (font DM Sans) ===== */
+:root[data-theme="pastello"]{--bg:#1e1e20;--surface:#2a2a2d;--raised:#36363a;--line:#38383c;--fg:#f6f5f8;--muted:#9c9ba4;--accent:#a9e5d3;--on-accent:#1b1b1d;
+  --danger:#f5a3a3;--good:#a9e5d3;--hl:#f3d9a4;--sel:#a9e5d3;--on-sel:#1b1b1d;--on-c:#1d1d20;
+  --grad:linear-gradient(115deg,#a9e5d3 0%,#d3e6df 34%,#f3c9d3 72%,#f7d8c9 100%);
+  --font:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color-scheme:dark;
+  --c1:#c7b6f3;--c2:#f6c7a4;--c3:#a9e5d3;--c4:#f1e0a0;--c5:#f2b8c8;--c6:#a8cdf3;--c7:#c6e3a8;--c8:#f19c9c;--cx:#8a8990}
+:root[data-theme="pastello"] header{border-color:transparent}
+:root[data-theme="pastello"] #hMonth{font-weight:700;letter-spacing:-.02em}
+:root[data-theme="pastello"] .icon-btn{background:var(--surface);border-radius:14px;width:38px;height:38px;margin-left:6px}
+:root[data-theme="pastello"] .icon-btn svg{width:19px;height:19px}
+:root[data-theme="pastello"] .pbar .icon-btn{margin-left:0}
+:root[data-theme="pastello"] :is(.panel,.card2,.ccard,.items){border-radius:26px}
+:root[data-theme="pastello"] :is(.tile,.sumbudget){border-radius:20px}
+:root[data-theme="pastello"] .cd{border-radius:12px}
+:root[data-theme="pastello"] :is(.cb,.tx .ic){border-radius:12px}
+:root[data-theme="pastello"] .cb.sm{border-radius:10px}
+:root[data-theme="pastello"] .sumhead .cb{border-radius:16px}
+:root[data-theme="pastello"] .hero{margin:12px 16px 4px;padding:18px 18px 16px;border-radius:26px;background:var(--grad);color:#1b1b1d;position:relative;overflow:hidden}
+:root[data-theme="pastello"] .hero::after{content:"";position:absolute;right:-18px;bottom:-26px;width:120px;height:120px;border-radius:30px;transform:rotate(18deg);background:rgba(255,255,255,.22);pointer-events:none}
+:root[data-theme="pastello"] .hero small{color:rgba(27,27,29,.66);font-weight:500}
+:root[data-theme="pastello"] .hero>b{font-weight:700;letter-spacing:-.03em;font-size:40px}
+:root[data-theme="pastello"] .hero .sub{color:rgba(27,27,29,.66);position:relative;z-index:1}
+:root[data-theme="pastello"] .hero .sub span b{color:#1b1b1d;font-weight:700}
+:root[data-theme="pastello"] .hero .delta{color:rgba(27,27,29,.72);font-weight:500}
+:root[data-theme="pastello"] .hero .delta i{color:#1b1b1d}
+:root[data-theme="pastello"] .hero .pill-status{background:rgba(27,27,29,.12);color:#1b1b1d}
+:root[data-theme="pastello"] .shead button{color:var(--muted);font-weight:500}
+:root[data-theme="pastello"] .chip{background:var(--surface);border-radius:12px}
+:root[data-theme="pastello"] :is(.chip,.seg button,.chips.sub .chip,.catgrid.subs .chip)[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);box-shadow:none}
+:root[data-theme="pastello"] .seg button{background:var(--surface);border-radius:12px;color:var(--fg);font-weight:500}
+:root[data-theme="pastello"] .chips.sub .chip,:root[data-theme="pastello"] .catgrid.subs .chip{border-radius:10px}
+:root[data-theme="pastello"] .btn{border-radius:14px}
+:root[data-theme="pastello"] .btn:not(.ghost):not(.danger){background:var(--grad);color:#1b1b1d}
+:root[data-theme="pastello"] :is(.field input[type=text],.field input[type=date],.field input[inputmode],.searchbar input,.field textarea,.ghform input){border-radius:14px;border-color:transparent;background:var(--surface)}
+:root[data-theme="pastello"] .amount{margin:12px 16px 4px;width:calc(100% - 32px);border-radius:24px;background:var(--grad);color:#1b1b1d;padding:24px 16px}
+:root[data-theme="pastello"] .amount #amt.ph,:root[data-theme="pastello"] .amount .cur{color:rgba(27,27,29,.5)}
+:root[data-theme="pastello"] .amount .caret{background:#1b1b1d}
+:root[data-theme="pastello"] .kp{border-top:0;border-radius:24px 24px 0 0;background:#252528}
+:root[data-theme="pastello"] .kp button{border-radius:14px;background:var(--raised)}
+:root[data-theme="pastello"] .kp .ok{background:var(--grad);color:#1b1b1d}
+:root[data-theme="pastello"] .cd.today .n,:root[data-theme="pastello"] .dpill.on{background:var(--accent);color:var(--on-accent)}
+:root[data-theme="pastello"] .cd[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--accent)}
+:root[data-theme="pastello"] .dpill{border-radius:14px}
+:root[data-theme="pastello"] .bar{background:#3a3a3e;border-radius:4px;height:5px}
+:root[data-theme="pastello"] .bar i{border-radius:4px}
+:root[data-theme="pastello"] .bar.budget i{background:var(--accent)}
+:root[data-theme="pastello"] .banner{border-radius:22px;background:var(--grad);color:#1b1b1d}
+:root[data-theme="pastello"] .banner.warn{background:var(--danger);color:#1b1b1d}
+:root[data-theme="pastello"] .toast{border-radius:16px;background:var(--grad);color:#1b1b1d;font-weight:500}
+:root[data-theme="pastello"] .toast button{color:#1b1b1d}
+:root[data-theme="pastello"] .prow .em,:root[data-theme="pastello"] .item .pc{border-radius:12px}
+/* barra in basso: solo icone, un puntino sotto la scheda aperta, + grande sfumato */
+:root[data-theme="pastello"] nav{border-top:0}
+:root[data-theme="pastello"] nav button{font-size:0;gap:6px}
+:root[data-theme="pastello"] nav button::after{content:"";width:5px;height:5px;border-radius:50%;background:transparent}
+:root[data-theme="pastello"] nav button[aria-current="true"]::after{background:var(--fg)}
+:root[data-theme="pastello"] nav button[aria-current="true"] svg{stroke-width:2.1}
+:root[data-theme="pastello"] nav .plus::after{display:none}
+:root[data-theme="pastello"] nav .plus svg{width:30px;height:30px;padding:15px;background:var(--grad);stroke:#1b1b1d;stroke-width:2;margin-top:-26px;box-shadow:0 10px 24px rgba(0,0,0,.45),0 0 0 6px var(--bg)}
+:root[data-theme="pastello"] .askbar{background:var(--grad);color:#1b1b1d}
+:root[data-theme="pastello"] .rczone{border-radius:22px}
+
+/* titoli delle sezioni nei due temi nuovi: frase normale e più grandi, non maiuscoletto */
+:root:is([data-theme="verde"],[data-theme="pastello"]) :is(.section>h2,.group,.shead h2){text-transform:none;letter-spacing:-.015em;font-size:18px;font-weight:700;color:var(--fg)}
+:root:is([data-theme="verde"],[data-theme="pastello"]) .field>label{text-transform:none;letter-spacing:0;font-size:13px;font-weight:500}
+:root:is([data-theme="verde"],[data-theme="pastello"]) .pbar h3{letter-spacing:-.02em}
+:root:is([data-theme="verde"],[data-theme="pastello"]) .card2 .shead{margin:2px 16px 12px}
+/* nel tema OLED i grafici usano i colori per lo sfondo scuro */
+:root[data-theme="oled"]{
   --c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#d55181;--c6:#008300;--c7:#9085e9;--c8:#e66767;--cx:#6f6d66}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -341,8 +440,11 @@ nav .plus:active svg{transform:scale(.94)}
 .list-item small.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:1px 0 2px}
 .list-item small{display:block;color:var(--muted);font-size:12px}
 .list-item.danger{color:var(--danger)}
-.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px}
-.themes button{border:1.5px solid var(--line);border-radius:12px;padding:10px 6px 8px;background:var(--surface);color:var(--fg);font:500 12.5px var(--font);display:flex;flex-direction:column;align-items:center;gap:7px}
+.themes{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px}
+.tprev{width:100%;height:74px;border-radius:12px;padding:9px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;box-shadow:inset 0 0 0 1px rgba(128,128,128,.3)}
+.tprev b{flex:1 0 100%;padding:8px 9px;font-size:15px;font-weight:700;letter-spacing:-.02em;text-align:left}
+.tprev i{height:10px;width:30%;border-radius:6px;display:block}
+.themes button{border:1.5px solid var(--line);border-radius:14px;padding:8px 8px 8px;background:var(--surface);color:var(--fg);font:500 12.5px var(--font);display:flex;flex-direction:column;align-items:center;gap:7px}
 .themes button[aria-pressed="true"]{border-color:var(--fg)}
 .themes .sw{width:44px;height:44px;border-radius:50%;border:1px solid rgba(128,128,128,.35);position:relative;overflow:hidden}
 .themes .sw i{position:absolute;right:0;bottom:0;width:50%;height:50%}
@@ -412,7 +514,6 @@ nav .plus:active svg{transform:scale(.94)}
 .dots20 i{display:block;aspect-ratio:1;border-radius:50%;background:var(--raised)}
 .ccard .foot{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ccard .foot.warn{color:var(--danger);font-weight:600}
-:root[data-theme="viola"] .ccard{border-radius:22px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
 .hgrid{display:flex;flex-direction:column}
 .hgrid .hside{display:contents}
 .hgrid .hside>.hero{order:0}.hgrid .hmain{order:1}.hgrid .hside>.section{order:2}
@@ -442,7 +543,6 @@ nav .plus:active svg{transform:scale(.94)}
 .sumfacts b{color:var(--fg);font-weight:600}
 .sumbudget{margin:12px 16px 0;padding:12px 14px;border-radius:14px;background:var(--surface)}
 .sumbudget .bar{margin-top:8px}
-:root[data-theme="viola"] .sumbudget{border-radius:20px}
 /* scontrino: pulsanti, elenco articoli, scelta categoria prodotto */
 .rcbtns{display:flex;gap:8px;flex-wrap:wrap}
 .rcbtns .btn{flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;position:relative;overflow:hidden}
@@ -453,7 +553,6 @@ nav .plus:active svg{transform:scale(.94)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .field textarea{width:100%;min-height:150px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);outline:none;resize:vertical;font-size:16px!important}
 .items{background:var(--surface);border-radius:14px;overflow:hidden;margin-top:10px}
-:root[data-theme="viola"] .items{border-radius:20px}
 .item{display:flex;align-items:center;gap:6px;padding:5px 6px;border-top:1px solid var(--line)}
 .item:first-child{border-top:0}
 .item .pc{width:38px;height:38px;border-radius:11px;border:0;background:var(--raised);font-size:19px;flex:none;display:grid;place-items:center;padding:0}
@@ -472,8 +571,39 @@ nav .plus:active svg{transform:scale(.94)}
 .item.ask .in::placeholder{color:var(--accent)}
 .askbar{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:11px 13px;border-radius:14px;background:color-mix(in srgb,var(--accent) 16%,var(--surface));font-size:13.5px;line-height:1.4}
 .askbar b{font-weight:700}
-.rczone{min-height:110px;border:2px dashed var(--line);border-radius:16px;padding:26px 16px;display:block;text-align:center;color:var(--muted);font-size:14px;line-height:1.45;outline:none;background:var(--surface);-webkit-user-select:text;user-select:text}
-.rczone:focus{border-color:var(--accent);color:var(--fg)}
+.rczone{position:relative;min-height:120px;border:2px dashed var(--line);border-radius:16px;padding:16px;display:block;color:var(--fg);font-size:14px;line-height:1.45;outline:none;background:var(--surface);-webkit-user-select:text;user-select:text;overflow:hidden;max-height:160px;caret-color:transparent}
+.rczone:focus{border-color:var(--accent)}
+/* il testo d'aiuto è solo disegnato: il riquadro resta vuoto, non c'è niente da cancellare prima di incollare */
+.rczone:empty::before{content:"📋  Tieni premuto qui e scegli «Incolla»";position:absolute;inset:0;display:grid;place-items:center;padding:0 16px;text-align:center;color:var(--muted);font-weight:600;pointer-events:none}
+/* procedura guidata per i prodotti non chiari */
+.askprog{height:4px;border-radius:4px;background:var(--raised);margin:2px 16px 0;overflow:hidden}
+.askprog i{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .25s}
+.askcard{margin:16px 16px 18px;padding:18px 16px;border-radius:20px;background:var(--surface);text-align:center}
+.askcard small{display:block;color:var(--muted);font-size:12.5px;font-weight:500}
+.askraw{display:block;margin:8px 0 6px;font:700 22px/1.25 ui-monospace,Menlo,"SF Mono",monospace;letter-spacing:.02em;word-break:break-word}
+.askcard .askp{color:var(--muted);font-size:13px}
+.askcard .askp b{color:var(--fg)}
+.asksug{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.asksug button{border:0;border-radius:999px;padding:8px 13px;background:var(--raised);color:var(--fg);font-size:13.5px;font-weight:500}
+.asksug button.g{background:color-mix(in srgb,var(--accent) 22%,var(--surface))}
+.askpcs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.askpcs button{border:0;border-radius:12px;background:var(--surface);color:var(--fg);padding:9px 4px;font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1.2}
+.askpcs button span{font-size:21px}
+.askpcs button[aria-pressed="true"]{background:var(--sel,var(--fg));color:var(--on-sel,var(--bg))}
+.asknav{display:flex;gap:8px;padding:6px 16px 0}
+.asknav .btn{flex:1}
+.askdone{text-align:center;padding:40px 24px 10px}
+.askdone div{font-size:52px}
+.askdone h2{margin:8px 0 6px;font:700 22px/1.25 var(--font)}
+/* risparmio con gli sconti */
+.savebar{display:flex;height:12px;border-radius:7px;overflow:hidden;gap:2px;margin:12px 0 6px}
+.savebar i{display:block}
+.savelg{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.savelg span{display:inline-flex;align-items:center;gap:6px}
+.savelg i{width:9px;height:9px;border-radius:3px;display:block}
+.tile b.good{color:var(--good)}
+.prow .rawc{display:block;font:500 10.5px ui-monospace,Menlo,monospace;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.pcbtn{border:0;background:var(--raised);color:var(--fg);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px;margin-top:6px}
 .namerow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--line)}
 .namerow:first-child{border-top:0}
 .namerow .mid{flex:1;min-width:0}
@@ -537,8 +667,10 @@ nav .plus:active svg{transform:scale(.94)}
 <section class="sheet" id="sSum" aria-label="Riepilogo categoria"></section>
 <section class="sheet" id="sProd" aria-label="Prodotto"></section>
 <section class="sheet" id="sNames" aria-label="Prodotti ricordati"></section>
+<section class="sheet" id="sPcat" aria-label="Prodotti di una categoria"></section>
 <section class="sheet" id="sTx" aria-label="Movimento"></section>
 <section class="sheet" id="sCat" aria-label="Categoria"></section>
+<section class="sheet" id="sAsk" aria-label="Prodotti da chiarire"></section>
 <section class="sheet" id="sSet" aria-label="Impostazioni"></section>
 <input type="file" id="fileIn" accept=".json,application/json" hidden>
 
@@ -547,7 +679,7 @@ nav .plus:active svg{transform:scale(.94)}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261025132801";
+const BUILD = "20261025135103";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -657,7 +789,7 @@ const cvar = c => typeof c === "string" && /^#[0-9a-f]{6}$/i.test(c) ? c : c >= 
 const MORE_COLORS = ["#0ea5e9", "#06b6d4", "#14b8a6", "#22c55e", "#84cc16", "#facc15", "#f59e0b", "#f97316", "#ef4444", "#be123c",
   "#ec4899", "#d946ef", "#a855f7", "#6366f1", "#1e40af", "#0f766e", "#166534", "#92400e", "#a16207", "#64748b", "#334155", "#a8a29e"];
 /* inchiostro dell'icona: scuro sui colori chiari scelti a mano, bianco altrimenti */
-const ink = c => { if (typeof c !== "string") return "#fff"; const n = parseInt(c.slice(1), 16), r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
+const ink = c => { if (typeof c !== "string") return "var(--on-c,#fff)"; const n = parseInt(c.slice(1), 16), r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.68 ? "#1a1a19" : "#fff"; };
 
 /* ---------- date e numeri ---------- */
@@ -1106,20 +1238,44 @@ function prodStats(items){
     byC.set(x.c, (byC.get(x.c) || 0) + x.p);
     if (x.p <= 0) continue;
     const k = normName(x.n); if (!k) continue;
-    const o = byP.get(k) || { k, n: x.n, c: x.c, cnt: 0, amt: 0 }; o.cnt++; o.amt += x.p; o.c = x.c; byP.set(k, o);
+    const o = byP.get(k) || { k, n: x.n, c: x.c, cnt: 0, amt: 0, sc: 0, r: "" }; o.cnt++; o.amt += x.p; o.sc += x.sc || 0; o.c = x.c; if (x.r) o.r = x.r; byP.set(k, o);
   }
-  return { cats: [...byC].map(([c, amt]) => ({ c, amt })).filter(x => x.amt > 0).sort((a, b) => b.amt - a.amt), prods: [...byP.values()], tot: items.reduce((s, x) => s + x.p, 0) };
+  return { cats: [...byC].map(([c, amt]) => ({ c, amt })).filter(x => x.amt > 0).sort((a, b) => b.amt - a.amt), prods: [...byP.values()], tot: items.reduce((s, x) => s + x.p, 0),
+    sc: items.reduce((s, x) => s + (x.p > 0 ? x.sc || 0 : 0), 0), nsc: items.filter(x => x.p > 0 && x.sc > 0).length };
+}
+const prodMonths = () => { const n = PPER[S.pper || "m"][1]; return Array.from({ length: n }, (_, i) => addMonth(S.month, i - n + 1)); };
+const pct1 = (a, b) => b ? (a / b * 100).toFixed(1).replace(".", ",").replace(",0", "") : "0";
+/* quanto ti fanno risparmiare gli sconti: speso, sconto, percentuale, quanto avresti speso senza */
+function saveCard(st, pst, n){
+  const full = st.tot + st.sc, per = n === 1 ? "questo mese" : "in questo periodo";
+  if (!st.sc) return `<div class="shead"><h2>Risparmio con gli sconti</h2></div><div class="panel pad help">Negli scontrini ${per} non ci sono sconti.</div>`;
+  const top = [...st.prods].filter(x => x.sc > 0).sort((a, b) => b.sc - a.sc).slice(0, 5);
+  const prevFull = pst.tot + pst.sc, prevP = prevFull ? pst.sc / prevFull * 100 : null, curP = st.sc / full * 100;
+  const cmp = prevP === null || !pst.sc ? "" : Math.abs(curP - prevP) < 1 ? `, come ${n === 1 ? "il mese prima" : "nel periodo prima"}` : `, ${curP > prevP ? "più" : "meno"} di ${n === 1 ? "il mese prima" : "nel periodo prima"} (${pct1(pst.sc, prevFull)}%)`;
+  return `<div class="shead"><h2>Risparmio con gli sconti</h2></div>
+    <div class="tiles">
+      <div class="tile"><small>Hai speso</small><b class="num">${eur(st.tot)}</b><span>quello che hai pagato</span></div>
+      <div class="tile"><small>Sconti</small><b class="num good">−${eur(st.sc)}</b><span>su ${st.nsc} ${st.nsc === 1 ? "articolo" : "articoli"}</span></div>
+      <div class="tile"><small>Senza sconti</small><b class="num">${eur(full)}</b><span>avresti speso</span></div>
+      <div class="tile"><small>Risparmio</small><b class="num good">${pct1(st.sc, full)}%</b><span>del prezzo pieno</span></div>
+    </div>
+    <div class="panel pad" style="margin-top:10px">
+      <div class="help" style="color:var(--fg)">Su ${eur(full)} di prezzo pieno ne hai risparmiati <b>${eur(st.sc)}</b>, il <b>${pct1(st.sc, full)}%</b>${cmp}.</div>
+      <div class="savebar" role="img" aria-label="Pagato ${eur(st.tot)}, risparmiato ${eur(st.sc)}"><i style="flex:${st.tot};background:var(--muted);opacity:.45"></i><i style="flex:${st.sc};background:var(--good)"></i></div>
+      <div class="savelg"><span><i style="background:var(--muted);opacity:.45"></i>Pagato</span><span><i style="background:var(--good)"></i>Risparmiato</span></div>
+    </div>
+    ${top.length ? `<div class="shead"><h2>Dove hai risparmiato di più</h2></div><div class="panel">${top.map(x => `<button class="prow" data-prod="${esc(x.k)}"><span class="em">${pcat(x.c).e}</span><div class="mid"><div class="t">${esc(x.n)}</div><div class="s">pagato ${eur(x.amt)} · ${x.cnt} ${x.cnt === 1 ? "volta" : "volte"}</div></div><div class="a" style="color:var(--good)">−${eur(x.sc)}<small>${pct1(x.sc, x.amt + x.sc)}%</small></div></button>`).join("")}</div>` : ""}`;
 }
 function renderProd(){
   const v = $("#vReport"), per = S.pper || "m", n = PPER[per][1];
-  const months = Array.from({ length: n }, (_, i) => addMonth(S.month, i - n + 1)), prevM = months.map(m => addMonth(m, -n));
+  const months = prodMonths(), prevM = months.map(m => addMonth(m, -n));
   const items = itemsIn(months), st = prodStats(items), pst = prodStats(itemsIn(prevM));
   const receipts = new Set(items.map(x => x.tx)).size;
   const seg = `<div class="seg" style="padding:12px 16px 0">${Object.entries(PPER).map(([k, [lab]]) => `<button data-pper="${k}" aria-pressed="${k === per}">${lab}</button>`).join("")}</div>`;
   const label = n === 1 ? mLabel(S.month) : `${mShort(months[0])} – ${mShort(months[n - 1])} ${S.month.slice(0, 4)}`;
   if (!items.length){
     v.innerHTML = rToggle() + seg + `<div class="empty"><h2>Nessuno scontrino in ${n === 1 ? mName(S.month) : "questo periodo"}</h2>
-      <p>Quando registri una spesa al supermercato tocca <b>📷 Foto scontrino</b> o <b>📋 Incolla testo</b>: qui vedrai cosa compri di più, per categoria e per prodotto.</p>
+      <p>Quando registri una spesa al supermercato tocca <b>📷 Foto o PDF</b> o <b>📋 Incolla scontrino</b>: qui vedrai cosa compri di più, per categoria e per prodotto, e quanto risparmi con gli sconti.</p>
       <div class="row-btns"><button class="btn" data-act="add">Aggiungi una spesa</button></div></div>`;
     return;
   }
@@ -1139,12 +1295,14 @@ function renderProd(){
       <div class="sub"><span>Scontrini <b class="num">${receipts}</b></span><span>Articoli <b class="num">${items.filter(x => x.p > 0).length}</b></span></div></div>
     <div class="section">
       ${story.length ? `<div class="panel pad story">${story.map(x => `<p>${x}</p>`).join("")}</div>` : ""}
-      <div class="shead"><h2>Per categoria</h2></div>
+      <div class="shead"><h2>Per categoria</h2><span class="help">tocca per vedere i prodotti</span></div>
       <div class="stack">${st.cats.map(x => `<i style="flex:${x.amt};background:${pcat(x.c).col}"></i>`).join("")}</div>
       <div class="panel">${st.cats.map(x => { const pc = pcat(x.c), pv = pmap.get(x.c) || 0, d = x.amt - pv;
         const dt = !pst.tot ? "" : !pv ? "nuova" : Math.abs(d) < 100 ? "= stabile" : `${d > 0 ? "▲ +" : "▼ −"}${eur0(Math.abs(d))}`;
-        return `<div class="prow" style="cursor:default"><span class="em">${pc.e}</span><div class="mid"><div class="t">${esc(pc.n)}</div><div class="s">${pct(x.amt, st.tot)}%${dt ? " · " + dt : ""}</div>
-          <div class="bar"><i style="width:${Math.max(2, x.amt / max * 100)}%;background:${pc.col}"></i></div></div><div class="a">${eur(x.amt)}</div></div>`; }).join("")}</div>
+        const np = st.prods.filter(p => p.c === x.c).length;
+        return `<button class="prow" data-pccat="${x.c}"><span class="em">${pc.e}</span><div class="mid"><div class="t">${esc(pc.n)}</div><div class="s">${np} ${np === 1 ? "prodotto" : "prodotti"} · ${pct(x.amt, st.tot)}%${dt ? " · " + dt : ""}</div>
+          <div class="bar"><i style="width:${Math.max(2, x.amt / max * 100)}%;background:${pc.col}"></i></div></div><div class="a">${eur(x.amt)}</div>${ICON_CHEV}</button>`; }).join("")}</div>
+      ${saveCard(st, pst, n)}
       <div class="shead"><h2>Compri più spesso</h2><span class="help">tocca un prodotto</span></div>
       <div class="panel">${byCnt.map(x => prow(x, `×${x.cnt}<small>${eur(x.amt / x.cnt)} in media</small>`)).join("")}</div>
       <div class="shead"><h2>Dove va più spesa</h2></div>
@@ -1153,6 +1311,33 @@ function renderProd(){
         return gone.length ? `<div class="shead"><h2>Non li hai più comprati</h2></div><div class="panel">${gone.map(x => prow(x, `<small>${x.cnt} volte prima</small>`)).join("")}</div>` : ""; })() : ""}
     </div>`;
 }
+/* una categoria dei prodotti (es. Dispensa): cosa c'è dentro, per controllare */
+function openPcat(c){ S.pcat = c; drawPcat(); open("#sPcat"); }
+function drawPcat(){
+  const c = S.pcat, pc = pcat(c), months = prodMonths(), n = months.length, items = itemsIn(months), st = prodStats(items);
+  const list = st.prods.filter(x => x.c === c).sort((a, b) => b.amt - a.amt), tot = list.reduce((s, x) => s + x.amt, 0), sc = list.reduce((s, x) => s + x.sc, 0);
+  const label = n === 1 ? mLabel(S.month) : `${mShort(months[0])} – ${mShort(months[n - 1])} ${S.month.slice(0, 4)}`;
+  $("#sPcat").innerHTML = `<div class="pbar"><button class="icon-btn" data-act="pcatBack" aria-label="Chiudi">${ICON_X}</button><h3>${pc.e} ${esc(pc.n)}</h3></div>
+    <div class="sumhead"><span class="cb lg" style="background:${pc.col};font-size:24px">${pc.e}</span><div><small>${esc(label)} · ${list.length} ${list.length === 1 ? "prodotto" : "prodotti"}</small><b>${eur(tot)}</b></div></div>
+    <div class="sumfacts"><span><b>${pct(tot, st.tot)}%</b> della spesa al supermercato</span>${sc ? `<span>sconti <b style="color:var(--good)">−${eur(sc)}</b></span>` : ""}</div>
+    <div class="section"><div class="shead"><h2>Prodotti</h2><span class="help">tocca per i dettagli o per spostarlo</span></div>
+      ${list.length ? `<div class="panel">${list.map(x => `<button class="prow" data-prod="${esc(x.k)}"><span class="em">${pc.e}</span><div class="mid"><div class="t">${esc(x.n)}</div>
+        ${x.r && normRaw(x.r) !== normRaw(x.n) ? `<code class="rawc">${esc(x.r)}</code>` : ""}<div class="s">${x.cnt} ${x.cnt === 1 ? "volta" : "volte"} · ${eur(x.amt / x.cnt)} in media</div></div><div class="a">${eur(x.amt)}</div>${ICON_CHEV}</button>`).join("")}</div>`
+      : `<p class="help">Nessun prodotto in questa categoria nel periodo.</p>`}
+      <p class="help" style="margin-top:12px">Se un prodotto è nella categoria sbagliata, aprilo e tocca <b>Cambia categoria</b>: lo sposto in tutti gli scontrini e me lo ricordo per i prossimi.</p></div>`;
+}
+/* sposta un prodotto in un'altra categoria: in tutti gli scontrini, e da ora in poi */
+function movePc(k, c){
+  D.learn ||= {}; D.names ||= {}; let n = 0;
+  for (const t of D.tx) if (t.items) for (const x of t.items) if (normName(x.n) === k){
+    x.c = c; n++;
+    for (const key of [normName(x.n), normName(x.r)]) if (key) D.learn[key] = c;
+    const rk = normRaw(x.r); if (rk && D.names[rk]) D.names[rk].c = c;
+  }
+  D.learn[k] = c; save(); render();
+  toast(`Spostato in ${pcat(c).e} ${pcat(c).n}${n > 1 ? ` (${n} acquisti)` : ""}`);
+}
+
 /* scheda di un prodotto: quante volte, quando, a che prezzo */
 function openProd(k){ S.prod = k; drawProd(); open("#sProd"); }
 function closeProd(){ $("#sProd").classList.remove("open"); }
@@ -1166,8 +1351,10 @@ function drawProd(){
   const months = Array.from({ length: 6 }, (_, i) => addMonth(thisMonth(), i - 5));
   const vals = months.map(m => { const t = list.filter(x => x.date.startsWith(m)).reduce((s, x) => s + x.p, 0); return { v: t, lab: mShort(m), tip: mLabel(m), top: t ? eur0(t) : "", color: pc.col }; });
   $("#sProd").innerHTML = `<div class="pbar"><button class="icon-btn" data-act="prodBack" aria-label="Chiudi">${ICON_X}</button><h3>${esc(name)}</h3></div>
-    <div class="sumhead"><span class="cb lg" style="background:var(--raised);font-size:24px">${pc.e}</span><div><small>${esc(pc.n)} · ${list.length} ${list.length === 1 ? "acquisto" : "acquisti"}</small><b>${eur(ps.reduce((a, b) => a + b, 0))}</b></div></div>
+    <div class="sumhead"><span class="cb lg" style="background:var(--raised);font-size:24px">${pc.e}</span><div><small>${list.length} ${list.length === 1 ? "acquisto" : "acquisti"}</small><b>${eur(ps.reduce((a, b) => a + b, 0))}</b>
+      <button class="pcbtn" data-act="prodPc" data-c="${pc.id}">${pc.e} ${esc(pc.n)} · Cambia categoria</button></div></div>
     <div class="sumfacts"><span>prezzo medio <b>${eur(avg)}</b></span><span>min <b>${eur(Math.min(...ps))}</b></span><span>max <b>${eur(Math.max(...ps))}</b></span>
+      ${list.some(x => x.sc) ? `<span>sconti <b style="color:var(--good)">−${eur(list.reduce((t, x) => t + (x.sc || 0), 0))}</b></span>` : ""}
       ${list.length > 1 && Math.abs(ch) >= 3 ? `<span>dalla prima volta <b>${ch > 0 ? "▲ +" : "▼ −"}${Math.abs(ch)}%</b></span>` : ""}</div>
     <div class="section"><div class="shead"><h2>Spesa negli ultimi 6 mesi</h2></div><div class="panel">${bars("chProd", vals, { h: 130, maxW: 34, label: "Spesa per questo prodotto" })}</div>
       <div class="shead"><h2>Acquisti</h2></div><div class="panel">${list.slice(0, 40).map(x => `<div class="prow" style="cursor:default"><span class="em" style="font-size:13px;font-weight:600">${pdate(x.date).getDate()}</span><div class="mid"><div class="t">${dLabel(x.date)}</div><div class="s">${esc(x.shop || x.r || "")}</div></div><div class="a">${eur(x.p)}</div></div>`).join("")}</div></div>`;
@@ -1515,29 +1702,26 @@ function delCat(){
 
 /* ---------- impostazioni ---------- */
 const THEMES = {
-  viola: { name: "Viola", bg: "#0b0b0f", su: "#6d28d9", ac: "#fb923c" },
-  auto: { name: "Automatico", bg: "#f3f1ea", su: "#1a1a19", ac: "#9c9a92" },
-  grafite: { name: "Grafite", bg: "#1a1a19", su: "#2e2e2b", ac: "#d9d7d1" },
-  carta: { name: "Carta", bg: "#f3f1ea", su: "#dfdbcf", ac: "#3b3b38" },
-  oled: { name: "Nero OLED", bg: "#000000", su: "#1a1a1a", ac: "#e6e6e6" },
-  neon: { name: "Neon", bg: "#12062a", su: "#2b1260", ac: "#ff2bd6" },
-  term: { name: "Terminale", bg: "#020a03", su: "#0b2210", ac: "#41ff74" }
+  verde: { name: "Verde", bg: "#050906", card: "linear-gradient(140deg,#d2fcbf,#9df796 38%,#5ad66d)", ink: "#06230a", fg: "#f1f8f0", font: "Inter", r: 10, pill: "#8ef58a" },
+  pastello: { name: "Pastello", bg: "#1e1e20", card: "linear-gradient(115deg,#a9e5d3,#d3e6df 34%,#f3c9d3 72%,#f7d8c9)", ink: "#1b1b1d", fg: "#f6f5f8", font: "DM Sans", r: 9, pill: "#c7b6f3" },
+  oled: { name: "Nero OLED", bg: "#000000", card: "#1a1a1a", ink: "#f2f2f2", fg: "#f2f2f2", font: "Roboto", r: 6, pill: "#e6e6e6" },
+  carta: { name: "Carta", bg: "#f3f1ea", card: "#dfdbcf", ink: "#141413", fg: "#141413", font: "Roboto", r: 6, pill: "#3b3b38" }
 };
 function applyTheme(t){
-  t = THEMES[t] ? t : "auto"; D.opt.theme = t;
-  if (t === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
-  try { t === "auto" ? localStorage.removeItem("spese.theme") : localStorage.setItem("spese.theme", t); } catch {}
+  t = THEMES[t] ? t : "verde"; D.opt.theme = t;
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem("spese.theme", t); } catch {}
   const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", bg || "#1a1a19");
 }
 function openSettings(){
-  const cur = D.opt.theme || "viola";
+  const cur = D.opt.theme || "verde";
   const n = D.tx.length, first = n ? D.tx.reduce((a, t) => t.date < a ? t.date : a, D.tx[0].date) : null;
   $("#sSet").innerHTML = `<div class="pbar"><button class="icon-btn" data-act="close" aria-label="Chiudi">${ICON_X}</button><h3>Impostazioni</h3></div>
   <div class="section">
     <h2>Tema</h2>
     <div class="panel"><div class="themes">${Object.entries(THEMES).map(([k, t]) => `<button data-theme-pick="${k}" aria-pressed="${k === cur}">
-      <span class="sw" style="background:${k === "auto" ? `linear-gradient(135deg,${t.bg} 50%,${t.su} 50%)` : t.bg}"><i style="background:${k === "auto" ? "transparent" : t.ac}"></i></span>${t.name}</button>`).join("")}</div></div>
+      <span class="tprev" style="background:${t.bg};color:${t.fg};font-family:'${t.font}',sans-serif"><b style="background:${t.card};color:${t.ink};border-radius:${t.r}px">Aa 124 €</b><i style="background:${t.pill}"></i><i style="background:${t.pill};opacity:.35"></i></span>${t.name}</button>`).join("")}</div></div>
     <h2>Lettura scontrini (IA)</h2>
     <div id="aiBox">${aiBox()}</div>
     <div class="panel" style="margin-top:10px"><button class="list-item" data-act="names"><span>Prodotti ricordati<small>${Object.keys(D.names || {}).length} righe di scontrino riconosciute in automatico</small></span>${ICON_CHEV}</button></div>
@@ -1695,7 +1879,7 @@ function applyKnown(items){
 }
 function rememberNames(items){
   D.names ||= {};
-  for (const x of items){ const k = normRaw(x.r); if (k && x.n && !x.ask) D.names[k] = { n: x.n, c: x.c }; delete x.ask; }   // le domande senza risposta non si ricordano
+  for (const x of items){ const k = normRaw(x.r); if (k && x.n && !x.ask) D.names[k] = { n: x.n, c: x.c }; delete x.ask; delete x.guess; delete x.pcManual; }   // le domande senza risposta non si ricordano
   const keys = Object.keys(D.names); if (keys.length > 3000) keys.slice(0, keys.length - 3000).forEach(k => delete D.names[k]);
 }
 /* testo incollato (es. "Copia tutto" di Testo dal vivo) -> righe articolo/prezzo */
@@ -1859,7 +2043,8 @@ function applyReceipt(res, how){
   const diff = res.total ? res.total - sumIt : 0;
   if (Math.abs(diff) >= 5){ toast(`Attenzione: la somma degli articoli differisce di ${eur(Math.abs(diff))} dal totale dello scontrino`); return; }
   const nAsk = e.items.filter(x => x.ask).length;
-  toast(nAsk ? `${e.items.length} articoli letti: ${nAsk} da chiarire, scrivi cosa sono` : `${e.items.length} articoli letti${how ? " " + how : ""}: controlla le categorie`);
+  if (nAsk) return openAsk();
+  toast(`${e.items.length} articoli letti${how ? " " + how : ""}: controlla le categorie`);
 }
 async function readReceiptPhotos(files){
   if (!files.length) return;
@@ -1899,14 +2084,15 @@ function readItems(){
 }
 function itemsBlock(e){
   if (S.rc === "wait") return `<div class="rcwait"><i></i>${esc(S.rcMsg || "Leggo lo scontrino…")}</div>`;
-  if (S.rc === "paste") return `<div class="rczone" id="rcZone" contenteditable="true" inputmode="none" aria-label="Incolla qui lo scontrino">Tieni premuto qui e scegli <b>Incolla</b><br><small>il PDF dello scontrino digitale, una foto o il testo</small></div>
+  if (S.rc === "paste") return `<div class="rczone" id="rcZone" contenteditable="true" inputmode="none" autocorrect="off" spellcheck="false" aria-label="Tieni premuto qui e scegli Incolla"></div>
+    <p class="help" style="margin:8px 2px 0">Va bene il PDF dello scontrino digitale (copialo dall'app Coop), una foto o il testo.</p>
     <div class="rcbtns" style="margin-top:8px"><button class="btn ghost" data-act="rcCancel">Annulla</button></div>`;
   const btns = `<div class="rcbtns"><label class="btn ghost">📷 ${e.items?.length ? "Rileggi" : "Foto o PDF"}<input type="file" id="rcFile" accept="image/*,application/pdf,.pdf" multiple></label><button class="btn ghost" data-act="rcPaste">📋 Incolla scontrino</button></div>`;
   if (!e.items?.length) return btns + `<p class="help" style="margin:8px 2px 0">Facoltativo: leggo i prodotti dello scontrino, così vedi cosa compri di più.${AI.key ? "" : " Per le foto serve la chiave API (⚙️)."}</p>`;
   const tot = e.items.reduce((s, x) => s + x.p, 0), amt = e.rcTotal || parseAmt(e.raw || ""), saved = e.items.reduce((s, x) => s + (x.sc || 0), 0);
   const diff = isFinite(amt) && amt > 0 && Math.abs(amt - tot) >= 5;
   const nAsk = e.items.filter(x => x.ask).length;
-  const ask = nAsk ? `<div class="askbar"><span>❓</span><span><b>${nAsk} ${nAsk === 1 ? "prodotto da chiarire" : "prodotti da chiarire"}.</b> Sotto ogni riga evidenziata c'è il testo dello scontrino: scrivi cos'è e scegli la categoria. Me lo ricordo per le prossime volte.</span></div>` : "";
+  const ask = nAsk ? `<button class="askbar" data-act="askOpen" style="width:100%;border:0;text-align:left;color:inherit"><span>❓</span><span style="flex:1"><b>${nAsk} ${nAsk === 1 ? "prodotto da chiarire" : "prodotti da chiarire"}</b><br>Tocca qui: te li mostro uno alla volta. Me li ricordo per le prossime volte.</span>${ICON_CHEV}</button>` : "";
   return btns + ask + `<div class="items">${e.items.map((x, i) => `<div class="item${x.ask ? " ask" : ""}" data-i="${i}"><button class="pc" data-pcpick="${i}" aria-label="Categoria: ${esc(pcat(x.c).n)}">${pcat(x.c).e}</button>
       <div class="nm2"><input type="text" class="in" value="${x.ask ? "" : esc(x.n)}" placeholder="${x.ask ? "Cos'è? (forse: " + esc(x.n) + ")" : ""}" data-guess="${x.ask ? esc(x.n) : ""}" aria-label="Prodotto">${x.r && (x.ask || normRaw(x.r) !== normRaw(x.n)) ? `<small class="raw">${esc(x.r)}</small>` : ""}</div>
       <input type="text" class="ip" inputmode="decimal" value="${fmtInput(x.p)}" aria-label="Prezzo"><button class="x" data-idel="${i}" aria-label="Togli">×</button></div>`).join("")}
@@ -1979,6 +2165,77 @@ document.addEventListener("paste", e => {
   const types = [...(dt?.types || [])].join(", ");
   toast(types ? `Negli appunti c'è qualcosa che non so leggere (${types}). Salva il PDF in File e usa "Foto o PDF".` : "Gli appunti sono vuoti: copia prima lo scontrino nell'app Coop");
 });
+
+/* se iOS inserisce il contenuto senza passare dall'evento "paste" (succede con alcune immagini) lo recupero dal riquadro */
+document.addEventListener("input", async e => {
+  const z = e.target.closest?.("#rcZone"); if (!z) return;
+  const img = z.querySelector("img"), txt = z.innerText.trim();
+  z.innerHTML = "";
+  if (img){
+    try { const b = await (await fetch(img.src)).blob(); return readReceiptPhotos([new File([b], "scontrino." + (b.type.split("/")[1] || "png"), { type: b.type || "image/png" })]); }
+    catch { return toast("Non riesco a leggere questa immagine: salvala e usa \"Foto o PDF\""); }
+  }
+  if (txt) readReceiptText(txt);
+});
+
+/* ---------- procedura guidata: i prodotti dello scontrino che non ho capito, uno alla volta ---------- */
+function openAsk(){
+  if ($("#amt")) readTx();
+  const e = S.edit, idx = (e?.items || []).map((x, i) => x.ask ? i : -1).filter(i => i >= 0);
+  if (!idx.length) return;
+  S.ask = { idx, i: 0, ok: 0 }; drawAsk(); open("#sAsk");
+}
+/* nomi già usati che assomigliano al testo dello scontrino: "P.SEM.ZUCCA" → "Pane ai semi di zucca" */
+function askSuggest(it){
+  const toks = normRaw(it.r).toLowerCase().split(" ").filter(w => w.length >= 3 && !/^\d+$/.test(w));
+  const names = new Set(); for (const v of Object.values(D.names || {})) names.add(v.n);
+  for (const t of D.tx) if (t.items) for (const x of t.items) if (x.n && x.p > 0) names.add(x.n);
+  const out = [];
+  for (const n of names){ const ws = normName(n).split(" "); const sc = toks.filter(t => ws.some(w => w.startsWith(t))).length; if (sc) out.push([sc, n]); }
+  return out.sort((a, b) => b[0] - a[0] || a[1].length - b[1].length).map(x => x[1]).filter(n => normName(n) !== normName(it.guess || it.n)).slice(0, 4);
+}
+function drawAsk(){
+  const A = S.ask, e = S.edit, el = $("#sAsk"); if (!A || !e) return;
+  const n = A.idx.length;
+  if (A.i >= n){
+    const left = A.idx.filter(i => e.items[i]?.ask).length;
+    el.innerHTML = `<div class="pbar"><button class="icon-btn" data-act="askEnd" aria-label="Chiudi">${ICON_X}</button><h3>Prodotti da chiarire</h3></div>
+      <div class="askprog"><i style="width:100%"></i></div>
+      <div class="askdone"><div>${left ? "👍" : "🎉"}</div><h2>${left ? `Fatto, ne restano ${left}` : "Tutto chiaro!"}</h2>
+        <p class="help">${n - left ? `Quando salvi la spesa mi ricordo ${n - left === 1 ? "questo prodotto" : `questi ${n - left} prodotti`}: dal prossimo scontrino li riconosco da solo.` : ""}${left ? ` Quelli saltati restano evidenziati: puoi chiarirli dopo.` : ""}</p></div>
+      <div class="asknav">${left ? `<button class="btn ghost" data-act="askAgain">Rivedi i saltati</button>` : ""}<button class="btn" data-act="askEnd">Torna alla spesa</button></div>`;
+    return;
+  }
+  const it = e.items[A.idx[A.i]];
+  it.guess ||= it.n;
+  const sug = askSuggest(it), pc = it.c;
+  el.innerHTML = `<div class="pbar"><button class="icon-btn" data-act="askEnd" aria-label="Finisci dopo">${ICON_X}</button><h3>Prodotto ${A.i + 1} di ${n}</h3></div>
+    <div class="askprog"><i style="width:${A.i / n * 100}%"></i></div>
+    <div class="askcard"><small>Sullo scontrino c'è scritto</small><code class="askraw">${esc(it.r || it.guess)}</code>
+      <div class="askp">pagato <b>${eur(it.p)}</b>${it.sc ? ` · sconto −${eur(it.sc)}` : ""}</div></div>
+    <div class="field"><label for="askName">Cos'è?</label><input type="text" id="askName" value="${it.ask ? "" : esc(it.n)}" placeholder="es. ${esc(it.guess)}" autocomplete="off" enterkeyhint="next">
+      <div class="asksug"><button class="g" data-asksug="${esc(it.guess)}">💡 ${esc(it.guess)}</button>${sug.map(x => `<button data-asksug="${esc(x)}">${esc(x)}</button>`).join("")}</div></div>
+    <div class="field"><label>Categoria</label><div class="askpcs">${PCATS.map(x => `<button data-askpc="${x.id}" aria-pressed="${x.id === pc}"><span>${x.e}</span>${esc(x.n)}</button>`).join("")}</div></div>
+    <div class="asknav">${A.i ? `<button class="btn ghost" data-act="askBack" style="flex:.7">Indietro</button>` : ""}<button class="btn ghost" data-act="askSkip" style="flex:.7">Salta</button><button class="btn" data-act="askNext">${A.i === n - 1 ? "Fine" : "Avanti"}</button></div>`;
+  el.scrollTop = 0;
+}
+function askNext(){
+  const A = S.ask, it = S.edit.items[A.idx[A.i]], v = $("#askName").value.trim();
+  if (!v){ toast("Scrivi cos'è, tocca il suggerimento 💡 oppure Salta"); $("#askName").focus(); return; }
+  it.n = v; it.ask = false; A.i++; drawAsk();
+}
+document.addEventListener("input", e => {
+  if (e.target.id !== "askName" || !S.ask) return;
+  const it = S.edit.items[S.ask.idx[S.ask.i]]; if (!it || it.pcManual) return;
+  const v = e.target.value.trim(); if (v.length < 3) return;
+  const c = guessPc(v, ""); if (c === "altro" || c === it.c) return;
+  it.c = c; document.querySelectorAll("[data-askpc]").forEach(b => b.setAttribute("aria-pressed", b.dataset.askpc === c));
+});
+document.addEventListener("keydown", e => { if (e.target.id === "askName" && e.key === "Enter"){ e.preventDefault(); askNext(); } });
+function askEnd(){
+  for (const x of S.edit?.items || []){ delete x.guess; delete x.pcManual; }
+  S.ask = null; $("#sAsk").classList.remove("open"); if (S.edit) drawTx();
+}
 
 /* ---------- prodotti ricordati (righe dello scontrino → nome) ---------- */
 function openNames(){ drawNames(); open("#sNames"); }
@@ -2148,6 +2405,7 @@ function close(){
 function render(){
   if ($("#sSum").classList.contains("open")) drawSum();
   if ($("#sProd").classList.contains("open")) drawProd();
+  if ($("#sPcat").classList.contains("open")) drawPcat();
   document.querySelector(".tip")?.remove();
   const yearMode = S.tab === "vReport" && S.rview === "year";
   $("#hMonth").textContent = yearMode ? "Anno " + S.month.slice(0, 4) : mLabel(S.month);
@@ -2195,11 +2453,15 @@ document.addEventListener("click", e => {
   if (d.aimode){ AI.mode = d.aimode; aiSave(); const box = $("#aiBox"); if (box) box.innerHTML = aiBox(); return; }
   if (d.ndel !== undefined){ delete D.names[d.ndel]; save(); return drawNames(); }
   if (d.npc !== undefined){ S.npc = d.npc; return openPcPickFor(D.names[d.npc]?.c); }
+  if (d.setpc && S.pcmove){ movePc(S.pcmove, d.setpc); S.pcmove = null; return closePcPick(); }
   if (d.setpc && S.npc){ if (D.names[S.npc]){ D.names[S.npc].c = d.setpc; save(); } S.npc = null; closePcPick(); return drawNames(); }
   if (d.pcpick !== undefined){ readTx(); return openPcPick(+d.pcpick); }
   if (d.setpc){ const it = S.edit?.items?.[+d.i]; if (it){ it.c = d.setpc; const row = document.querySelector(`#sTx .item[data-i="${d.i}"] .pc`); if (row) row.textContent = pcat(d.setpc).e; } return closePcPick(); }
   if (d.idel !== undefined){ readTx(); S.edit.items.splice(+d.idel, 1); return drawTx(); }
   if (d.prod){ return openProd(d.prod); }
+  if (d.pccat){ return openPcat(d.pccat); }
+  if (d.asksug !== undefined){ const i = $("#askName"); i.value = d.asksug; i.dispatchEvent(new Event("input", { bubbles: true })); return; }
+  if (d.askpc){ const it = S.edit.items[S.ask.idx[S.ask.i]]; it.c = d.askpc; it.pcManual = true; document.querySelectorAll("[data-askpc]").forEach(b => b.setAttribute("aria-pressed", b === el)); return; }
   if (d.type && el.closest(".seg")){ readTx(); S.edit.type = d.type; drawTx(); return sizeAmt(); }
   if (d.ctype){ readCat(); S.cat.type = d.ctype; return drawCat(); }
   if (d.color !== undefined){ readCat(); S.cat.color = /^-?\d+$/.test(d.color) ? +d.color : d.color; return drawCat(); }
@@ -2217,7 +2479,15 @@ document.addEventListener("click", e => {
     case "rcParse": return readReceiptText();
     case "itAdd": readTx(); S.edit.items.push({ n: "", r: "", p: 0, c: "altro" }); drawTx(); setTimeout(() => [...document.querySelectorAll("#sTx .item .in")].pop()?.focus(), 50); return;
     case "itUse": readTx(); S.edit.raw = fmtInput(S.edit.items.reduce((s, x) => s + x.p, 0)); return drawTx();
-    case "pcClose": S.npc = null; return closePcPick();
+    case "pcClose": S.npc = null; S.pcmove = null; return closePcPick();
+    case "askOpen": return openAsk();
+    case "askNext": return askNext();
+    case "askSkip": S.ask.i++; return drawAsk();
+    case "askBack": S.ask.i = Math.max(0, S.ask.i - 1); return drawAsk();
+    case "askAgain": S.ask.idx = S.ask.idx.filter(i => S.edit.items[i]?.ask); S.ask.i = 0; return drawAsk();
+    case "askEnd": return askEnd();
+    case "prodPc": S.pcmove = S.prod; return openPcPickFor(d.c);
+    case "pcatBack": return $("#sPcat").classList.remove("open");
     case "names": return openNames();
     case "aiSave": return aiConnect();
     case "aiOff": AI = {}; aiSave(); return openSettings();
@@ -2322,7 +2592,7 @@ document.addEventListener("focusout", () => setTimeout(fitApp, 300));
 /* se l'app resta aperta a cavallo di mezzanotte o del cambio mese */
 document.addEventListener("visibilitychange", () => { if (!document.hidden){ setTimeout(fitApp, 100); render(); } });
 
-if (!D.opt.vio){ D.opt.vio = 1; D.opt.theme = "viola"; }   // il nuovo stile diventa quello predefinito (una volta sola)
+if (!THEMES[D.opt.theme]) D.opt.theme = "verde";   // i temi tolti passano al nuovo tema verde
 applyTheme(D.opt.theme);
 render();
 
