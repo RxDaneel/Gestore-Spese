@@ -73,7 +73,7 @@
 :root:is([data-theme="verde"],[data-theme="aurora"]) .hero .delta i{color:#06230a}
 :root:is([data-theme="verde"],[data-theme="aurora"]) .hero .pill-status{background:rgba(6,35,10,.14);color:#06230a}
 :root:is([data-theme="verde"],[data-theme="aurora"]) .shead button{color:var(--accent)}
-:root:is([data-theme="verde"],[data-theme="aurora"]) .shead button::after{content:" →"}
+:root:is([data-theme="verde"],[data-theme="aurora"]) .shead button:not([data-act="newCat"])::after{content:" →"}
 :root:is([data-theme="verde"],[data-theme="aurora"]) .chip{background:#0c150d;box-shadow:inset 0 0 0 1px var(--line);color:var(--fg)}
 :root:is([data-theme="verde"],[data-theme="aurora"]) :is(.chip,.seg button,.chips.sub .chip,.catgrid.subs .chip)[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);box-shadow:0 0 18px -2px rgba(142,245,138,.55)}
 :root:is([data-theme="verde"],[data-theme="aurora"]) .seg button{background:#0c150d;box-shadow:inset 0 0 0 1px var(--line)}
@@ -153,6 +153,15 @@
 :root[data-theme="aurora"] .pcpick{background:#0b0b0e}
 :root[data-theme="aurora"] .askbar{background:rgba(143,180,255,.10);box-shadow:inset 0 0 0 1px rgba(143,180,255,.28)}
 :root[data-theme="aurora"] .askprog i{background:var(--grad)}
+/* nessun bagliore nel tema nero: tutto piatto */
+:root[data-theme="aurora"] .cb{box-shadow:none}
+:root[data-theme="aurora"] .hero{box-shadow:none}
+:root[data-theme="aurora"] .hero::after{display:none}
+:root[data-theme="aurora"] :is(.chip,.seg button,.chips.sub .chip,.catgrid.subs .chip)[aria-pressed="true"]{box-shadow:none}
+:root[data-theme="aurora"] .btn:not(.ghost):not(.danger),:root[data-theme="aurora"] .kp .ok{box-shadow:none}
+:root[data-theme="aurora"] nav{box-shadow:inset 0 0 0 1px var(--line)}
+:root[data-theme="aurora"] nav .plus svg{box-shadow:none}
+:root[data-theme="aurora"] .kp{box-shadow:inset 0 1px 0 var(--line)}
 
 /* titoli delle sezioni nei due temi nuovi: frase normale e più grandi, non maiuscoletto */
 :root:is([data-theme="verde"],[data-theme="aurora"]) :is(.section>h2,.group,.shead h2){text-transform:none;letter-spacing:-.015em;font-size:18px;font-weight:700;color:var(--fg)}
@@ -687,7 +696,7 @@ nav .plus:active svg{transform:scale(.94)}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261025144009";
+const BUILD = "20261025144259";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
