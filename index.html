@@ -465,6 +465,22 @@ nav .plus:active svg{transform:scale(.94)}
 .itemfoot b{color:var(--fg)}
 .itemfoot button{border:0;background:none;color:var(--fg);font-weight:600;font-size:13px;padding:4px 0}
 .itemfoot .warn{color:var(--danger)}
+.item .nm2{flex:1;min-width:0;display:flex;flex-direction:column}
+.item .raw{font:500 10.5px/1.2 ui-monospace,Menlo,monospace;color:var(--muted);padding:0 4px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item.ask{background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.item.ask .raw{color:var(--fg)}
+.item.ask .in::placeholder{color:var(--accent)}
+.askbar{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:11px 13px;border-radius:14px;background:color-mix(in srgb,var(--accent) 16%,var(--surface));font-size:13.5px;line-height:1.4}
+.askbar b{font-weight:700}
+.rczone{min-height:110px;border:2px dashed var(--line);border-radius:16px;padding:26px 16px;display:block;text-align:center;color:var(--muted);font-size:14px;line-height:1.45;outline:none;background:var(--surface);-webkit-user-select:text;user-select:text}
+.rczone:focus{border-color:var(--accent);color:var(--fg)}
+.namerow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--line)}
+.namerow:first-child{border-top:0}
+.namerow .mid{flex:1;min-width:0}
+.namerow code{display:block;font:500 11px ui-monospace,Menlo,monospace;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.namerow input{width:100%;border:0;background:none;padding:4px 0;font-size:15px!important;color:var(--fg);outline:none}
+.namerow .pc{width:34px;height:34px;border-radius:10px;border:0;background:var(--raised);font-size:17px;flex:none}
+.namerow .x{border:0;background:none;color:var(--muted);font-size:20px;width:30px}
 .pcpick{position:fixed;left:8px;right:8px;bottom:calc(var(--bot) + 8px);z-index:9500;background:var(--surface);border-radius:20px;padding:12px;box-shadow:0 12px 50px rgba(0,0,0,.5);display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:520px;margin:0 auto}
 .pcpick button{border:0;border-radius:12px;background:var(--raised);color:var(--fg);padding:10px 4px;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:4px;line-height:1.2}
 .pcpick button span{font-size:22px}
@@ -520,6 +536,7 @@ nav .plus:active svg{transform:scale(.94)}
 
 <section class="sheet" id="sSum" aria-label="Riepilogo categoria"></section>
 <section class="sheet" id="sProd" aria-label="Prodotto"></section>
+<section class="sheet" id="sNames" aria-label="Prodotti ricordati"></section>
 <section class="sheet" id="sTx" aria-label="Movimento"></section>
 <section class="sheet" id="sCat" aria-label="Categoria"></section>
 <section class="sheet" id="sSet" aria-label="Impostazioni"></section>
@@ -530,7 +547,7 @@ nav .plus:active svg{transform:scale(.94)}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261014110702";
+const BUILD = "20261025132801";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1327,7 +1344,7 @@ function saveTx(){
   readTx(); const e = S.edit;
   if (!(e.amt > 0)){ toast("Scrivi un importo"); showKp(true); $("#sTx").scrollTop = 0; return; }
   if (!e.cat){ toast("Scegli una categoria"); return; }
-  if (e.items){ e.items = e.items.filter(x => x.n && isFinite(x.p) && x.p !== 0); if (!e.items.length || e.type !== "out") delete e.items; else learnItems(e.items); }
+  if (e.items){ e.items = e.items.filter(x => x.n && isFinite(x.p) && x.p !== 0); if (!e.items.length || e.type !== "out") delete e.items; else { learnItems(e.items); rememberNames(e.items); } }
   S.rc = null; delete e.rcTotal;
   if (e.id){ const i = D.tx.findIndex(t => t.id === e.id); D.tx[i] = { ...D.tx[i], ...e }; }
   else D.tx.push({ ...e, id: uid(), ts: Date.now() });
@@ -1523,6 +1540,7 @@ function openSettings(){
       <span class="sw" style="background:${k === "auto" ? `linear-gradient(135deg,${t.bg} 50%,${t.su} 50%)` : t.bg}"><i style="background:${k === "auto" ? "transparent" : t.ac}"></i></span>${t.name}</button>`).join("")}</div></div>
     <h2>Lettura scontrini (IA)</h2>
     <div id="aiBox">${aiBox()}</div>
+    <div class="panel" style="margin-top:10px"><button class="list-item" data-act="names"><span>Prodotti ricordati<small>${Object.keys(D.names || {}).length} righe di scontrino riconosciute in automatico</small></span>${ICON_CHEV}</button></div>
     <h2>Backup automatico su GitHub</h2>
     <div id="ghBox">${ghBox()}</div>
     <h2>I tuoi dati</h2>
@@ -1661,6 +1679,25 @@ function mergeDiscounts(items){
   }
   return out.filter(x => x.p > 0);
 }
+/* memoria delle righe dello scontrino: "GRANCER M.BIANCO" → nome e categoria che hai confermato tu.
+   Il testo stampato da un supermercato resta sempre uguale, quindi la volta dopo il prodotto è già riconosciuto. */
+const normRaw = r => String(r || "").toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\b\d+([.,]\d+)?\s*(G|GR|KG|ML|L|CL|PZ|X\d+)\b/g, " ").replace(/[^A-Z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+const looksCryptic = r => /\./.test(r) || String(r).toUpperCase().split(/\s+/).some(w => /^[A-Z]{1,3}$/.test(w) && !["DI", "DA", "IN", "CON", "AL", "E", "LA", "IL", "BIO", "UHT", "DOP", "IGP", "MIX"].includes(w));
+function applyKnown(items){
+  D.names ||= {};
+  for (const x of items){
+    const k = normRaw(x.r), m = k && D.names[k];
+    if (m){ x.n = m.n; x.c = m.c; x.ask = false; }
+    else x.ask = x.ok === false;
+    delete x.ok;
+  }
+  return items;
+}
+function rememberNames(items){
+  D.names ||= {};
+  for (const x of items){ const k = normRaw(x.r); if (k && x.n && !x.ask) D.names[k] = { n: x.n, c: x.c }; delete x.ask; }   // le domande senza risposta non si ricordano
+  const keys = Object.keys(D.names); if (keys.length > 3000) keys.slice(0, keys.length - 3000).forEach(k => delete D.names[k]);
+}
 /* testo incollato (es. "Copia tutto" di Testo dal vivo) -> righe articolo/prezzo */
 function parseReceiptText(txt){
   const SKIP = /TOTALE|SUBTOT|CONTANT|RESTO|\bIVA\b|CARTA|\bCARD\b|MASTERCARD|\bVISA\b|MAESTRO|AMEX|SATISPAY|PAGATO|BANCOMAT|PAGAMENT|DOCUMENTO|SCONTRINO|ARTICOLI|P\.? ?IVA|TEL\.?|CASSA|OPERATORE|GRAZIE|ARRIVEDERCI|PUNTI|SALDO|RESTO|IMPORTO|DI CUI|ELETTRON|COMMERCIALE|NUMERO|^\s*N\.? ?\d/i;
@@ -1676,9 +1713,9 @@ function parseReceiptText(txt){
     if (price > 0 && /SCONTO|PROMO|RIBASSO/i.test(name)) price = -price;
     const raw = name, nice = name.toLowerCase().replace(/\b\w/, c => c.toUpperCase());
     const prev = items[items.length - 1];
-    items.push({ n: nice, r: raw, p: price, c: price < 0 && prev ? prev.c : guessPc(nice, raw) });
+    items.push({ n: nice, r: raw, p: price, c: price < 0 && prev ? prev.c : guessPc(nice, raw), ok: !looksCryptic(raw) });
   }
-  return { items: mergeDiscounts(items), total };
+  return { items: applyKnown(mergeDiscounts(items)), total };
 }
 
 /* lettura con l'IA (Claude) direttamente dal telefono; la chiave resta solo qui */
@@ -1791,20 +1828,22 @@ Leggi riga per riga, con attenzione alle cifre dei prezzi (non confondere 1 e 7,
 - Ignora righe che non sono prodotti: intestazione del negozio, "Inizio/Fine Salvatempo", "Inizio sacc./Fine sacc.", "N. ART.", "NUMERO", "ARTICOLI", totale, subtotale, IVA, pagamento, resto, punti spesa o fedeltà, buste se non pagate.
 - Metti in "totale" il TOTALE pagato stampato sullo scontrino. Prima di rispondere somma i prezzi degli articoli: deve coincidere con il totale. Se non coincide, rileggi le righe e correggi gli errori.
 - "categoria": una tra ${PCATS.map(x => `${x.id} (${x.n})`).join(", ")}.
-${learned ? "Categorie già scelte dall'utente per prodotti simili (seguile):\n" + learned : ""}`;
+- "chiaro": true solo se sei SICURO di quale prodotto si tratta. Se la riga è un'abbreviazione, una sigla o un codice che non sai interpretare con certezza (es. "P.SEM.SUCCH.34", "MIX FORM GRA.GS"), metti false e in "nome" la tua ipotesi migliore: te lo chiederà l'utente. Non inventare.
+${learned ? "Categorie già scelte dall'utente per prodotti simili (seguile):\n" + learned : ""}
+${(() => { const kn = Object.entries(D.names || {}).slice(-80).map(([k, v]) => `${k} = ${v.n}`).join("\n"); return kn ? "Righe che l'utente ti ha già spiegato (testo dello scontrino = prodotto):\n" + kn : ""; })()}`;
   // immagini (stringhe base64 JPEG) oppure PDF (scontrino digitale scaricato dall'app del supermercato)
   const content = images.map(b => b.pdf ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: b.pdf } } : { type: "image", source: { type: "base64", media_type: "image/jpeg", data: b } });
   content.push({ type: "text", text: (text ? "Testo dello scontrino:\n" + text + "\n\n" : "") + prompt });
   const tool = { name: "scontrino", description: "Registra il contenuto dello scontrino", input_schema: { type: "object", properties: {
     negozio: { type: "string" }, data: { type: "string", description: "data dello scontrino AAAA-MM-GG, vuota se non leggibile" }, totale: { type: "number" },
-    articoli: { type: "array", items: { type: "object", properties: { nome: { type: "string" }, testo: { type: "string" }, prezzo: { type: "number", description: "importo pagato, già scontato" }, sconto: { type: "number" }, categoria: { type: "string", enum: PCATS.map(x => x.id) } }, required: ["nome", "prezzo", "categoria"] } } }, required: ["articoli"] } };
+    articoli: { type: "array", items: { type: "object", properties: { nome: { type: "string" }, testo: { type: "string" }, prezzo: { type: "number", description: "importo pagato, già scontato" }, sconto: { type: "number" }, chiaro: { type: "boolean" }, categoria: { type: "string", enum: PCATS.map(x => x.id) } }, required: ["nome", "testo", "prezzo", "categoria", "chiaro"] } } }, required: ["articoli"] } };
   const j = await aiCall(content, { tools: [tool], model });
   const out = j.content?.find(c => c.type === "tool_use")?.input;
   if (!out || !Array.isArray(out.articoli)) throw new Error("Non sono riuscito a leggere lo scontrino");
   return {
     shop: out.negozio || "", date: /^\d{4}-\d{2}-\d{2}$/.test(out.data || "") ? out.data : "",
     total: isFinite(out.totale) ? Math.round(out.totale * 100) : null,
-    items: mergeDiscounts(out.articoli.filter(a => a && a.nome && isFinite(a.prezzo)).map(a => ({ n: String(a.nome).trim(), r: String(a.testo || "").trim(), p: Math.round(a.prezzo * 100), sc: a.sconto > 0 ? Math.round(a.sconto * 100) : 0, c: guessPc(a.nome, a.testo || "", a.categoria) })))
+    items: applyKnown(mergeDiscounts(out.articoli.filter(a => a && a.nome && isFinite(a.prezzo)).map(a => ({ n: String(a.nome).trim(), r: String(a.testo || "").trim(), p: Math.round(a.prezzo * 100), sc: a.sconto > 0 ? Math.round(a.sconto * 100) : 0, ok: a.chiaro !== false, c: guessPc(a.nome, a.testo || "", a.categoria) }))))
   };
 }
 /* applica il risultato alla spesa che si sta scrivendo */
@@ -1819,7 +1858,8 @@ function applyReceipt(res, how){
   S.rc = null; S.rcMsg = null; S.kp = false; drawTx();
   const diff = res.total ? res.total - sumIt : 0;
   if (Math.abs(diff) >= 5){ toast(`Attenzione: la somma degli articoli differisce di ${eur(Math.abs(diff))} dal totale dello scontrino`); return; }
-  toast(`${e.items.length} articoli letti${how ? " " + how : ""}: controlla le categorie`);
+  const nAsk = e.items.filter(x => x.ask).length;
+  toast(nAsk ? `${e.items.length} articoli letti: ${nAsk} da chiarire, scrivi cosa sono` : `${e.items.length} articoli letti${how ? " " + how : ""}: controlla le categorie`);
 }
 async function readReceiptPhotos(files){
   if (!files.length) return;
@@ -1837,8 +1877,8 @@ async function readReceiptPhotos(files){
     applyReceipt(await aiReceiptSmart(imgs.slice(0, 10)), "con l'IA");
   } catch (err) { S.rc = null; S.rcMsg = null; drawTx(); toast(err.message || "Errore nella lettura"); }
 }
-async function readReceiptText(){
-  const t = $("#rcText")?.value || "";
+async function readReceiptText(given){
+  const t = given ?? ($("#rcText")?.value || "");
   if (!t.trim()){ toast("Incolla prima il testo dello scontrino"); return; }
   readTx();
   if (AI.key){
@@ -1851,20 +1891,25 @@ function readItems(){
   const e = S.edit; if (!e?.items) return;
   document.querySelectorAll("#sTx .item").forEach(row => {
     const i = +row.dataset.i, it = e.items[i]; if (!it) return;
-    it.n = row.querySelector(".in").value.trim();
+    const inp = row.querySelector(".in"), v = inp.value.trim();
+    if (it.ask){ if (v){ it.n = v; it.ask = false; } else it.n = inp.dataset.guess || it.n; }   // senza risposta resta l'ipotesi, e la domanda
+    else it.n = v;
     const p = parseAmt(row.querySelector(".ip").value); if (isFinite(p)) it.p = p;
   });
 }
 function itemsBlock(e){
   if (S.rc === "wait") return `<div class="rcwait"><i></i>${esc(S.rcMsg || "Leggo lo scontrino…")}</div>`;
-  if (S.rc === "paste") return `<textarea id="rcText" placeholder="Incolla qui il testo dello scontrino: apri la foto, tieni premuto sul testo e scegli Copia tutto"></textarea>
-    <div class="rcbtns" style="margin-top:8px"><button class="btn" data-act="rcParse">Leggi il testo</button><button class="btn ghost" data-act="rcCancel">Annulla</button></div>`;
-  const btns = `<div class="rcbtns"><label class="btn ghost">📷 ${e.items?.length ? "Rileggi" : "Foto o PDF"}<input type="file" id="rcFile" accept="image/*,application/pdf,.pdf" multiple></label><button class="btn ghost" data-act="rcPaste">📋 Incolla testo</button></div>`;
+  if (S.rc === "paste") return `<div class="rczone" id="rcZone" contenteditable="true" inputmode="none" aria-label="Incolla qui lo scontrino">Tieni premuto qui e scegli <b>Incolla</b><br><small>il PDF dello scontrino digitale, una foto o il testo</small></div>
+    <div class="rcbtns" style="margin-top:8px"><button class="btn ghost" data-act="rcCancel">Annulla</button></div>`;
+  const btns = `<div class="rcbtns"><label class="btn ghost">📷 ${e.items?.length ? "Rileggi" : "Foto o PDF"}<input type="file" id="rcFile" accept="image/*,application/pdf,.pdf" multiple></label><button class="btn ghost" data-act="rcPaste">📋 Incolla scontrino</button></div>`;
   if (!e.items?.length) return btns + `<p class="help" style="margin:8px 2px 0">Facoltativo: leggo i prodotti dello scontrino, così vedi cosa compri di più.${AI.key ? "" : " Per le foto serve la chiave API (⚙️)."}</p>`;
   const tot = e.items.reduce((s, x) => s + x.p, 0), amt = e.rcTotal || parseAmt(e.raw || ""), saved = e.items.reduce((s, x) => s + (x.sc || 0), 0);
   const diff = isFinite(amt) && amt > 0 && Math.abs(amt - tot) >= 5;
-  return btns + `<div class="items">${e.items.map((x, i) => `<div class="item" data-i="${i}"><button class="pc" data-pcpick="${i}" aria-label="Categoria: ${esc(pcat(x.c).n)}">${pcat(x.c).e}</button>
-      <input type="text" class="in" value="${esc(x.n)}" aria-label="Prodotto"><input type="text" class="ip" inputmode="decimal" value="${fmtInput(x.p)}" aria-label="Prezzo"><button class="x" data-idel="${i}" aria-label="Togli">×</button></div>`).join("")}
+  const nAsk = e.items.filter(x => x.ask).length;
+  const ask = nAsk ? `<div class="askbar"><span>❓</span><span><b>${nAsk} ${nAsk === 1 ? "prodotto da chiarire" : "prodotti da chiarire"}.</b> Sotto ogni riga evidenziata c'è il testo dello scontrino: scrivi cos'è e scegli la categoria. Me lo ricordo per le prossime volte.</span></div>` : "";
+  return btns + ask + `<div class="items">${e.items.map((x, i) => `<div class="item${x.ask ? " ask" : ""}" data-i="${i}"><button class="pc" data-pcpick="${i}" aria-label="Categoria: ${esc(pcat(x.c).n)}">${pcat(x.c).e}</button>
+      <div class="nm2"><input type="text" class="in" value="${x.ask ? "" : esc(x.n)}" placeholder="${x.ask ? "Cos'è? (forse: " + esc(x.n) + ")" : ""}" data-guess="${x.ask ? esc(x.n) : ""}" aria-label="Prodotto">${x.r && (x.ask || normRaw(x.r) !== normRaw(x.n)) ? `<small class="raw">${esc(x.r)}</small>` : ""}</div>
+      <input type="text" class="ip" inputmode="decimal" value="${fmtInput(x.p)}" aria-label="Prezzo"><button class="x" data-idel="${i}" aria-label="Togli">×</button></div>`).join("")}
     <div class="itemfoot"><span>${e.items.length} articoli · <b class="num">${eur(tot)}</b>${saved ? ` · sconti −${eur(saved)}` : ""}${diff ? ` <span class="warn">(${e.rcTotal ? "totale scontrino" : "importo"} ${eur(amt)})</span>` : ""}</span><span><button data-act="itAdd">+ Articolo</button>${diff ? ` · <button data-act="itUse">Usa il totale</button>` : ""}</span></div></div>`;
 }
 function openPcPick(i){
@@ -1874,6 +1919,11 @@ function openPcPick(i){
   document.body.appendChild(w);
 }
 function closePcPick(){ $("#pcWrap")?.remove(); }
+function openPcPickFor(cur){
+  closePcPick(); const w = document.createElement("div"); w.id = "pcWrap";
+  w.innerHTML = `<div class="pcscrim" data-act="pcClose"></div><div class="pcpick" role="dialog" aria-label="Categoria del prodotto">${PCATS.map(x => `<button data-setpc="${x.id}" aria-pressed="${x.id === cur}"><span>${x.e}</span>${esc(x.n)}</button>`).join("")}</div>`;
+  document.body.appendChild(w);
+}
 /* quando salvi, l'app ricorda le categorie che hai confermato o corretto */
 function learnItems(items){
   D.learn ||= {};
@@ -1897,6 +1947,52 @@ async function aiConnect(){
   catch (err) { AI.err = err.message; aiSave(); toast(err.message); }
   const box = $("#aiBox"); if (box) box.innerHTML = aiBox();
 }
+
+/* incolla lo scontrino: prima provo a leggere gli appunti (iOS mostra "Incolla"), altrimenti apro lo spazio dove tenere premuto */
+async function pasteReceipt(){
+  readTx();
+  try {
+    if (!navigator.clipboard?.read) throw 0;
+    const items = await navigator.clipboard.read(), files = [], types = [];
+    for (const it of items){
+      types.push(...it.types);
+      const t = it.types.find(t => t === "application/pdf" || t.startsWith("image/"));
+      if (t){ const b = await it.getType(t); files.push(new File([b], t === "application/pdf" ? "scontrino.pdf" : "scontrino." + t.split("/")[1], { type: t })); continue; }
+      if (it.types.includes("text/plain")){ const txt = await (await it.getType("text/plain")).text(); if (txt.trim()) return readReceiptText(txt); }
+    }
+    if (files.length) return readReceiptPhotos(files);
+    if (types.length){ S.rcTypes = types.join(", "); }
+    throw 0;
+  } catch {
+    S.rc = "paste"; S.kp = false; drawTx(); setTimeout(() => { const z = $("#rcZone"); z?.focus(); z?.scrollIntoView({ block: "center" }); }, 60);
+  }
+}
+document.addEventListener("paste", e => {
+  if (!e.target.closest?.("#rcZone")) return;
+  e.preventDefault();
+  const dt = e.clipboardData, files = [...(dt?.files || [])];
+  if (!files.length) for (const it of dt?.items || []) if (it.kind === "file"){ const f = it.getAsFile(); if (f) files.push(f); }
+  const ok = files.filter(f => f.type === "application/pdf" || /\.pdf$/i.test(f.name) || f.type.startsWith("image/"));
+  if (ok.length) return readReceiptPhotos(ok);
+  const txt = dt?.getData("text/plain") || "";
+  if (txt.trim()) return readReceiptText(txt);
+  const types = [...(dt?.types || [])].join(", ");
+  toast(types ? `Negli appunti c'è qualcosa che non so leggere (${types}). Salva il PDF in File e usa "Foto o PDF".` : "Gli appunti sono vuoti: copia prima lo scontrino nell'app Coop");
+});
+
+/* ---------- prodotti ricordati (righe dello scontrino → nome) ---------- */
+function openNames(){ drawNames(); open("#sNames"); }
+function drawNames(){
+  const list = Object.entries(D.names || {}).sort((a, b) => a[1].n.localeCompare(b[1].n));
+  $("#sNames").innerHTML = `<div class="pbar"><button class="icon-btn" data-act="close" aria-label="Chiudi">${ICON_X}</button><h3>Prodotti ricordati</h3></div>
+    <div class="section"><p class="help" style="margin-top:0">Ogni riga dello scontrino che hai confermato o spiegato. Puoi correggere il nome (si salva quando esci dal campo), cambiare categoria o toglierla.</p>
+    ${list.length ? `<div class="panel">${list.map(([k, v]) => `<div class="namerow"><button class="pc" data-npc="${esc(k)}">${pcat(v.c).e}</button><div class="mid"><code>${esc(k)}</code><input type="text" value="${esc(v.n)}" data-nname="${esc(k)}" aria-label="Nome"></div><button class="x" data-ndel="${esc(k)}" aria-label="Dimentica">×</button></div>`).join("")}</div>`
+      : `<p class="help">Ancora nessuno: si riempie da solo quando salvi una spesa con lo scontrino.</p>`}</div>`;
+}
+document.addEventListener("change", e => {
+  const k = e.target.dataset?.nname; if (k === undefined || !D.names?.[k]) return;
+  const v = e.target.value.trim(); if (v){ D.names[k].n = v; save(); toast("Nome aggiornato"); }
+});
 
 /* ---------- backup automatico su GitHub ----------
    Il file spese.json va in un repository privato dell'utente, con un token che può scrivere solo lì.
@@ -2097,6 +2193,9 @@ document.addEventListener("click", e => {
   if (d.psub !== undefined){ S.edit.sub = d.psub || null; document.querySelectorAll("[data-psub]").forEach(b => b.setAttribute("aria-pressed", b === el)); return; }
   if (d.subdel !== undefined) return delSub(+d.subdel);
   if (d.aimode){ AI.mode = d.aimode; aiSave(); const box = $("#aiBox"); if (box) box.innerHTML = aiBox(); return; }
+  if (d.ndel !== undefined){ delete D.names[d.ndel]; save(); return drawNames(); }
+  if (d.npc !== undefined){ S.npc = d.npc; return openPcPickFor(D.names[d.npc]?.c); }
+  if (d.setpc && S.npc){ if (D.names[S.npc]){ D.names[S.npc].c = d.setpc; save(); } S.npc = null; closePcPick(); return drawNames(); }
   if (d.pcpick !== undefined){ readTx(); return openPcPick(+d.pcpick); }
   if (d.setpc){ const it = S.edit?.items?.[+d.i]; if (it){ it.c = d.setpc; const row = document.querySelector(`#sTx .item[data-i="${d.i}"] .pc`); if (row) row.textContent = pcat(d.setpc).e; } return closePcPick(); }
   if (d.idel !== undefined){ readTx(); S.edit.items.splice(+d.idel, 1); return drawTx(); }
@@ -2113,12 +2212,13 @@ document.addEventListener("click", e => {
   switch (d.act){
     case "add": return openTx();
     case "kp": return showKp(true);
-    case "rcPaste": readTx(); S.rc = "paste"; drawTx(); setTimeout(() => $("#rcText")?.focus(), 50); return;
+    case "rcPaste": return pasteReceipt();
     case "rcCancel": readTx(); S.rc = null; return drawTx();
     case "rcParse": return readReceiptText();
     case "itAdd": readTx(); S.edit.items.push({ n: "", r: "", p: 0, c: "altro" }); drawTx(); setTimeout(() => [...document.querySelectorAll("#sTx .item .in")].pop()?.focus(), 50); return;
     case "itUse": readTx(); S.edit.raw = fmtInput(S.edit.items.reduce((s, x) => s + x.p, 0)); return drawTx();
-    case "pcClose": return closePcPick();
+    case "pcClose": S.npc = null; return closePcPick();
+    case "names": return openNames();
     case "aiSave": return aiConnect();
     case "aiOff": AI = {}; aiSave(); return openSettings();
     case "prodBack": return closeProd();
