@@ -746,6 +746,13 @@ nav .plus:active svg{transform:scale(.94)}
 :root[data-look="deciso"] .shead h2{font-size:24px!important;letter-spacing:-.03em!important}
 :root[data-look="deciso"] .tx .a{font-size:18px}
 :root[data-look="deciso"] .tx .t{font-weight:500}
+/* i riquadri sotto il totale restano sempre dentro la card, anche quando sono tre e il carattere è largo */
+.hero .sub{grid-auto-columns:minmax(0,1fr)!important}
+.hero .sub span{min-width:0;overflow:hidden}
+.hero .sub span b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+:root[data-look="tecnico"] .hero .sub span{font-size:11px!important;letter-spacing:.05em!important;padding:10px 11px!important}
+:root[data-look="tecnico"] .hero .sub span b{font-size:16px!important;letter-spacing:-.06em!important}
+:root[data-look="tecnico"] .hero small{font-size:11.5px!important}
 @media (prefers-reduced-motion:reduce){.sheet{transition:none}}
 
 /* stampa / PDF del report: solo il contenuto */
@@ -798,7 +805,7 @@ nav .plus:active svg{transform:scale(.94)}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261025230038";
+const BUILD = "20261026000541";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1355,7 +1362,7 @@ function renderProd(){
   if (sc) ins.push(["💸", `Con gli sconti hai risparmiato <b>${eur(sc)}</b>, il ${pct1(sc, paid + sc)}%`]);
   const prow = (x, right) => `<button class="prow" data-prod="${esc(x.k)}"><span class="em">${pcat(x.c).e}</span><div class="mid"><div class="t">${esc(x.n)}</div><div class="s">${esc(pcat(x.c).n)}</div></div><div class="a">${right}</div></button>`;
   const gone = pst.prods.length ? (() => { const curK = new Set(st.prods.map(x => x.k)); return pst.prods.filter(x => !curK.has(x.k) && x.cnt >= 2).sort((a, b) => b.cnt - a.cnt).slice(0, 5); })() : [];
-  v.innerHTML = seg + `<div class="hero"><small>Spesa al supermercato · ${esc(label)}</small><b class="num">${eur(paid || st.tot)}</b>
+  v.innerHTML = seg + `<div class="hero"><small>Supermercato · ${esc(label)}</small><b class="num">${eur(paid || st.tot)}</b>
       <div class="sub"><span>Scontrini <b class="num">${rtx.length}</b></span><span>Prodotti <b class="num">${items.filter(x => x.p > 0).length}</b></span>${sc ? `<span>Sconti <b class="num">−${eur0(sc)}</b></span>` : ""}</div></div>
     <div class="section">
       ${ins.length ? `<div class="shead"><h2>In breve</h2></div>${insights(ins)}` : ""}
