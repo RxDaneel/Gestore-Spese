@@ -768,6 +768,8 @@ nav .plus:active svg{transform:scale(.94)}
   .tile b{font-size:20px!important}
   .shead{gap:6px}
 }
+/* colori delle categorie: palette Flat UI, uguale in tutti i temi */
+html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#9b59b6;--c6:#2ecc71;--c7:#34495e;--c8:#e74c3c;--cx:#95a5a6}
 @media (prefers-reduced-motion:reduce){.sheet{transition:none}}
 
 /* stampa / PDF del report: solo il contenuto */
@@ -820,7 +822,7 @@ nav .plus:active svg{transform:scale(.94)}
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261026014253";
+const BUILD = "20261027105821";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -927,10 +929,9 @@ const sub = t => t.sub ? (cat(t.cat).subs || []).find(x => x.id === t.sub) || nu
 const catLabel = t => { const s = sub(t); return cat(t.cat).name + (s ? " › " + s.name : ""); };
 const cvar = c => typeof c === "string" && /^#[0-9a-f]{6}$/i.test(c) ? c : c >= 0 && c < 8 ? `var(--c${c + 1})` : "var(--cx)";
 /* colori in più tra cui scegliere, oltre a quelli del tema */
-const MORE_COLORS = ["#0ea5e9", "#06b6d4", "#14b8a6", "#22c55e", "#84cc16", "#facc15", "#f59e0b", "#f97316", "#ef4444", "#be123c",
-  "#ec4899", "#d946ef", "#a855f7", "#6366f1", "#1e40af", "#0f766e", "#166534", "#92400e", "#a16207", "#64748b", "#334155", "#a8a29e"];
+const MORE_COLORS = ["#16a085", "#27ae60", "#2980b9", "#8e44ad", "#2c3e50", "#f39c12", "#d35400", "#c0392b", "#ecf0f1", "#bdc3c7", "#95a5a6", "#7f8c8d"];   // il resto della palette Flat UI
 /* inchiostro dell'icona: scuro sui colori chiari scelti a mano, bianco altrimenti */
-const ink = c => { if (typeof c !== "string") return "var(--on-c,#fff)"; const n = parseInt(c.slice(1), 16), r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
+const ink = c => { if (typeof c !== "string") return c === 3 ? "#2c3e50" : "#fff"; const n = parseInt(c.slice(1), 16), r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.68 ? "#1a1a19" : "#fff"; };
 
 /* ---------- date e numeri ---------- */
@@ -1911,11 +1912,11 @@ function demo(){
 
 /* ---------- scontrini: articoli e categorie dei prodotti ---------- */
 const PCATS = [
-  ["frutta", "Frutta", "🍎", "#e34948"], ["verdura", "Verdura", "🥦", "#1baf7a"], ["carne", "Carne", "🥩", "#be123c"], ["pesce", "Pesce", "🐟", "#0ea5e9"],
-  ["salumi", "Salumi e formaggi", "🧀", "#eda100"], ["latte", "Latte, uova, yogurt", "🥛", "#a8a29e"], ["pane", "Pane e forno", "🥖", "#a16207"],
-  ["pasta", "Pasta, riso, cereali", "🍝", "#f59e0b"], ["dispensa", "Dispensa", "🥫", "#92400e"], ["surgelati", "Surgelati", "🧊", "#06b6d4"],
-  ["dolci", "Dolci e snack", "🍫", "#ec4899"], ["bevande", "Bevande", "🥤", "#2a78d6"], ["alcolici", "Vino e alcolici", "🍷", "#6250d6"],
-  ["casa", "Casa e pulizia", "🧽", "#14b8a6"], ["igiene", "Igiene e cura", "🧴", "#a855f7"], ["animali", "Animali", "🐾", "#84cc16"], ["altro", "Altro", "📦", "#64748b"]
+  ["frutta", "Frutta", "🍎", "#e74c3c"], ["verdura", "Verdura", "🥦", "#2ecc71"], ["carne", "Carne", "🥩", "#c0392b"], ["pesce", "Pesce", "🐟", "#3498db"],
+  ["salumi", "Salumi e formaggi", "🧀", "#f39c12"], ["latte", "Latte, uova, yogurt", "🥛", "#bdc3c7"], ["pane", "Pane e forno", "🥖", "#d35400"],
+  ["pasta", "Pasta, riso, cereali", "🍝", "#f1c40f"], ["dispensa", "Dispensa", "🥫", "#e67e22"], ["surgelati", "Surgelati", "🧊", "#1abc9c"],
+  ["dolci", "Dolci e snack", "🍫", "#9b59b6"], ["bevande", "Bevande", "🥤", "#2980b9"], ["alcolici", "Vino e alcolici", "🍷", "#8e44ad"],
+  ["casa", "Casa e pulizia", "🧽", "#16a085"], ["igiene", "Igiene e cura", "🧴", "#27ae60"], ["animali", "Animali", "🐾", "#7f8c8d"], ["altro", "Altro", "📦", "#95a5a6"]
 ].map(([id, n, e, col]) => ({ id, n, e, col }));
 const pcat = id => PCATS.find(x => x.id === id) || PCATS[PCATS.length - 1];
 /* categorie riconosciute dalle parole dello scontrino (in ordine: la prima che corrisponde vince) */
