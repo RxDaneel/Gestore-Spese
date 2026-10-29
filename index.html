@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Spese">
 <meta name="theme-color" content="#1a1a19">
-<script>try{var t=localStorage.getItem("spese.theme");if(!/^(oled|carta|vetro)$/.test(t))t="oled";document.documentElement.dataset.theme=t;var l=localStorage.getItem("spese.look")||"morbido";if(t==="vetro")l="vetro";if(l!=="classico")document.documentElement.dataset.look=l;}catch(e){document.documentElement.dataset.theme="oled";}</script>
+<script>try{var t=localStorage.getItem("spese.theme");if(!/^(oled|carta)$/.test(t))t="oled";document.documentElement.dataset.theme=t;var l=localStorage.getItem("spese.look")||"morbido";if(l!=="classico")document.documentElement.dataset.look=l;}catch(e){document.documentElement.dataset.theme="oled";}</script>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=3">
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png?v=3">
 <link rel="apple-touch-icon" href="icon-180.png?v=3">
@@ -124,7 +124,6 @@ nav .plus:active svg{transform:scale(.94)}
 
 /* cifra principale del mese */
 .hero{padding:18px 16px 4px}
-.hring{display:none}
 .hero small{display:block;color:var(--muted);font-size:13px;font-weight:500}
 .hero b{display:block;font:700 38px/1.15 var(--font);letter-spacing:-.01em;margin:2px 0 6px}
 .hero .sub{color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:4px 14px}
@@ -643,231 +642,6 @@ nav .plus:active svg{transform:scale(.94)}
   .tile b{font-size:20px!important}
   .shead{gap:6px}
 }
-/* ===== tema VETRO: notte blu luminosa che sfuma nel chiaro, vetro bianco smerigliato e "impilato", testo Inter leggero ===== */
-:root[data-theme="vetro"]{--bg:#eef0f4;--surface:rgba(255,255,255,.74);--raised:#e4e7f0;--line:rgba(20,30,70,.07);--fg:#0b0e1c;--muted:#5d6480;--accent:#0b0e1c;--on-accent:#fff;
-  --danger:#e5484d;--good:#15924a;--hl:#d48a00;--sel:#0b0e1c;--on-sel:#fff;--meta:#05081a;
-  --glass:linear-gradient(180deg,rgba(255,255,255,.80),rgba(255,255,255,.60));
-  --gshadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.55),0 18px 40px -22px rgba(15,25,90,.45);
-  --blur:blur(26px) saturate(180%);
-  --font:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color-scheme:light}
-:root[data-theme="vetro"] body,:root[data-theme="vetro"] main{background:#eef0f4}
-:root[data-theme="vetro"] body{letter-spacing:-.01em}
-/* intestazione: titolo a due toni come "Today / Wed, Aug 4" */
-:root[data-theme="vetro"] header{background:#05081a;border-color:transparent;padding-bottom:10px}
-:root[data-theme="vetro"] #hMonth{color:#fff;font-weight:600!important;letter-spacing:-.03em;font-size:26px}
-:root[data-theme="vetro"] #hMonth .hy{color:#8ea0ff;font-weight:400}
-:root[data-theme="vetro"] header .icon-btn{color:#fff;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);margin-left:6px;width:40px;height:40px}
-:root[data-theme="vetro"] header .icon-btn:disabled{opacity:.3}
-/* lo sfondo scorre con la pagina: notte in cima con un bagliore blu, poi chiaro */
-:root[data-theme="vetro"] :is(#vTx,#vReport,#vShop){display:flow-root;min-height:100%;
-  background:radial-gradient(70% 220px at 18% 250px,rgba(110,140,255,.55),rgba(110,140,255,0) 70%) 0 0/100% 640px no-repeat,
-    radial-gradient(60% 200px at 90% 120px,rgba(60,90,255,.35),rgba(60,90,255,0) 70%) 0 0/100% 640px no-repeat,
-    linear-gradient(180deg,#05081a 0,#0a1142 110px,#1c38cc 260px,#4f70f2 380px,#a9bafa 500px,#e4e9f8 580px,#eef0f4 640px) 0 0/100% 640px no-repeat,#eef0f4}
-/* vetro */
-:root[data-theme="vetro"] :is(.panel,.tile,.card2,.ccard,.items,.sumbudget,.cd:not(.blank):not(.none),.banner:not(.warn),.empty){background:var(--glass);box-shadow:var(--gshadow);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
-:root[data-theme="vetro"] :is(.panel,.card2,.ccard,.items,.empty){border-radius:28px}
-:root[data-theme="vetro"] :is(.tile,.sumbudget,.banner){border-radius:22px}
-:root[data-theme="vetro"] .cd{border-radius:14px}
-:root[data-theme="vetro"] .empty{margin:16px}
-:root[data-theme="vetro"] .banner:not(.warn){color:var(--fg)}
-:root[data-theme="vetro"] .banner:not(.warn) svg{stroke:#2a46d8}
-/* la card del totale: carta di vetro con altre due "dietro" che spuntano sopra, come una pila */
-:root[data-theme="vetro"] .hero{margin:26px 16px 6px;padding:20px 20px 18px;border-radius:30px;position:relative;overflow:visible;color:var(--fg);
-  background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
-  box-shadow:0 -11px 0 -6px rgba(255,255,255,.58),0 -21px 0 -12px rgba(255,255,255,.30),inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.5),0 26px 50px -26px rgba(10,20,90,.6)}
-:root[data-theme="vetro"] .hero small{color:var(--muted);font-weight:500;font-size:14px!important}
-:root[data-theme="vetro"] .hero:has(.hring)>small{display:flex;align-items:center;flex-wrap:wrap;gap:6px;min-height:64px;padding-right:80px;margin-top:-4px}
-:root[data-theme="vetro"] .hero>b{font-weight:600!important;letter-spacing:-.045em!important;font-size:44px!important;margin:4px 0 2px}
-:root[data-theme="vetro"] .hero .sub{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;margin-top:14px}
-:root[data-theme="vetro"] .hero .sub span{display:flex;flex-direction:column;gap:2px;background:rgba(11,14,28,.045);color:var(--muted);border-radius:16px;padding:10px 12px!important;font-size:12px!important;font-weight:500}
-:root[data-theme="vetro"] .hero .sub span b{color:var(--fg);font-size:16px!important;font-weight:600}
-:root[data-theme="vetro"] .hero .delta{display:flex;margin:16px -20px -18px;padding:13px 20px;border-top:1px solid rgba(11,14,28,.06);background:rgba(11,14,28,.025);border-radius:0 0 30px 30px;color:var(--muted);font-weight:500}
-:root[data-theme="vetro"] .hero .pill-status{background:#0b0e1c;color:#fff;font-weight:600}
-:root[data-theme="vetro"] .hring{display:grid;place-items:center;position:absolute;top:14px;right:14px;width:68px;height:68px}
-:root[data-theme="vetro"] .hring svg{position:absolute;inset:0;width:100%;height:100%}
-:root[data-theme="vetro"] .hring circle{fill:none;stroke-width:4}
-:root[data-theme="vetro"] .hring .tr{stroke:rgba(11,14,28,.08)}
-:root[data-theme="vetro"] .hring .pg{stroke:#0b0e1c;stroke-linecap:round}
-:root[data-theme="vetro"] .hring.over .pg{stroke:var(--danger)}
-:root[data-theme="vetro"] .hring span{display:flex;flex-direction:column;align-items:center;line-height:1.05;position:relative}
-:root[data-theme="vetro"] .hring b{font-size:15px!important;font-weight:600!important;letter-spacing:-.03em!important;margin:0!important;color:var(--fg)!important}
-:root[data-theme="vetro"] .hring small{font-size:9px!important;font-weight:500!important;color:var(--muted);min-height:0!important;padding:0!important;margin:0!important;display:block!important}
-/* testo: Inter, pesi leggeri e titoli grandi ma non pesanti */
-:root[data-theme="vetro"] :is(.section>h2,.group,.shead h2){font-weight:600!important;letter-spacing:-.025em!important;color:var(--fg)}
-:root[data-theme="vetro"] :is(.tx .t,.crow .nm,.prow .t){font-weight:500!important}
-:root[data-theme="vetro"] :is(.tx .a,.tile b,.sumhead b,.amount #amt){font-weight:600!important;letter-spacing:-.02em}
-:root[data-theme="vetro"] .shead button{color:#2a46d8}
-/* scelte a pillola: vetro scuro sulla parte blu, l'opzione scelta è bianca */
-:root[data-theme="vetro"] .seg.viewseg,:root[data-theme="vetro"] .chartseg.top{margin:14px 16px 0;padding:4px!important;background:rgba(255,255,255,.14);border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
-:root[data-theme="vetro"] :is(.seg.viewseg,.chartseg.top) button{background:transparent;color:rgba(255,255,255,.82);font-weight:500}
-:root[data-theme="vetro"] :is(.seg.viewseg,.chartseg.top) button[aria-pressed="true"]{background:#fff;color:var(--fg);font-weight:600;box-shadow:0 8px 20px -8px rgba(5,8,26,.6)}
-:root[data-theme="vetro"] .chartseg:not(.top) button,:root[data-theme="vetro"] .seg:not(.viewseg) button{background:rgba(11,14,28,.05);color:var(--muted)}
-:root[data-theme="vetro"] :is(.chartseg:not(.top),.seg:not(.viewseg)) button[aria-pressed="true"]{background:#0b0e1c;color:#fff}
-:root[data-theme="vetro"] .chip{background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px rgba(20,30,70,.06)}
-:root[data-theme="vetro"] :is(.chip,.chips.sub .chip,.catgrid.subs .chip)[aria-pressed="true"]{background:#0b0e1c;color:#fff;box-shadow:none}
-:root[data-theme="vetro"] .btn{border-radius:999px}
-:root[data-theme="vetro"] .btn:not(.ghost):not(.danger){background:#0b0e1c;color:#fff}
-:root[data-theme="vetro"] .btn.ghost{background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px rgba(20,30,70,.08)}
-:root[data-theme="vetro"] :is(.field input[type=text],.field input[type=date],.field input[inputmode],.searchbar input,.field textarea,.ghform input,.manform input){border-radius:18px;background:rgba(255,255,255,.88);border-color:rgba(20,30,70,.07)}
-/* movimenti: ogni riga è una piccola carta di vetro */
-:root[data-theme="vetro"] #vTx .swipe{margin:0 12px 8px;border-radius:22px;box-shadow:var(--gshadow)}
-:root[data-theme="vetro"] #vTx .swipe .tx{background:rgba(255,255,255,.80);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
-:root[data-theme="vetro"] .panel .swipe .tx,:root[data-theme="vetro"] .panel .tx{background:transparent}
-:root[data-theme="vetro"] .day{padding-left:20px;padding-right:20px;color:rgba(11,14,28,.55);font-weight:600}
-:root[data-theme="vetro"] .cal .wd span{color:rgba(255,255,255,.7)}
-:root[data-theme="vetro"] .cd.today .n{background:#0b0e1c;color:#fff}
-:root[data-theme="vetro"] .cd[aria-pressed="true"]{box-shadow:inset 0 0 0 2px #0b0e1c,var(--gshadow)}
-:root[data-theme="vetro"] .bar{background:rgba(11,14,28,.07);border-radius:4px}
-:root[data-theme="vetro"] .bar i{border-radius:4px}
-:root[data-theme="vetro"] .bar.budget i{background:#0b0e1c}
-:root[data-theme="vetro"] :is(.ins .ie,.prow .em,.item .pc){background:rgba(11,14,28,.05)}
-:root[data-theme="vetro"] .card2 .area .gdot{fill:#0b0e1c}
-/* fogli: chiari, con la barra in alto di vetro */
-:root[data-theme="vetro"] .sheet{background:#eef0f4}
-:root[data-theme="vetro"] .pbar{background:rgba(238,240,244,.78);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
-:root[data-theme="vetro"] .amount{margin:10px 16px 4px;width:calc(100% - 32px);border-radius:28px;background:var(--glass);box-shadow:var(--gshadow);padding:24px 16px}
-:root[data-theme="vetro"] .kp{background:rgba(238,240,244,.9);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:0;border-radius:28px 28px 0 0;box-shadow:0 -14px 40px -18px rgba(25,35,90,.35)}
-:root[data-theme="vetro"] .kp button{background:#fff;border-radius:18px;box-shadow:0 2px 6px -3px rgba(25,35,90,.25)}
-:root[data-theme="vetro"] .kp .ok{background:#0b0e1c;color:#fff}
-:root[data-theme="vetro"] .toast{border-radius:999px;background:#0b0e1c;color:#fff;bottom:calc(var(--bot) + var(--nav-h) + 22px)}
-:root[data-theme="vetro"] .toast button{color:#fff}
-:root[data-theme="vetro"] .pcpick{background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
-/* barra in basso: pillola di vetro chiaro che galleggia, solo icone, + nero */
-:root[data-theme="vetro"] nav{margin:0 14px calc(var(--bot) + 6px);padding:0 4px;border:0;border-radius:32px;background:rgba(255,255,255,.72);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.6),0 16px 36px -14px rgba(15,25,90,.4)}
-:root[data-theme="vetro"] nav button{font-size:0;gap:0;color:#7a8099}
-:root[data-theme="vetro"] nav button svg{padding:9px;box-sizing:content-box;border-radius:50%;margin:-9px;stroke-width:1.8}
-:root[data-theme="vetro"] nav button[aria-current="true"] svg{stroke:var(--fg);background:rgba(11,14,28,.07)}
-:root[data-theme="vetro"] nav .plus svg{width:28px;height:28px;padding:12px;margin:0;background:#0b0e1c;stroke:#fff;box-shadow:0 10px 22px -8px rgba(5,8,26,.6)}
-/* ---------- interfaccia Vetro: struttura propria ---------- */
-.dock{display:none}
-:root[data-theme="vetro"] header,:root[data-theme="vetro"] #nav{display:none}
-:root[data-theme="vetro"] main{padding-bottom:calc(var(--bot) + 92px)}
-:root[data-theme="vetro"] #vToday{display:flow-root;min-height:100%;
-  background:radial-gradient(70% 220px at 18% 250px,rgba(110,140,255,.55),rgba(110,140,255,0) 70%) 0 0/100% 640px no-repeat,
-    radial-gradient(60% 200px at 90% 120px,rgba(60,90,255,.35),rgba(60,90,255,0) 70%) 0 0/100% 640px no-repeat,
-    linear-gradient(180deg,#05081a 0,#0a1142 110px,#1c38cc 260px,#4f70f2 380px,#a9bafa 500px,#e4e9f8 580px,#eef0f4 640px) 0 0/100% 640px no-repeat,#eef0f4}
-:root[data-theme="vetro"] #vCats{display:flow-root;min-height:100%;background:linear-gradient(180deg,#05081a 0,#0a1142 110px,#1c38cc 200px,#a9bafa 255px,#eef0f4 295px) 0 0/100% 300px no-repeat,#eef0f4}
-/* intestazione grande: frecce del mese, titolo a due toni con il cerchio, sezioni scritte */
-.vh{padding:calc(var(--top) + 12px) 16px 4px;color:#fff}
-.vh-bar{display:flex;align-items:center;gap:8px}
-.vh-bar span{flex:1}
-.vh-ic{width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);color:#fff;display:grid;place-items:center;padding:0}
-.vh-ic svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.vh-ic:disabled{opacity:.3}
-.vh-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 2px}
-.vh-title small{display:block;color:#8ea0ff;font-size:15px;font-weight:500}
-.vh-title small::first-letter{text-transform:uppercase}
-.vh-title h1{margin:2px 0 0;font:600 42px/1.05 var(--font);letter-spacing:-.045em;color:#fff}
-.vh-title h1 span{color:#8ea0ff;font-weight:300}
-:root[data-theme="vetro"] .vh .hring{display:grid;position:relative;top:auto;right:auto;width:74px;height:74px;flex:none}
-:root[data-theme="vetro"] .vh .hring .tr{stroke:rgba(255,255,255,.14)}
-:root[data-theme="vetro"] .vh .hring .pg{stroke:#fff}
-:root[data-theme="vetro"] .vh .hring.over .pg{stroke:#ff8f93}
-:root[data-theme="vetro"] .vh .hring b{color:#fff!important;font-size:16px!important}
-:root[data-theme="vetro"] .vh .hring small{color:rgba(255,255,255,.62)!important;font-size:9.5px!important}
-.vh-tabs{display:flex;gap:20px;overflow-x:auto;margin:16px -16px 0;padding:0 16px 2px;scrollbar-width:none}
-.vh-tabs::-webkit-scrollbar{display:none}
-.vh-tabs button{border:0;background:none;padding:6px 0 9px;color:rgba(255,255,255,.48);font:600 17px var(--font);letter-spacing:-.02em;white-space:nowrap;position:relative}
-.vh-tabs button[aria-current="true"]{color:#fff}
-.vh-tabs button[aria-current="true"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;background:#fff}
-/* contenitore e carte */
-.vwrap{padding:6px 16px 8px;display:flex;flex-direction:column;gap:14px}
-:root[data-theme="vetro"] .vcard{background:var(--glass);box-shadow:var(--gshadow);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border-radius:28px;padding:18px;color:var(--fg)}
-.vcard.vflush{padding:4px 0}
-.vk{font-size:13.5px;color:var(--muted);font-weight:500}
-.vrow{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.vlink{border:0;background:none;color:#2a46d8;font:600 14px var(--font);padding:2px 0}
-.vsec{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:10px 4px -4px}
-.vsec h2{margin:0;font:600 21px var(--font);letter-spacing:-.03em;color:var(--fg)}
-/* la pila: striscia dietro, carta, riga "ultima" sotto */
-.vstack{position:relative;margin-top:10px}
-.vstrip{position:relative;margin:0 14px -18px;padding:12px 18px 28px;border-radius:24px 24px 0 0;color:rgba(255,255,255,.9);font-size:13.5px;font-weight:500;
-  background:rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,255,255,.16);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
-.vstrip b{color:#fff;font-weight:700}
-.vfocus{position:relative;z-index:1;padding:22px 20px 20px!important}
-.vbig{display:block;font:600 46px/1.04 var(--font);letter-spacing:-.05em;margin:6px 0 10px;color:var(--fg)}
-.vmini .vbig{font-size:38px;margin-bottom:0}
-.vdesc{margin:0 0 18px;font-size:15.5px;line-height:1.45;color:#2b3150}
-.vdesc b{color:var(--fg)}
-.vcta{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.vbtn{border:0;border-radius:999px;background:#0b0e1c;color:#fff;font:600 15px var(--font);padding:9px 18px 9px 9px;display:inline-flex;align-items:center;gap:10px;box-shadow:0 12px 24px -12px rgba(5,8,26,.7)}
-.vbtn span{width:28px;height:28px;border-radius:50%;background:#fff;color:#0b0e1c;display:grid;place-items:center;font-size:19px;font-weight:600;line-height:1}
-.vnext{display:flex;align-items:center;gap:10px;width:calc(100% - 20px);margin:-16px 10px 0;padding:28px 18px 14px;border:0;border-radius:0 0 24px 24px;text-align:left;color:var(--fg);
-  background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),0 14px 30px -18px rgba(15,25,90,.35);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
-.vnext small{color:var(--muted);font-size:13px;font-weight:500}
-.vnext b{flex:1;min-width:0;font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vnext span{font-size:14.5px;font-weight:600}
-/* settimana */
-.vwn{display:flex;align-items:center;gap:4px}
-.vwn button{border:0;background:none;width:26px;height:26px;display:grid;place-items:center;color:var(--muted);padding:0}
-.vwn button:disabled{opacity:.3}
-.vwn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.vweek{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;margin:12px -8px 2px}
-.vday{border:0;background:none;border-radius:20px;padding:9px 0 8px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--fg)}
-.vday small{font-size:12px;color:var(--muted);font-weight:500}
-.vday b{font-size:18px;font-weight:500}
-.vday i{width:5px;height:5px;border-radius:50%;background:transparent;display:block}
-.vday i.has{background:#2a46d8}
-.vday.on{background:#fff;box-shadow:0 12px 24px -12px rgba(15,25,90,.5),inset 0 0 0 1px rgba(255,255,255,.9)}
-.vday.on b{font-weight:700}
-.vday.fut{opacity:.35}
-.vsel{margin-top:12px;padding-top:14px;border-top:1px solid var(--line)}
-.vsel b{font-size:15.5px;font-weight:600}
-.vlist{margin:6px -18px -12px}
-:root[data-theme="vetro"] .vcard .tx{background:transparent;padding:10px 18px}
-:root[data-theme="vetro"] .vcard .swipe.sw .tx{background:#fff}
-:root[data-theme="vetro"] .vcard .swipe+.swipe{border-top:1px solid var(--line)}
-/* dove va */
-.vbarstack{display:flex;gap:3px;height:10px;border-radius:6px;overflow:hidden;margin:14px 0 8px}
-.vbarstack i{display:block;min-width:3px}
-.vcat{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:9px 0;color:var(--fg);text-align:left;font-size:15px}
-.vcat i{width:10px;height:10px;border-radius:50%;flex:none}
-.vcat span{flex:1;min-width:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vcat b{font-weight:600}
-.vcat small{width:38px;text-align:right;color:var(--muted);font-size:12.5px}
-/* movimenti a carte per giorno */
-.vdaycard{padding:6px 0 4px!important}
-.vdc-h{display:flex;align-items:center;gap:12px;padding:12px 18px 4px}
-.vdc-n{display:flex;flex-direction:column;align-items:center;width:38px;flex:none}
-.vdc-n b{font-size:26px;font-weight:600;line-height:1;letter-spacing:-.04em}
-.vdc-n small{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-.vdc-h .vk{flex:1}
-.vdc-t{font-size:14.5px;font-weight:600}
-.vdc-t em{display:block;font-style:normal;color:var(--good);text-align:right}
-:root[data-theme="vetro"] #vTx .vdaycard .swipe{margin:0;border-radius:0;box-shadow:none}
-:root[data-theme="vetro"] #vTx .vdaycard .swipe .tx{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
-:root[data-theme="vetro"] #vTx .vdaycard .swipe.sw .tx{background:#fff}
-/* carosello "in breve" e riquadri */
-.vcar{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:4px 16px 12px;scrollbar-width:none}
-.vcar::-webkit-scrollbar{display:none}
-.vins{flex:0 0 74%;scroll-snap-align:start;display:flex;flex-direction:column;gap:12px;min-height:128px}
-.vins .ve{font-size:28px;line-height:1}
-.vins p{margin:0;font-size:15.5px;line-height:1.42}
-.vchips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:6px}
-.vchips span{display:flex;flex-direction:column;gap:2px;background:rgba(11,14,28,.045);border-radius:16px;padding:10px 12px;font-size:12px;color:var(--muted);font-weight:500;min-width:0}
-.vchips b{font-size:16px;color:var(--fg);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-:root[data-theme="vetro"] .vtile{border:0;text-align:left;display:flex;flex-direction:column;gap:3px;padding:16px;border-radius:24px;color:var(--fg);min-width:0;
-  background:var(--glass);box-shadow:var(--gshadow);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
-.vtile .cb,.vtile .vemo{margin-bottom:8px}
-.vtile .vemo{font-size:26px;line-height:1}
-.vtile b{font-size:20px;font-weight:600;letter-spacing:-.03em}
-.vtile span:not(.cb):not(.vemo){font-size:14.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vtile small{font-size:12px;color:var(--muted)}
-.vtile .bar{margin-top:8px;height:5px}
-.vdonut{padding:6px 0 10px!important}
-:root[data-theme="vetro"] .vwrap>.card2{margin-top:0!important}
-/* pillola in basso: scrivi la spesa al volo */
-:root[data-theme="vetro"] .dock{position:fixed;left:14px;right:14px;bottom:calc(var(--bot) + 8px);z-index:35;display:flex;align-items:center;gap:8px;padding:6px 6px 6px 20px;border-radius:999px;
-  background:rgba(255,255,255,.78);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.6),0 18px 40px -14px rgba(15,25,90,.45)}
-.dock input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--fg);padding:10px 0;font-family:var(--font)}
-.dock input::placeholder{color:#8a90a8}
-.dock-plus{width:44px;height:44px;border-radius:50%;border:0;background:#0b0e1c;color:#fff;display:grid;place-items:center;flex:none;padding:0;box-shadow:0 10px 22px -8px rgba(5,8,26,.6)}
-.dock-plus svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
-:root[data-theme="vetro"] .toast{bottom:calc(var(--bot) + 76px)!important}
-:root[data-theme="vetro"] .vh~.seg.viewseg,:root[data-theme="vetro"] .vh~.chartseg.top{margin-top:8px}
-@media (max-width:360px){.vchips{grid-template-columns:1fr 1fr}.vchips span:nth-child(3):last-child{grid-column:1/-1}.vbig{font-size:42px}.vh-title h1{font-size:40px}}
-@media (min-width:900px){:root[data-theme="vetro"] main{padding-left:0}:root[data-theme="vetro"] .dock{max-width:560px;margin:0 auto}}
 /* colori delle categorie: palette Flat UI, uguale in tutti i temi */
 html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#9b59b6;--c6:#2ecc71;--c7:#34495e;--c8:#e74c3c;--cx:#95a5a6}
 @media (prefers-reduced-motion:reduce){.sheet{transition:none}}
@@ -892,7 +666,6 @@ html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#
 </header>
 
 <main id="main">
-  <div class="view" id="vToday" hidden></div>
   <div class="view" id="vTx"></div>
   <div class="view" id="vReport" hidden></div>
   <div class="view" id="vShop" hidden></div>
@@ -916,7 +689,6 @@ html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#
 <section class="sheet" id="sAsk" aria-label="Prodotti da chiarire"></section>
 <section class="sheet" id="sMan" aria-label="Prodotti a mano"></section>
 <section class="sheet" id="sSet" aria-label="Impostazioni"></section>
-<form class="dock" id="dock" autocomplete="off"><input id="qa" type="text" enterkeyhint="done" autocomplete="off" autocorrect="off" placeholder="Scrivi una spesa… es. 12,50 pizza" aria-label="Scrivi una spesa"><button type="button" class="dock-plus" data-act="add" aria-label="Nuova spesa"><svg viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></svg></button></form>
 <input type="file" id="fileIn" accept=".json,application/json" hidden>
 
 <script>
@@ -924,7 +696,7 @@ html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261029110549";
+const BUILD = "20261029111202";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1253,14 +1025,6 @@ function catCards(st){
   }).join("")}</div>`;
 }
 /* in cima ai Movimenti: avvisi e la card con il totale del mese */
-/* cerchio di avanzamento: quanto dei budget hai usato, oppure quanto del mese è passato */
-function heroRing(st){
-  const bud = st.cats.filter(c => c.cat.budget), B = bud.reduce((s, c) => s + c.cat.budget, 0);
-  const cur = S.month === thisMonth(), dm = daysIn(S.month);
-  const p = B ? bud.reduce((s, c) => s + c.amt, 0) / B : cur ? +today().slice(8) / dm : 1, lab = B ? "budget" : "del mese";
-  const R = 25, C = 2 * Math.PI * R, v = Math.max(0, Math.min(1, p));
-  return `<div class="hring${p > 1 ? " over" : ""}" aria-label="${Math.round(p * 100)}% ${lab}"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="${R}" class="tr"/><circle cx="30" cy="30" r="${R}" class="pg" stroke-dasharray="${(v * C).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 30 30)"/></svg><span><b>${Math.round(p * 100)}%</b><small>${lab}</small></span></div>`;
-}
 function topCard(st){
   const cur = S.month === thisMonth();
   let banner = "";
@@ -1279,126 +1043,9 @@ function topCard(st){
   else { prevTot = sum(txIn(prev, "out")); cmp = `rispetto a ${mName(prev)}`; }
   let delta = "";
   if (prevTot > 0){ const p = pct(st.tot - prevTot, prevTot); delta = `<div class="delta ${p > 0 ? "up" : "down"}"><i>${p > 0 ? "▲" : "▼"}</i>${Math.abs(p)}% ${p > 0 ? "in più" : "in meno"} ${cmp}</div>`; }
-  const hero = `<div class="hero">${heroRing(st)}<small>Spese di ${mName(S.month)}${cur ? " (finora)" : ""}</small><b class="num">${eur(st.tot)}</b>
+  const hero = `<div class="hero"><small>Spese di ${mName(S.month)}${cur ? " (finora)" : ""}</small><b class="num">${eur(st.tot)}</b>
     <div class="sub"><span>Entrate <b class="num">${eur(st.income)}</b></span><span>Saldo <b class="num">${st.income - st.tot >= 0 ? "+" : "−"}${eur(Math.abs(st.income - st.tot))}</b></span></div>${delta}</div>`;
   return { banner, hero };
-}
-
-/* ================= INTERFACCIA "VETRO" =================
-   Con il tema Vetro l'app cambia struttura, non solo colori: niente barra delle schede, intestazione grande con le sezioni,
-   schermata "Oggi", movimenti a carte per giorno, report a riquadri, e in basso una pillola dove scrivere la spesa al volo. */
-const V2 = () => D.opt.theme === "vetro";
-const ucf = s => String(s || "").charAt(0).toUpperCase() + String(s || "").slice(1);
-const isoD = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-const V2TABS = [["vToday", "Oggi"], ["vTx", "Movimenti"], ["vReport", "Report"], ["vShop", "Spesa"], ["vCats", "Categorie"]];
-const SV = { prev: '<svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg>', next: '<svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>',
-  gear: '<svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>' };
-function v2Head(st){
-  st ||= monthStats(S.month);
-  const yearMode = S.tab === "vReport" && S.rview === "year", cur = S.month === thisMonth();
-  const kicker = yearMode ? "Tutto l'anno" : S.tab === "vToday" && cur ? dLabel(today()) : cur ? "Questo mese" : "Mese passato";
-  const nextOff = yearMode ? S.month.slice(0, 4) >= thisMonth().slice(0, 4) : S.month >= thisMonth();
-  return `<div class="vh">
-    <div class="vh-bar"><button class="vh-ic" data-act="mprev" aria-label="Indietro">${SV.prev}</button><button class="vh-ic" data-act="mnext" aria-label="Avanti"${nextOff ? " disabled" : ""}>${SV.next}</button><span></span><button class="vh-ic" data-act="settings" aria-label="Impostazioni">${SV.gear}</button></div>
-    <div class="vh-title"><div><small>${esc(kicker)}</small><h1>${yearMode ? "Anno" : ucf(mName(S.month))} <span>${S.month.slice(0, 4)}</span></h1></div>${yearMode ? "" : heroRing(st)}</div>
-    <div class="vh-tabs">${V2TABS.map(([k, l]) => `<button data-tab="${k}" aria-current="${S.tab === k}">${l}</button>`).join("")}</div>
-  </div>`;
-}
-/* la carta principale "impilata": una striscia dietro, la carta, e sotto una riga "ultima" */
-const vStack = (strip, body, foot = "") => `<div class="vstack"><div class="vstrip">${strip}</div><div class="vcard vfocus">${body}</div>${foot}</div>`;
-const vSec = (t, right = "") => `<div class="vsec"><h2>${t}</h2>${right}</div>`;
-const vCarousel = ins => ins.length ? `<div class="vcar">${ins.map(([e, t]) => `<div class="vcard vins"><span class="ve">${e}</span><p>${t}</p></div>`).join("")}</div>` : "";
-
-function renderToday(){
-  const v = $("#vToday"), st = monthStats(S.month), cur = S.month === thisMonth(), td = today();
-  const head = v2Head(st);
-  if (!st.out.length && !st.inc.length){
-    v.innerHTML = head + `<div class="vwrap">${vStack(`Nessun movimento a ${mName(S.month)}`, `<small class="vk">Per iniziare</small><b class="vbig" style="font-size:30px">Scrivi la tua prima spesa</b>
-      <p class="vdesc">Nella barra in basso, ad esempio <b>12,50 pizza</b> oppure <b>+1500 stipendio</b> per un'entrata. Oppure tocca il pulsante.</p>
-      <div class="vcta"><button class="vbtn" data-act="add"><span>+</span>Nuova spesa</button><button class="vlink" data-act="demo">Dati di esempio</button></div>`)}</div>`;
-    return;
-  }
-  const dm = daysIn(S.month), dd = cur ? +td.slice(8) : dm, pm = addMonth(S.month, -1);
-  const pout = txIn(pm, "out"), prevRef = sum(cur ? pout.filter(t => +t.date.slice(8) <= dd) : pout);
-  const desc = [];
-  if (prevRef){ const p = pct(st.tot - prevRef, prevRef); desc.push(p === 0 ? `Come ${cur ? `nei primi ${dd} giorni di` : "a"} ${mName(pm)}.` : `<b>${Math.abs(p)}% ${p > 0 ? "in più" : "in meno"}</b> rispetto ${cur ? `ai primi ${dd} giorni di` : "a"} ${mName(pm)}.`); }
-  if (cur && dd >= 3 && dm > dd) desc.push(`A questo ritmo chiudi intorno a <b>${eur0(st.tot / dd * dm)}</b>.`);
-  const bud = st.cats.filter(c => c.cat.budget), B = bud.reduce((s, c) => s + c.cat.budget, 0), used = bud.reduce((s, c) => s + c.amt, 0);
-  const strip = B ? `Budget usato <b>${pct(used, B)}%</b> · ${used > B ? `oltre di ${eur0(used - B)}` : `restano ${eur0(B - used)}`}` : `Entrate <b>${eur0(st.income)}</b> · saldo <b>${st.income - st.tot >= 0 ? "+" : "−"}${eur0(Math.abs(st.income - st.tot))}</b>`;
-  const last = [...st.out, ...st.inc].sort((a, b) => b.date.localeCompare(a.date) || b.ts - a.ts)[0];
-  const focus = vStack(strip, `<small class="vk">Spese di ${mName(S.month)}${cur ? " finora" : ""}</small><b class="vbig num">${eur(st.tot)}</b>
-      ${desc.length ? `<p class="vdesc">${desc.join(" ")}</p>` : ""}
-      <div class="vcta"><button class="vbtn" data-act="add"><span>+</span>Nuova spesa</button><span class="vk num">${eur0(st.tot / dd)} al giorno</span></div>`,
-    last ? `<button class="vnext" data-tx="${last.id}"><small>Ultima</small><b>${esc(last.note || catLabel(last))}</b><span class="num">${last.type === "in" ? "+" : "−"}${eur(last.amt)}</span></button>` : "");
-  // la settimana del giorno scelto
-  if (!S.wday || !S.wday.startsWith(S.month)) S.wday = cur ? td : `${S.month}-${pad(dm)}`;
-  const d0 = pdate(S.wday), mon = new Date(d0); mon.setDate(d0.getDate() - (d0.getDay() + 6) % 7);
-  const days = Array.from({ length: 7 }, (_, i) => { const d = new Date(mon); d.setDate(mon.getDate() + i); return isoD(d); });
-  const dayTx = d => D.tx.filter(t => t.date === d);
-  const wk = days.map(d => `<button class="vday${d === S.wday ? " on" : ""}${d > td ? " fut" : ""}" data-wday="${d}"><small>${GIORNI[pdate(d).getDay()].charAt(0).toUpperCase()}</small><b>${+d.slice(8)}</b><i class="${dayTx(d).length ? "has" : ""}"></i></button>`).join("");
-  const sel = dayTx(S.wday).sort((a, b) => b.ts - a.ts), selTot = sum(sel.filter(t => t.type === "out"));
-  const week = `<div class="vcard"><div class="vrow"><span class="vk">Settimana</span><span class="vwn"><button data-wstep="-7" aria-label="Settimana prima">${SV.prev}</button><span class="vk">${dShort(days[0])} – ${dShort(days[6])}</span><button data-wstep="7" aria-label="Settimana dopo"${days[6] >= td ? " disabled" : ""}>${SV.next}</button></span></div>
-    <div class="vweek">${wk}</div>
-    <div class="vrow vsel"><b>${ucf(dLabel(S.wday))}</b><span class="num vk">${selTot ? "−" + eur(selTot) : sel.length ? "" : "nessuna spesa"}</span></div>
-    ${sel.length ? `<div class="vlist">${sel.slice(0, 6).map(txRow).join("")}</div>` : ""}</div>`;
-  const where = st.cats.length ? `<div class="vcard"><div class="vrow"><span class="vk">Dove va</span><button class="vlink" data-tab="vReport">Report →</button></div>
-    <div class="vbarstack">${st.cats.map(c => `<i style="flex:${c.amt};background:${cvar(c.cat.color)}"></i>`).join("")}</div>
-    ${st.cats.slice(0, 5).map(c => `<button class="vcat" data-cat="${c.cat.id}"><i style="background:${cvar(c.cat.color)}"></i><span>${esc(c.cat.name)}</span><b class="num">${eur0(c.amt)}</b><small class="num">${pct(c.amt, st.tot)}%</small></button>`).join("")}</div>` : "";
-  v.innerHTML = head + `<div class="vwrap">${focus}${week}${where}</div>`;
-}
-function renderTxV2(){
-  const v = $("#vTx"), st = monthStats(S.month), all = [...st.out, ...st.inc].sort((a, b) => b.date.localeCompare(a.date) || b.ts - a.ts);
-  if (!all.length){ v.innerHTML = v2Head(st) + emptyMonth(); return; }
-  const days = []; for (const t of all){ const g = days[days.length - 1]; if (g && g[0] === t.date) g[1].push(t); else days.push([t.date, [t]]); }
-  v.innerHTML = v2Head(st) + `<div class="vwrap">
-    <div class="vstack"><div class="vstrip">${movs(all.length)} · entrate <b>${eur0(st.income)}</b></div><div class="vcard vfocus vmini"><small class="vk">Spese di ${mName(S.month)}</small><b class="vbig num">${eur(st.tot)}</b></div></div>
-    ${days.map(([d, list]) => { const out = sum(list.filter(t => t.type === "out")), inc = sum(list.filter(t => t.type === "in")), dt = pdate(d);
-      return `<div class="vcard vdaycard"><div class="vdc-h"><div class="vdc-n"><b>${dt.getDate()}</b><small>${GIORNI[dt.getDay()].slice(0, 3)}</small></div><span class="vk">${ucf(GIORNI[dt.getDay()])}</span><span class="num vdc-t">${out ? "−" + eur(out) : ""}${inc ? `<em>+${eur(inc)}</em>` : ""}</span></div>${list.map(txRow).join("")}</div>`; }).join("")}
-  </div>`;
-}
-/* scrivi la spesa al volo: "12,50 pizza", "pizza 12.5", "+1500 stipendio" per un'entrata */
-/* parole comuni → categoria (e sottocategoria) quando la nota non è mai stata usata prima */
-const QA_WORDS = [
-  [/\b(caffe|cappuccin|colazion|cornett|brioche|bar|aperitiv|spritz)/, /cibo|mangiar|aliment/, /bar|caffe|colazion/],
-  [/\b(pizz|ristorant|cena|sushi|kebab|trattoria|osteria|hamburger|burger|mc ?donald|pub|pranzo)/, /cibo|mangiar|aliment/, /cena|ristor|pranzo|fuori/],
-  [/\b(spesa|supermercat|coop|esselunga|conad|lidl|carrefour|eurospin|pam|famila|aldi|panino|pane)/, /cibo|mangiar|aliment/, /spesa|settiman|supermerc/],
-  [/\b(glovo|deliveroo|just ?eat|domicilio|asporto)/, /cibo|mangiar|aliment/, /domicilio|asporto|delivery/],
-  [/\b(benzina|carburant|diesel|gasolio|pieno|distributor)/, /trasport|auto|macchin/, /carburant|benzina/],
-  [/\b(treno|bus|metro|biglietto|tram|atm|trenitalia|italo|taxi|uber)/, /trasport/, /mezzi|pubblic|treno|taxi/],
-  [/\b(parchegg|autostrad|pedagg|telepass)/, /trasport|auto/, /parchegg|pedagg/],
-  [/\b(farmaci|medic|dentist|visita|analisi|ottico)/, /salute/, /farmac|visit|medic/],
-  [/\b(palestra|piscina|sport)/, /salute|sport|svago/, /sport|palestr/],
-  [/\b(cinema|netflix|spotify|disney|prime|concerto|teatro|giochi?|steam|playstation|libro|libri)/, /svago|divertim|tempo libero/, /abbonam|uscit|giochi|hobby/],
-  [/\b(vestit|scarpe|maglia|jeans|zara|amazon|regalo)/, /shopping|acquisti/, /vestit|scarpe|regal|elettron/],
-  [/\b(affitto|mutuo|condominio|ikea)/, /casa/, /affitto|mutuo|condomin|arred/],
-  [/\b(luce|enel|gas|acqua|internet|fibra|telefono|ricarica|tim|vodafone|iliad|wind)/, /bollett|utenze/, /luce|gas|acqua|internet|telefon/],
-  [/\b(stipendio|busta paga|salario)/, /stipend|lavoro/, null]
-];
-function quickAdd(text){
-  text = String(text || "").trim(); if (!text) return;
-  let type = "out"; if (/^\+/.test(text)){ type = "in"; text = text.slice(1).trim(); }
-  const m = text.match(/(?:^|\s)(\d{1,6}(?:[.,]\d{1,2})?)\s*(?:€|euro|eur)?(?=\s|$)/i), amt = m ? parseAmt(m[1]) : NaN;
-  const note = ucf((m ? text.replace(m[0], " ") : text).replace(/\s+/g, " ").trim()).slice(0, 60);
-  if (!(amt > 0)){ openTx(); S.edit.type = type; S.edit.note = note; drawTx(); return; }
-  const k = normName(note), words = k.split(" ").filter(w => w.length > 2), recent = [...D.tx].sort((a, b) => b.ts - a.ts);
-  let catId = null, subId = null;
-  const same = k && recent.find(t => t.type === type && normName(t.note) === k);
-  if (same){ catId = same.cat; subId = same.sub || null; }
-  if (!catId) for (const c of D.cats.filter(c => c.type === type)){
-    const s = (c.subs || []).find(s => words.some(w => normName(s.name).split(" ").some(x => x.startsWith(w) || w.startsWith(x) && x.length > 3)));
-    if (s){ catId = c.id; subId = s.id; break; }
-    if (words.some(w => normName(c.name).startsWith(w))){ catId = c.id; break; }
-  }
-  if (!catId){ const p = recent.find(t => t.type === type && words.some(w => w.length > 3 && normName(t.note).split(" ").includes(w))); if (p){ catId = p.cat; subId = p.sub || null; } }
-  if (!catId) for (const [re, cre, sre] of QA_WORDS){
-    if (!re.test(k)) continue;
-    const c = D.cats.find(c => c.type === type && cre.test(normName(c.name))); if (!c) continue;
-    catId = c.id; subId = (sre && (c.subs || []).find(x => sre.test(normName(x.name)))?.id) || null; break;
-  }
-  if (!catId){ const p = recent.find(t => t.type === type); catId = p?.cat || D.cats.find(c => c.type === type)?.id; subId = null; }
-  const t = { id: uid(), type, cat: catId, sub: subId, amt, date: today(), note, ts: Date.now() };
-  D.tx.push(t); save(); S.month = thisMonth(); S.wday = today(); render();
-  toast(`${type === "in" ? "+" : "−"}${eur(amt)} · ${catLabel(t)}`, "Modifica", () => openTx(t.id));
 }
 
 /* ---------- Movimenti ---------- */
@@ -1517,23 +1164,7 @@ function renderReport(){
   }
   const top5 = [...st.out].sort((a, b) => b.amt - a.amt).slice(0, 5);
 
-  if (V2()){
-    const bud = st.cats.filter(c => c.cat.budget), B = bud.reduce((s, c) => s + c.cat.budget, 0), used = bud.reduce((s, c) => s + c.amt, 0);
-    v.innerHTML = v2Head(st) + rToggle() + `<div class="vwrap">
-      ${vStack(B ? `Budget usato <b>${pct(used, B)}%</b> · ${movs(st.out.length)}` : `${movs(st.out.length)} · ${dd} giorni`,
-        `<small class="vk">Spese di ${mName(S.month)}${cur ? " finora" : ""}</small><b class="vbig num">${eur(st.tot)}</b>
-        <div class="vchips"><span>Entrate<b class="num">${eur0(st.income)}</b></span><span>Saldo<b class="num">${saldo >= 0 ? "+" : "−"}${eur0(Math.abs(saldo))}</b></span><span>Al giorno<b class="num">${eur0(st.tot / dd)}</b></span></div>`)}
-      ${ins.length ? vSec("In breve", `<small class="vk">scorri →</small>`) + vCarousel(ins) : ""}
-      ${st.cats.length ? vSec("Dove hai speso", `<small class="vk">tocca per il dettaglio</small>`) + `<div class="vcard vdonut">${donut(foldRows(st.cats, st.tot), st.tot)}</div>
-        <div class="vgrid">${st.cats.map(c => { const p = prevCats.get(c.cat.id) || 0, dt = prevRef ? dTag(c.amt - p, p) : "";
-          return `<button class="vtile" data-cat="${c.cat.id}">${cbadge(c.cat)}<b class="num">${eur0(c.amt)}</b><span>${esc(c.cat.name)}</span><small>${pct(c.amt, st.tot)}%${dt ? " · " + dt : ""}</small><div class="bar"><i style="width:${Math.max(3, c.amt / st.cats[0].amt * 100)}%;background:${cvar(c.cat.color)}"></i></div></button>`; }).join("")}</div>` : ""}
-      ${st.out.length ? statsCard(st) + vSec("Andamento") + `<div class="vcard vflush">${chartSeg("rchart", [["days", "Giorni"], ["months", "6 mesi"], ["week", "Settimana"]], rc)}${chart}${cap ? `<p class="help chcap">${cap}</p>` : ""}</div>
-        ${vSec("Le spese più grandi")}<div class="vcard vflush">${top5.map(txRow).join("")}</div>` : ""}
-      <div class="row-btns noprint"><button class="btn ghost" data-act="print">Salva in PDF</button><button class="btn ghost" data-act="csvMonth">Esporta CSV</button></div>
-    </div>`;
-    return;
-  }
-  v.innerHTML = rToggle() + `<div class="hero">${heroRing(st)}<small>Spese di ${mName(S.month)}${cur ? ` <span class="pill-status">in corso</span>` : ""}</small><b class="num">${eur(st.tot)}</b>
+  v.innerHTML = rToggle() + `<div class="hero"><small>Spese di ${mName(S.month)}${cur ? ` <span class="pill-status">in corso</span>` : ""}</small><b class="num">${eur(st.tot)}</b>
       <div class="sub"><span>Entrate <b class="num">${eur0(st.income)}</b></span><span>Saldo <b class="num">${saldo >= 0 ? "+" : "−"}${eur0(Math.abs(saldo))}</b></span><span>Al giorno <b class="num">${eur0(st.tot / dd)}</b></span></div></div>
   <div class="section">
     ${st.out.length ? statsCard(st) : ""}
@@ -1631,20 +1262,6 @@ function renderProd(){
   if (sc) ins.push(["💸", `Con gli sconti hai risparmiato <b>${eur(sc)}</b>, il ${pct1(sc, paid + sc)}%`]);
   const prow = (x, right) => `<button class="prow" data-prod="${esc(x.k)}"><span class="em">${pcat(x.c).e}</span><div class="mid"><div class="t">${esc(x.n)}</div><div class="s">${esc(pcat(x.c).n)}</div></div><div class="a">${right}</div></button>`;
   const gone = pst.prods.length ? (() => { const curK = new Set(st.prods.map(x => x.k)); return pst.prods.filter(x => !curK.has(x.k) && x.cnt >= 2).sort((a, b) => b.cnt - a.cnt).slice(0, 5); })() : [];
-  if (V2()){
-    const nIt = items.filter(x => x.p > 0).length;
-    v.innerHTML = v2Head() + seg + `<div class="vwrap">
-      ${vStack(`${rtx.length} ${rtx.length === 1 ? "scontrino" : "scontrini"} · ${nIt} prodotti`, `<small class="vk">Supermercato · ${esc(label)}</small><b class="vbig num">${eur(paid || st.tot)}</b>
-        ${sc ? `<p class="vdesc">Con gli sconti hai risparmiato <b>${eur(sc)}</b>: senza avresti speso ${eur(paid + sc)}.</p>` : `<p class="vdesc">Scrivi gli sconti dello scontrino quando salvi la spesa: qui vedrai quanto risparmi.</p>`}`)}
-      ${ins.length ? vSec("In breve", `<small class="vk">scorri →</small>`) + vCarousel(ins) : ""}
-      ${st.cats.length ? vSec("Per categoria", `<small class="vk">tocca per i prodotti</small>`) + `<div class="vgrid">${st.cats.map(x => { const pc = pcat(x.c), pv = pmap.get(x.c) || 0, np = st.prods.filter(p => p.c === x.c).length, dt = pst.tot ? dTag(x.amt - pv, pv) : "";
-          return `<button class="vtile" data-pccat="${x.c}"><span class="vemo">${pc.e}</span><b class="num">${eur0(x.amt)}</b><span>${esc(pc.n)}</span><small>${np} ${np === 1 ? "prodotto" : "prodotti"}${dt ? " · " + dt : ""}</small><div class="bar"><i style="width:${Math.max(3, x.amt / max * 100)}%;background:${pc.col}"></i></div></button>`; }).join("")}</div>` : ""}
-      ${saveCard(rtx, prtx, n)}
-      ${tops.length ? vSec("I prodotti") + `<div class="vcard vflush">${chartSeg("ptop", [["cnt", "Più comprati"], ["amt", "Più spesa"]], pt)}<div style="margin-top:6px">${tops.map(x => pt === "cnt" ? prow(x, `×${x.cnt}<small>${eur(x.amt / x.cnt)} l'uno</small>`) : prow(x, `${eur(x.amt)}<small>${x.cnt} ${x.cnt === 1 ? "volta" : "volte"}</small>`)).join("")}</div></div>` : ""}
-      ${gone.length ? vSec("Non li hai più comprati") + `<div class="vcard vflush">${gone.map(x => prow(x, `<small>${x.cnt} volte prima</small>`)).join("")}</div>` : ""}
-    </div>`;
-    return;
-  }
   v.innerHTML = seg + `<div class="hero"><small>Supermercato · ${esc(label)}</small><b class="num">${eur(paid || st.tot)}</b>
       <div class="sub"><span>Scontrini <b class="num">${rtx.length}</b></span><span>Prodotti <b class="num">${items.filter(x => x.p > 0).length}</b></span>${sc ? `<span>Sconti <b class="num">−${eur0(sc)}</b></span>` : ""}</div></div>
     <div class="section">
@@ -2046,24 +1663,20 @@ function lookFonts(k){
 }
 function applyLook(k){
   k = LOOKS[k] ? k : "morbido"; D.opt.look = k; lookFonts(k);
-  const eff = D.opt.theme === "vetro" ? "vetro" : k;   // il tema Vetro ha il suo stile del testo
-  if (eff === "classico") delete document.documentElement.dataset.look; else document.documentElement.dataset.look = eff;
+  if (k === "classico") delete document.documentElement.dataset.look; else document.documentElement.dataset.look = k;
   try { localStorage.setItem("spese.look", k); } catch {}
 }
 
 /* ---------- impostazioni ---------- */
 const THEMES = {
   oled: { name: "Nero OLED", bg: "#000000", card: "#1a1a1a", ink: "#f2f2f2", fg: "#f2f2f2", font: "Roboto", r: 6, pill: "#e6e6e6" },
-  vetro: { name: "Vetro", bg: "linear-gradient(180deg,#060a1c,#2747c8 55%,#eef0f4)", card: "rgba(255,255,255,.88)", ink: "#0d1020", fg: "#fff", font: "Inter", r: 10, pill: "#0d1020" },
   carta: { name: "Carta", bg: "#f3f1ea", card: "#dfdbcf", ink: "#141413", fg: "#141413", font: "Roboto", r: 6, pill: "#3b3b38" }
 };
 function applyTheme(t){
   t = THEMES[t] ? t : "oled"; D.opt.theme = t;
   document.documentElement.dataset.theme = t;
   try { localStorage.setItem("spese.theme", t); } catch {}
-  if (typeof LOOKS !== "undefined") applyLook(D.opt.look);
-  if (typeof S !== "undefined"){ if (t === "vetro" && S.tab === "vTx") S.tab = "vToday"; if (t !== "vetro" && S.tab === "vToday") S.tab = "vTx"; }
-  const cs = getComputedStyle(document.documentElement), bg = cs.getPropertyValue("--meta").trim() || cs.getPropertyValue("--bg").trim();
+  const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", bg || "#1a1a19");
 }
 function openSettings(){
@@ -2074,7 +1687,7 @@ function openSettings(){
     <h2>Tema</h2>
     <div class="panel"><div class="themes">${Object.entries(THEMES).map(([k, t]) => `<button data-theme-pick="${k}" aria-pressed="${k === cur}">
       <span class="tprev" style="background:${t.bg};color:${t.fg};font-family:'${t.font}',sans-serif"><b style="background:${t.card};color:${t.ink};border-radius:${t.r}px">Aa 124 €</b><i style="background:${t.pill}"></i><i style="background:${t.pill};opacity:.35"></i></span>${t.name}</button>`).join("")}</div></div>
-    <h2>Stile del testo</h2>${cur === "vetro" ? `<p class="help" style="margin:-4px 2px 10px">Il tema Vetro usa il suo stile: quello che scegli qui vale per Nero OLED e Carta.</p>` : ""}
+    <h2>Stile del testo</h2>
     <div class="panel">${Object.entries(LOOKS).map(([k, L]) => { lookFonts(k); return `<button class="list-item lookpick" data-look-pick="${k}"><span><b style="font-family:'${L.f}',sans-serif">${L.name} · 1.805,98 €</b><small>${L.d}</small></span>${(D.opt.look || "morbido") === k ? '<i class="ok">✓</i>' : ""}</button>`; }).join("")}</div>
     <h2>Lettura scontrini (IA)</h2>
     <div id="aiBox">${aiBox()}</div>
@@ -2615,8 +2228,6 @@ function askEnd(){
   S.ask = null; $("#sAsk").classList.remove("open"); if (S.edit) drawTx();
 }
 
-document.getElementById("dock").addEventListener("submit", e => { e.preventDefault(); const i = $("#qa"); const v = i.value; i.value = ""; i.blur(); quickAdd(v); });
-
 /* ---------- prodotti a mano (quando non hai lo scontrino digitale) ---------- */
 function knownProducts(){
   const m = new Map();
@@ -2847,10 +2458,7 @@ function render(){
   $("#btnNext").disabled = yearMode ? S.month.slice(0, 4) >= thisMonth().slice(0, 4) : S.month >= thisMonth();
   document.querySelectorAll("nav [data-tab]").forEach(b => b.setAttribute("aria-current", b.dataset.tab === S.tab));
   document.querySelectorAll(".view").forEach(v => v.hidden = v.id !== S.tab);
-  if (!V2() && S.tab === "vToday") S.tab = "vTx";
-  document.querySelectorAll(".view").forEach(v => v.hidden = v.id !== S.tab);
-  ({ vToday: renderToday, vTx: V2() ? renderTxV2 : renderTx, vReport: renderReport, vShop: renderProd, vCats: renderCats })[S.tab]();
-  if (V2()){ const v = $("#" + S.tab); if (!v.querySelector(".vh")) v.insertAdjacentHTML("afterbegin", v2Head()); }
+  ({ vTx: renderTx, vReport: renderReport, vShop: renderProd, vCats: renderCats })[S.tab]();
 }
 function go(tab){ if (S.tab !== tab){ S.tab = tab; $("#main").scrollTop = 0; } render(); }
 
@@ -2900,8 +2508,6 @@ document.addEventListener("click", e => {
   if (d.idel !== undefined){ readTx(); S.edit.items.splice(+d.idel, 1); return drawTx(); }
   if (d.prod){ return openProd(d.prod); }
   if (d.pccat){ return openPcat(d.pccat); }
-  if (d.wday){ S.wday = d.wday; return renderToday(); }
-  if (d.wstep){ const x = pdate(S.wday); x.setDate(x.getDate() + +d.wstep); let w = isoD(x); if (w > today()) w = today(); S.wday = w; S.month = w.slice(0, 7); return render(); }
   if (d.asksug !== undefined){ const i = $("#askName"); i.value = d.asksug; i.dispatchEvent(new Event("input", { bubbles: true })); return; }
   if (d.manpc){ S.man.c = d.manpc; S.man.manual = true; document.querySelectorAll("[data-manpc]").forEach(b => b.setAttribute("aria-pressed", b === el)); return; }
   if (d.mansug !== undefined){ const o = knownProducts().get(d.mansug); if (!o) return; $("#manName").value = o.n; $("#manPrice").value = fmtInput(o.p); manSetPc(o.c); $("#manSug").innerHTML = ""; return $("#manPrice").focus(); }
@@ -2943,8 +2549,6 @@ document.addEventListener("click", e => {
     case "prodBack": return closeProd();
     case "editCat": return openCat(d.id);
     case "settings": return openSettings();
-    case "mprev": return $("#btnPrev").onclick();
-    case "mnext": return $("#btnNext").onclick();
     case "ghOn": return ghConnect();
     case "ghNow": return backupNow(true);
     case "ghRestore": return ghRestore();
