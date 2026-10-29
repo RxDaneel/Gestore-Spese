@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Spese">
 <meta name="theme-color" content="#1a1a19">
-<script>try{var t=localStorage.getItem("spese.theme");if(!/^(oled|carta)$/.test(t))t="oled";document.documentElement.dataset.theme=t;var l=localStorage.getItem("spese.look")||"morbido";if(l!=="classico")document.documentElement.dataset.look=l;}catch(e){document.documentElement.dataset.theme="oled";}</script>
+<script>try{var t=localStorage.getItem("spese.theme");if(!/^(oled|carta|vetro)$/.test(t))t="oled";document.documentElement.dataset.theme=t;var l=localStorage.getItem("spese.look")||"morbido";if(l!=="classico")document.documentElement.dataset.look=l;}catch(e){document.documentElement.dataset.theme="oled";}</script>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=3">
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png?v=3">
 <link rel="apple-touch-icon" href="icon-180.png?v=3">
@@ -540,7 +540,7 @@ nav .plus:active svg{transform:scale(.94)}
 .toast button{border:0;background:none;color:var(--bg);font-weight:700;padding:2px 4px;text-decoration:underline}
 /* ===== STILI DEL TESTO (si scelgono a parte dal tema): Classico = nessuno, gli altri sono più grandi e contrastati ===== */
 /* tutto un po' più grande e più contrastato */
-:root[data-look]{--muted:#a6a6b2}
+:root[data-look][data-theme="oled"]{--muted:#a6a6b2}
 :root[data-look] body{font-size:16px}
 :root[data-look] #hMonth{font-size:25px}
 :root[data-look] :is(.section>h2,.group,.shead h2){font-size:21px!important;text-transform:none;letter-spacing:-.015em;font-weight:800;color:var(--fg)}
@@ -627,6 +627,10 @@ nav .plus:active svg{transform:scale(.94)}
 :root[data-look="tecnico"] .hero small{font-size:11.5px!important}
 /* schermi stretti (iPhone con lo Zoom schermo attivo: 320 px di larghezza) */
 @media (max-width:360px){
+  #hMonth{font-size:22px!important}
+  header .icon-btn{width:34px!important;height:34px!important;margin-left:4px!important}
+  .shead h2{white-space:nowrap}
+  .shead .help{font-size:12.5px!important;text-align:right}
   .hero .sub{grid-auto-flow:row!important;grid-template-columns:1fr 1fr!important}
   .hero .sub span:nth-child(3):last-child{grid-column:1/-1}
   .card2 .shead .help{display:none}
@@ -638,6 +642,73 @@ nav .plus:active svg{transform:scale(.94)}
   .tile b{font-size:20px!important}
   .shead{gap:6px}
 }
+/* ===== tema VETRO: notte blu in alto che sfuma nel chiaro, carte di vetro bianco smerigliato, pulsanti neri ===== */
+:root[data-theme="vetro"]{--bg:#eef0f4;--surface:rgba(255,255,255,.78);--raised:#e3e6ef;--line:rgba(20,30,70,.08);--fg:#0d1020;--muted:#5f6680;--accent:#0d1020;--on-accent:#fff;
+  --danger:#e5484d;--good:#15924a;--hl:#c88a00;--sel:#0d1020;--on-sel:#fff;--meta:#060a1c;
+  --night:linear-gradient(180deg,#060a1c 0,#0e1847 90px,#2747c8 230px,#7d95ee 340px,#dfe5f6 450px,#eef0f4 530px);
+  --glass:linear-gradient(180deg,rgba(255,255,255,.86),rgba(255,255,255,.66));
+  --gshadow:inset 0 0 0 1px rgba(255,255,255,.75),0 14px 34px -16px rgba(25,35,90,.35);
+  --font:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color-scheme:light}
+:root[data-theme="vetro"] body{background:#eef0f4}
+:root[data-theme="vetro"] header{background:#060a1c;border-color:transparent}
+:root[data-theme="vetro"] #hMonth{color:#fff;font-weight:600;letter-spacing:-.02em}
+:root[data-theme="vetro"] header .icon-btn{color:#fff;background:rgba(255,255,255,.10);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);margin-left:6px;width:38px;height:38px}
+:root[data-theme="vetro"] header .icon-btn:disabled{opacity:.35}
+/* lo sfondo scorre con la pagina: notte in cima, poi chiaro */
+:root[data-theme="vetro"] main{background:#eef0f4}
+:root[data-theme="vetro"] :is(#vTx,#vReport,#vShop){background:var(--night) 0 0/100% 560px no-repeat;display:flow-root;min-height:100%}
+:root[data-theme="vetro"] :is(.panel,.tile,.card2,.ccard,.items,.sumbudget,.cd:not(.blank):not(.none),.banner:not(.warn),.empty){background:var(--glass);box-shadow:var(--gshadow);-webkit-backdrop-filter:blur(22px) saturate(160%);backdrop-filter:blur(22px) saturate(160%)}
+:root[data-theme="vetro"] :is(.panel,.card2,.ccard,.items,.empty){border-radius:28px}
+:root[data-theme="vetro"] :is(.tile,.sumbudget,.banner){border-radius:22px}
+:root[data-theme="vetro"] .cd{border-radius:14px}
+:root[data-theme="vetro"] .empty{margin:16px}
+:root[data-theme="vetro"] .banner:not(.warn){color:var(--fg)}
+:root[data-theme="vetro"] .banner:not(.warn) svg{stroke:#2747c8}
+:root[data-theme="vetro"] .hero{margin:14px 16px 4px;padding:20px 20px 18px;border-radius:30px;background:var(--glass);box-shadow:var(--gshadow);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);color:var(--fg)}
+:root[data-theme="vetro"] .hero small{color:var(--muted);font-weight:500}
+:root[data-theme="vetro"] .hero>b{font-weight:600;letter-spacing:-.035em}
+:root[data-theme="vetro"] .hero .sub{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;margin-top:14px}
+:root[data-theme="vetro"] .hero .sub span{display:flex;flex-direction:column;gap:1px;background:rgba(13,16,32,.05);color:var(--muted);border-radius:16px;padding:9px 12px;font-size:11.5px;font-weight:500}
+:root[data-theme="vetro"] .hero .sub span b{color:var(--fg);font-size:15px;font-weight:700}
+:root[data-theme="vetro"] .hero .pill-status{background:#0d1020;color:#fff}
+/* scelte a pillola dentro un contenitore di vetro: si leggono su qualsiasi sfondo */
+:root[data-theme="vetro"] .seg.viewseg,:root[data-theme="vetro"] .chartseg.top{margin:12px 16px 0;padding:4px!important;background:rgba(255,255,255,.55);border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+:root[data-theme="vetro"] .seg button,:root[data-theme="vetro"] .chartseg button{background:transparent;color:var(--muted);font-weight:600}
+:root[data-theme="vetro"] :is(.seg button,.chartseg button)[aria-pressed="true"]{background:#fff;color:var(--fg);box-shadow:0 6px 16px -6px rgba(25,35,90,.35)}
+:root[data-theme="vetro"] .chip{background:rgba(255,255,255,.8);box-shadow:inset 0 0 0 1px rgba(20,30,70,.06)}
+:root[data-theme="vetro"] :is(.chip,.chips.sub .chip,.catgrid.subs .chip)[aria-pressed="true"]{background:#0d1020;color:#fff;box-shadow:none}
+:root[data-theme="vetro"] .btn{border-radius:999px}
+:root[data-theme="vetro"] .btn:not(.ghost):not(.danger){background:#0d1020;color:#fff}
+:root[data-theme="vetro"] .btn.ghost{background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px rgba(20,30,70,.08)}
+:root[data-theme="vetro"] :is(.field input[type=text],.field input[type=date],.field input[inputmode],.searchbar input,.field textarea,.ghform input,.manform input){border-radius:18px;background:rgba(255,255,255,.85);border-color:rgba(20,30,70,.08)}
+/* movimenti: ogni riga è una piccola carta di vetro */
+:root[data-theme="vetro"] #vTx .swipe{margin:0 12px 8px;border-radius:22px;box-shadow:var(--gshadow)}
+:root[data-theme="vetro"] #vTx .swipe .tx{background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+:root[data-theme="vetro"] .panel .swipe .tx,:root[data-theme="vetro"] .panel .tx{background:transparent}
+:root[data-theme="vetro"] .day{padding-left:20px;padding-right:20px}
+:root[data-theme="vetro"] .cd.today .n{background:#0d1020;color:#fff}
+:root[data-theme="vetro"] .cd[aria-pressed="true"]{box-shadow:inset 0 0 0 2px #0d1020,var(--gshadow)}
+:root[data-theme="vetro"] .bar{background:rgba(13,16,32,.07);border-radius:4px}
+:root[data-theme="vetro"] .bar i{border-radius:4px}
+:root[data-theme="vetro"] .bar.budget i{background:#0d1020}
+:root[data-theme="vetro"] .ins .ie,:root[data-theme="vetro"] .prow .em,:root[data-theme="vetro"] .item .pc{background:rgba(13,16,32,.05)}
+/* fogli: chiari, con la barra in alto di vetro */
+:root[data-theme="vetro"] .sheet{background:#eef0f4}
+:root[data-theme="vetro"] .pbar{background:rgba(238,240,244,.78);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+:root[data-theme="vetro"] .amount{margin:10px 16px 4px;width:calc(100% - 32px);border-radius:28px;background:var(--glass);box-shadow:var(--gshadow);padding:24px 16px}
+:root[data-theme="vetro"] .kp{background:rgba(238,240,244,.9);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:0;border-radius:28px 28px 0 0;box-shadow:0 -14px 40px -18px rgba(25,35,90,.35)}
+:root[data-theme="vetro"] .kp button{background:#fff;border-radius:18px;box-shadow:0 2px 6px -3px rgba(25,35,90,.25)}
+:root[data-theme="vetro"] .kp .ok{background:#0d1020;color:#fff}
+:root[data-theme="vetro"] .toast{border-radius:999px;background:#0d1020;color:#fff}
+:root[data-theme="vetro"] .toast button{color:#fff}
+:root[data-theme="vetro"] .pcpick{background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+/* barra in basso: pillola di vetro chiaro che galleggia, solo icone, + nero */
+:root[data-theme="vetro"] nav{margin:0 14px calc(var(--bot) + 6px);padding:0 4px;border:0;border-radius:32px;background:rgba(255,255,255,.78);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.8),0 14px 34px -12px rgba(25,35,90,.35)}
+:root[data-theme="vetro"] nav button{font-size:0;gap:0;color:var(--muted)}
+:root[data-theme="vetro"] nav button svg{padding:9px;box-sizing:content-box;border-radius:50%;margin:-9px}
+:root[data-theme="vetro"] nav button[aria-current="true"] svg{stroke:var(--fg);background:rgba(13,16,32,.07)}
+:root[data-theme="vetro"] nav .plus svg{width:28px;height:28px;padding:12px;margin:0;background:#0d1020;stroke:#fff;box-shadow:0 8px 20px -6px rgba(13,16,32,.5)}
+:root[data-theme="vetro"] .toast{bottom:calc(var(--bot) + var(--nav-h) + 22px)}
 /* colori delle categorie: palette Flat UI, uguale in tutti i temi */
 html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#9b59b6;--c6:#2ecc71;--c7:#34495e;--c8:#e74c3c;--cx:#95a5a6}
 @media (prefers-reduced-motion:reduce){.sheet{transition:none}}
@@ -692,7 +763,7 @@ html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261027110958";
+const BUILD = "20261029105118";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1666,13 +1737,14 @@ function applyLook(k){
 /* ---------- impostazioni ---------- */
 const THEMES = {
   oled: { name: "Nero OLED", bg: "#000000", card: "#1a1a1a", ink: "#f2f2f2", fg: "#f2f2f2", font: "Roboto", r: 6, pill: "#e6e6e6" },
+  vetro: { name: "Vetro", bg: "linear-gradient(180deg,#060a1c,#2747c8 55%,#eef0f4)", card: "rgba(255,255,255,.88)", ink: "#0d1020", fg: "#fff", font: "Inter", r: 10, pill: "#0d1020" },
   carta: { name: "Carta", bg: "#f3f1ea", card: "#dfdbcf", ink: "#141413", fg: "#141413", font: "Roboto", r: 6, pill: "#3b3b38" }
 };
 function applyTheme(t){
   t = THEMES[t] ? t : "oled"; D.opt.theme = t;
   document.documentElement.dataset.theme = t;
   try { localStorage.setItem("spese.theme", t); } catch {}
-  const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+  const cs = getComputedStyle(document.documentElement), bg = cs.getPropertyValue("--meta").trim() || cs.getPropertyValue("--bg").trim();
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", bg || "#1a1a19");
 }
 function openSettings(){
