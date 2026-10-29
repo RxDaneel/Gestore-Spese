@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Spese">
 <meta name="theme-color" content="#1a1a19">
-<script>try{var t=localStorage.getItem("spese.theme");if(!/^(oled|carta|vetro)$/.test(t))t="oled";document.documentElement.dataset.theme=t;var l=localStorage.getItem("spese.look")||"morbido";if(l!=="classico")document.documentElement.dataset.look=l;}catch(e){document.documentElement.dataset.theme="oled";}</script>
+<script>try{var t=localStorage.getItem("spese.theme");if(!/^(oled|carta|vetro)$/.test(t))t="oled";document.documentElement.dataset.theme=t;var l=localStorage.getItem("spese.look")||"morbido";if(t==="vetro")l="vetro";if(l!=="classico")document.documentElement.dataset.look=l;}catch(e){document.documentElement.dataset.theme="oled";}</script>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=3">
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png?v=3">
 <link rel="apple-touch-icon" href="icon-180.png?v=3">
@@ -124,6 +124,7 @@ nav .plus:active svg{transform:scale(.94)}
 
 /* cifra principale del mese */
 .hero{padding:18px 16px 4px}
+.hring{display:none}
 .hero small{display:block;color:var(--muted);font-size:13px;font-weight:500}
 .hero b{display:block;font:700 38px/1.15 var(--font);letter-spacing:-.01em;margin:2px 0 6px}
 .hero .sub{color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:4px 14px}
@@ -642,73 +643,101 @@ nav .plus:active svg{transform:scale(.94)}
   .tile b{font-size:20px!important}
   .shead{gap:6px}
 }
-/* ===== tema VETRO: notte blu in alto che sfuma nel chiaro, carte di vetro bianco smerigliato, pulsanti neri ===== */
-:root[data-theme="vetro"]{--bg:#eef0f4;--surface:rgba(255,255,255,.78);--raised:#e3e6ef;--line:rgba(20,30,70,.08);--fg:#0d1020;--muted:#5f6680;--accent:#0d1020;--on-accent:#fff;
-  --danger:#e5484d;--good:#15924a;--hl:#c88a00;--sel:#0d1020;--on-sel:#fff;--meta:#060a1c;
-  --night:linear-gradient(180deg,#060a1c 0,#0e1847 90px,#2747c8 230px,#7d95ee 340px,#dfe5f6 450px,#eef0f4 530px);
-  --glass:linear-gradient(180deg,rgba(255,255,255,.86),rgba(255,255,255,.66));
-  --gshadow:inset 0 0 0 1px rgba(255,255,255,.75),0 14px 34px -16px rgba(25,35,90,.35);
+/* ===== tema VETRO: notte blu luminosa che sfuma nel chiaro, vetro bianco smerigliato e "impilato", testo Inter leggero ===== */
+:root[data-theme="vetro"]{--bg:#eef0f4;--surface:rgba(255,255,255,.74);--raised:#e4e7f0;--line:rgba(20,30,70,.07);--fg:#0b0e1c;--muted:#5d6480;--accent:#0b0e1c;--on-accent:#fff;
+  --danger:#e5484d;--good:#15924a;--hl:#d48a00;--sel:#0b0e1c;--on-sel:#fff;--meta:#05081a;
+  --glass:linear-gradient(180deg,rgba(255,255,255,.80),rgba(255,255,255,.60));
+  --gshadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.55),0 18px 40px -22px rgba(15,25,90,.45);
+  --blur:blur(26px) saturate(180%);
   --font:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color-scheme:light}
-:root[data-theme="vetro"] body{background:#eef0f4}
-:root[data-theme="vetro"] header{background:#060a1c;border-color:transparent}
-:root[data-theme="vetro"] #hMonth{color:#fff;font-weight:600;letter-spacing:-.02em}
-:root[data-theme="vetro"] header .icon-btn{color:#fff;background:rgba(255,255,255,.10);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);margin-left:6px;width:38px;height:38px}
-:root[data-theme="vetro"] header .icon-btn:disabled{opacity:.35}
-/* lo sfondo scorre con la pagina: notte in cima, poi chiaro */
-:root[data-theme="vetro"] main{background:#eef0f4}
-:root[data-theme="vetro"] :is(#vTx,#vReport,#vShop){background:var(--night) 0 0/100% 560px no-repeat;display:flow-root;min-height:100%}
-:root[data-theme="vetro"] :is(.panel,.tile,.card2,.ccard,.items,.sumbudget,.cd:not(.blank):not(.none),.banner:not(.warn),.empty){background:var(--glass);box-shadow:var(--gshadow);-webkit-backdrop-filter:blur(22px) saturate(160%);backdrop-filter:blur(22px) saturate(160%)}
+:root[data-theme="vetro"] body,:root[data-theme="vetro"] main{background:#eef0f4}
+:root[data-theme="vetro"] body{letter-spacing:-.01em}
+/* intestazione: titolo a due toni come "Today / Wed, Aug 4" */
+:root[data-theme="vetro"] header{background:#05081a;border-color:transparent;padding-bottom:10px}
+:root[data-theme="vetro"] #hMonth{color:#fff;font-weight:600!important;letter-spacing:-.03em;font-size:26px}
+:root[data-theme="vetro"] #hMonth .hy{color:#8ea0ff;font-weight:400}
+:root[data-theme="vetro"] header .icon-btn{color:#fff;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);margin-left:6px;width:40px;height:40px}
+:root[data-theme="vetro"] header .icon-btn:disabled{opacity:.3}
+/* lo sfondo scorre con la pagina: notte in cima con un bagliore blu, poi chiaro */
+:root[data-theme="vetro"] :is(#vTx,#vReport,#vShop){display:flow-root;min-height:100%;
+  background:radial-gradient(70% 220px at 18% 250px,rgba(110,140,255,.55),rgba(110,140,255,0) 70%) 0 0/100% 640px no-repeat,
+    radial-gradient(60% 200px at 90% 120px,rgba(60,90,255,.35),rgba(60,90,255,0) 70%) 0 0/100% 640px no-repeat,
+    linear-gradient(180deg,#05081a 0,#0a1142 110px,#1c38cc 260px,#4f70f2 380px,#a9bafa 500px,#e4e9f8 580px,#eef0f4 640px) 0 0/100% 640px no-repeat,#eef0f4}
+/* vetro */
+:root[data-theme="vetro"] :is(.panel,.tile,.card2,.ccard,.items,.sumbudget,.cd:not(.blank):not(.none),.banner:not(.warn),.empty){background:var(--glass);box-shadow:var(--gshadow);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
 :root[data-theme="vetro"] :is(.panel,.card2,.ccard,.items,.empty){border-radius:28px}
 :root[data-theme="vetro"] :is(.tile,.sumbudget,.banner){border-radius:22px}
 :root[data-theme="vetro"] .cd{border-radius:14px}
 :root[data-theme="vetro"] .empty{margin:16px}
 :root[data-theme="vetro"] .banner:not(.warn){color:var(--fg)}
-:root[data-theme="vetro"] .banner:not(.warn) svg{stroke:#2747c8}
-:root[data-theme="vetro"] .hero{margin:14px 16px 4px;padding:20px 20px 18px;border-radius:30px;background:var(--glass);box-shadow:var(--gshadow);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);color:var(--fg)}
-:root[data-theme="vetro"] .hero small{color:var(--muted);font-weight:500}
-:root[data-theme="vetro"] .hero>b{font-weight:600;letter-spacing:-.035em}
+:root[data-theme="vetro"] .banner:not(.warn) svg{stroke:#2a46d8}
+/* la card del totale: carta di vetro con altre due "dietro" che spuntano sopra, come una pila */
+:root[data-theme="vetro"] .hero{margin:26px 16px 6px;padding:20px 20px 18px;border-radius:30px;position:relative;overflow:visible;color:var(--fg);
+  background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
+  box-shadow:0 -11px 0 -6px rgba(255,255,255,.58),0 -21px 0 -12px rgba(255,255,255,.30),inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.5),0 26px 50px -26px rgba(10,20,90,.6)}
+:root[data-theme="vetro"] .hero small{color:var(--muted);font-weight:500;font-size:14px!important}
+:root[data-theme="vetro"] .hero:has(.hring)>small{display:flex;align-items:center;flex-wrap:wrap;gap:6px;min-height:64px;padding-right:80px;margin-top:-4px}
+:root[data-theme="vetro"] .hero>b{font-weight:600!important;letter-spacing:-.045em!important;font-size:44px!important;margin:4px 0 2px}
 :root[data-theme="vetro"] .hero .sub{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;margin-top:14px}
-:root[data-theme="vetro"] .hero .sub span{display:flex;flex-direction:column;gap:1px;background:rgba(13,16,32,.05);color:var(--muted);border-radius:16px;padding:9px 12px;font-size:11.5px;font-weight:500}
-:root[data-theme="vetro"] .hero .sub span b{color:var(--fg);font-size:15px;font-weight:700}
-:root[data-theme="vetro"] .hero .pill-status{background:#0d1020;color:#fff}
-/* scelte a pillola dentro un contenitore di vetro: si leggono su qualsiasi sfondo */
-:root[data-theme="vetro"] .seg.viewseg,:root[data-theme="vetro"] .chartseg.top{margin:12px 16px 0;padding:4px!important;background:rgba(255,255,255,.55);border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
-:root[data-theme="vetro"] .seg button,:root[data-theme="vetro"] .chartseg button{background:transparent;color:var(--muted);font-weight:600}
-:root[data-theme="vetro"] :is(.seg button,.chartseg button)[aria-pressed="true"]{background:#fff;color:var(--fg);box-shadow:0 6px 16px -6px rgba(25,35,90,.35)}
-:root[data-theme="vetro"] .chip{background:rgba(255,255,255,.8);box-shadow:inset 0 0 0 1px rgba(20,30,70,.06)}
-:root[data-theme="vetro"] :is(.chip,.chips.sub .chip,.catgrid.subs .chip)[aria-pressed="true"]{background:#0d1020;color:#fff;box-shadow:none}
+:root[data-theme="vetro"] .hero .sub span{display:flex;flex-direction:column;gap:2px;background:rgba(11,14,28,.045);color:var(--muted);border-radius:16px;padding:10px 12px!important;font-size:12px!important;font-weight:500}
+:root[data-theme="vetro"] .hero .sub span b{color:var(--fg);font-size:16px!important;font-weight:600}
+:root[data-theme="vetro"] .hero .delta{display:flex;margin:16px -20px -18px;padding:13px 20px;border-top:1px solid rgba(11,14,28,.06);background:rgba(11,14,28,.025);border-radius:0 0 30px 30px;color:var(--muted);font-weight:500}
+:root[data-theme="vetro"] .hero .pill-status{background:#0b0e1c;color:#fff;font-weight:600}
+:root[data-theme="vetro"] .hring{display:grid;place-items:center;position:absolute;top:14px;right:14px;width:68px;height:68px}
+:root[data-theme="vetro"] .hring svg{position:absolute;inset:0;width:100%;height:100%}
+:root[data-theme="vetro"] .hring circle{fill:none;stroke-width:4}
+:root[data-theme="vetro"] .hring .tr{stroke:rgba(11,14,28,.08)}
+:root[data-theme="vetro"] .hring .pg{stroke:#0b0e1c;stroke-linecap:round}
+:root[data-theme="vetro"] .hring.over .pg{stroke:var(--danger)}
+:root[data-theme="vetro"] .hring span{display:flex;flex-direction:column;align-items:center;line-height:1.05;position:relative}
+:root[data-theme="vetro"] .hring b{font-size:15px!important;font-weight:600!important;letter-spacing:-.03em!important;margin:0!important;color:var(--fg)!important}
+:root[data-theme="vetro"] .hring small{font-size:9px!important;font-weight:500!important;color:var(--muted);min-height:0!important;padding:0!important;margin:0!important;display:block!important}
+/* testo: Inter, pesi leggeri e titoli grandi ma non pesanti */
+:root[data-theme="vetro"] :is(.section>h2,.group,.shead h2){font-weight:600!important;letter-spacing:-.025em!important;color:var(--fg)}
+:root[data-theme="vetro"] :is(.tx .t,.crow .nm,.prow .t){font-weight:500!important}
+:root[data-theme="vetro"] :is(.tx .a,.tile b,.sumhead b,.amount #amt){font-weight:600!important;letter-spacing:-.02em}
+:root[data-theme="vetro"] .shead button{color:#2a46d8}
+/* scelte a pillola: vetro scuro sulla parte blu, l'opzione scelta è bianca */
+:root[data-theme="vetro"] .seg.viewseg,:root[data-theme="vetro"] .chartseg.top{margin:14px 16px 0;padding:4px!important;background:rgba(255,255,255,.14);border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+:root[data-theme="vetro"] :is(.seg.viewseg,.chartseg.top) button{background:transparent;color:rgba(255,255,255,.82);font-weight:500}
+:root[data-theme="vetro"] :is(.seg.viewseg,.chartseg.top) button[aria-pressed="true"]{background:#fff;color:var(--fg);font-weight:600;box-shadow:0 8px 20px -8px rgba(5,8,26,.6)}
+:root[data-theme="vetro"] .chartseg:not(.top) button,:root[data-theme="vetro"] .seg:not(.viewseg) button{background:rgba(11,14,28,.05);color:var(--muted)}
+:root[data-theme="vetro"] :is(.chartseg:not(.top),.seg:not(.viewseg)) button[aria-pressed="true"]{background:#0b0e1c;color:#fff}
+:root[data-theme="vetro"] .chip{background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px rgba(20,30,70,.06)}
+:root[data-theme="vetro"] :is(.chip,.chips.sub .chip,.catgrid.subs .chip)[aria-pressed="true"]{background:#0b0e1c;color:#fff;box-shadow:none}
 :root[data-theme="vetro"] .btn{border-radius:999px}
-:root[data-theme="vetro"] .btn:not(.ghost):not(.danger){background:#0d1020;color:#fff}
+:root[data-theme="vetro"] .btn:not(.ghost):not(.danger){background:#0b0e1c;color:#fff}
 :root[data-theme="vetro"] .btn.ghost{background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px rgba(20,30,70,.08)}
-:root[data-theme="vetro"] :is(.field input[type=text],.field input[type=date],.field input[inputmode],.searchbar input,.field textarea,.ghform input,.manform input){border-radius:18px;background:rgba(255,255,255,.85);border-color:rgba(20,30,70,.08)}
+:root[data-theme="vetro"] :is(.field input[type=text],.field input[type=date],.field input[inputmode],.searchbar input,.field textarea,.ghform input,.manform input){border-radius:18px;background:rgba(255,255,255,.88);border-color:rgba(20,30,70,.07)}
 /* movimenti: ogni riga è una piccola carta di vetro */
 :root[data-theme="vetro"] #vTx .swipe{margin:0 12px 8px;border-radius:22px;box-shadow:var(--gshadow)}
-:root[data-theme="vetro"] #vTx .swipe .tx{background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+:root[data-theme="vetro"] #vTx .swipe .tx{background:rgba(255,255,255,.80);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
 :root[data-theme="vetro"] .panel .swipe .tx,:root[data-theme="vetro"] .panel .tx{background:transparent}
-:root[data-theme="vetro"] .day{padding-left:20px;padding-right:20px}
-:root[data-theme="vetro"] .cd.today .n{background:#0d1020;color:#fff}
-:root[data-theme="vetro"] .cd[aria-pressed="true"]{box-shadow:inset 0 0 0 2px #0d1020,var(--gshadow)}
-:root[data-theme="vetro"] .bar{background:rgba(13,16,32,.07);border-radius:4px}
+:root[data-theme="vetro"] .day{padding-left:20px;padding-right:20px;color:rgba(11,14,28,.55);font-weight:600}
+:root[data-theme="vetro"] .cal .wd span{color:rgba(255,255,255,.7)}
+:root[data-theme="vetro"] .cd.today .n{background:#0b0e1c;color:#fff}
+:root[data-theme="vetro"] .cd[aria-pressed="true"]{box-shadow:inset 0 0 0 2px #0b0e1c,var(--gshadow)}
+:root[data-theme="vetro"] .bar{background:rgba(11,14,28,.07);border-radius:4px}
 :root[data-theme="vetro"] .bar i{border-radius:4px}
-:root[data-theme="vetro"] .bar.budget i{background:#0d1020}
-:root[data-theme="vetro"] .ins .ie,:root[data-theme="vetro"] .prow .em,:root[data-theme="vetro"] .item .pc{background:rgba(13,16,32,.05)}
+:root[data-theme="vetro"] .bar.budget i{background:#0b0e1c}
+:root[data-theme="vetro"] :is(.ins .ie,.prow .em,.item .pc){background:rgba(11,14,28,.05)}
+:root[data-theme="vetro"] .card2 .area .gdot{fill:#0b0e1c}
 /* fogli: chiari, con la barra in alto di vetro */
 :root[data-theme="vetro"] .sheet{background:#eef0f4}
 :root[data-theme="vetro"] .pbar{background:rgba(238,240,244,.78);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
 :root[data-theme="vetro"] .amount{margin:10px 16px 4px;width:calc(100% - 32px);border-radius:28px;background:var(--glass);box-shadow:var(--gshadow);padding:24px 16px}
 :root[data-theme="vetro"] .kp{background:rgba(238,240,244,.9);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:0;border-radius:28px 28px 0 0;box-shadow:0 -14px 40px -18px rgba(25,35,90,.35)}
 :root[data-theme="vetro"] .kp button{background:#fff;border-radius:18px;box-shadow:0 2px 6px -3px rgba(25,35,90,.25)}
-:root[data-theme="vetro"] .kp .ok{background:#0d1020;color:#fff}
-:root[data-theme="vetro"] .toast{border-radius:999px;background:#0d1020;color:#fff}
+:root[data-theme="vetro"] .kp .ok{background:#0b0e1c;color:#fff}
+:root[data-theme="vetro"] .toast{border-radius:999px;background:#0b0e1c;color:#fff;bottom:calc(var(--bot) + var(--nav-h) + 22px)}
 :root[data-theme="vetro"] .toast button{color:#fff}
 :root[data-theme="vetro"] .pcpick{background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
 /* barra in basso: pillola di vetro chiaro che galleggia, solo icone, + nero */
-:root[data-theme="vetro"] nav{margin:0 14px calc(var(--bot) + 6px);padding:0 4px;border:0;border-radius:32px;background:rgba(255,255,255,.78);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.8),0 14px 34px -12px rgba(25,35,90,.35)}
-:root[data-theme="vetro"] nav button{font-size:0;gap:0;color:var(--muted)}
-:root[data-theme="vetro"] nav button svg{padding:9px;box-sizing:content-box;border-radius:50%;margin:-9px}
-:root[data-theme="vetro"] nav button[aria-current="true"] svg{stroke:var(--fg);background:rgba(13,16,32,.07)}
-:root[data-theme="vetro"] nav .plus svg{width:28px;height:28px;padding:12px;margin:0;background:#0d1020;stroke:#fff;box-shadow:0 8px 20px -6px rgba(13,16,32,.5)}
-:root[data-theme="vetro"] .toast{bottom:calc(var(--bot) + var(--nav-h) + 22px)}
+:root[data-theme="vetro"] nav{margin:0 14px calc(var(--bot) + 6px);padding:0 4px;border:0;border-radius:32px;background:rgba(255,255,255,.72);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.6),0 16px 36px -14px rgba(15,25,90,.4)}
+:root[data-theme="vetro"] nav button{font-size:0;gap:0;color:#7a8099}
+:root[data-theme="vetro"] nav button svg{padding:9px;box-sizing:content-box;border-radius:50%;margin:-9px;stroke-width:1.8}
+:root[data-theme="vetro"] nav button[aria-current="true"] svg{stroke:var(--fg);background:rgba(11,14,28,.07)}
+:root[data-theme="vetro"] nav .plus svg{width:28px;height:28px;padding:12px;margin:0;background:#0b0e1c;stroke:#fff;box-shadow:0 10px 22px -8px rgba(5,8,26,.6)}
 /* colori delle categorie: palette Flat UI, uguale in tutti i temi */
 html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#9b59b6;--c6:#2ecc71;--c7:#34495e;--c8:#e74c3c;--cx:#95a5a6}
 @media (prefers-reduced-motion:reduce){.sheet{transition:none}}
@@ -763,7 +792,7 @@ html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261029105118";
+const BUILD = "20261029105741";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1092,6 +1121,14 @@ function catCards(st){
   }).join("")}</div>`;
 }
 /* in cima ai Movimenti: avvisi e la card con il totale del mese */
+/* cerchio di avanzamento: quanto dei budget hai usato, oppure quanto del mese è passato */
+function heroRing(st){
+  const bud = st.cats.filter(c => c.cat.budget), B = bud.reduce((s, c) => s + c.cat.budget, 0);
+  const cur = S.month === thisMonth(), dm = daysIn(S.month);
+  const p = B ? bud.reduce((s, c) => s + c.amt, 0) / B : cur ? +today().slice(8) / dm : 1, lab = B ? "budget" : "del mese";
+  const R = 25, C = 2 * Math.PI * R, v = Math.max(0, Math.min(1, p));
+  return `<div class="hring${p > 1 ? " over" : ""}" aria-label="${Math.round(p * 100)}% ${lab}"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="${R}" class="tr"/><circle cx="30" cy="30" r="${R}" class="pg" stroke-dasharray="${(v * C).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 30 30)"/></svg><span><b>${Math.round(p * 100)}%</b><small>${lab}</small></span></div>`;
+}
 function topCard(st){
   const cur = S.month === thisMonth();
   let banner = "";
@@ -1110,7 +1147,7 @@ function topCard(st){
   else { prevTot = sum(txIn(prev, "out")); cmp = `rispetto a ${mName(prev)}`; }
   let delta = "";
   if (prevTot > 0){ const p = pct(st.tot - prevTot, prevTot); delta = `<div class="delta ${p > 0 ? "up" : "down"}"><i>${p > 0 ? "▲" : "▼"}</i>${Math.abs(p)}% ${p > 0 ? "in più" : "in meno"} ${cmp}</div>`; }
-  const hero = `<div class="hero"><small>Spese di ${mName(S.month)}${cur ? " (finora)" : ""}</small><b class="num">${eur(st.tot)}</b>
+  const hero = `<div class="hero">${heroRing(st)}<small>Spese di ${mName(S.month)}${cur ? " (finora)" : ""}</small><b class="num">${eur(st.tot)}</b>
     <div class="sub"><span>Entrate <b class="num">${eur(st.income)}</b></span><span>Saldo <b class="num">${st.income - st.tot >= 0 ? "+" : "−"}${eur(Math.abs(st.income - st.tot))}</b></span></div>${delta}</div>`;
   return { banner, hero };
 }
@@ -1231,7 +1268,7 @@ function renderReport(){
   }
   const top5 = [...st.out].sort((a, b) => b.amt - a.amt).slice(0, 5);
 
-  v.innerHTML = rToggle() + `<div class="hero"><small>Spese di ${mName(S.month)}${cur ? ` <span class="pill-status">in corso</span>` : ""}</small><b class="num">${eur(st.tot)}</b>
+  v.innerHTML = rToggle() + `<div class="hero">${heroRing(st)}<small>Spese di ${mName(S.month)}${cur ? ` <span class="pill-status">in corso</span>` : ""}</small><b class="num">${eur(st.tot)}</b>
       <div class="sub"><span>Entrate <b class="num">${eur0(st.income)}</b></span><span>Saldo <b class="num">${saldo >= 0 ? "+" : "−"}${eur0(Math.abs(saldo))}</b></span><span>Al giorno <b class="num">${eur0(st.tot / dd)}</b></span></div></div>
   <div class="section">
     ${st.out.length ? statsCard(st) : ""}
@@ -1730,7 +1767,8 @@ function lookFonts(k){
 }
 function applyLook(k){
   k = LOOKS[k] ? k : "morbido"; D.opt.look = k; lookFonts(k);
-  if (k === "classico") delete document.documentElement.dataset.look; else document.documentElement.dataset.look = k;
+  const eff = D.opt.theme === "vetro" ? "vetro" : k;   // il tema Vetro ha il suo stile del testo
+  if (eff === "classico") delete document.documentElement.dataset.look; else document.documentElement.dataset.look = eff;
   try { localStorage.setItem("spese.look", k); } catch {}
 }
 
@@ -1744,6 +1782,7 @@ function applyTheme(t){
   t = THEMES[t] ? t : "oled"; D.opt.theme = t;
   document.documentElement.dataset.theme = t;
   try { localStorage.setItem("spese.theme", t); } catch {}
+  if (typeof LOOKS !== "undefined") applyLook(D.opt.look);
   const cs = getComputedStyle(document.documentElement), bg = cs.getPropertyValue("--meta").trim() || cs.getPropertyValue("--bg").trim();
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", bg || "#1a1a19");
 }
@@ -1755,7 +1794,7 @@ function openSettings(){
     <h2>Tema</h2>
     <div class="panel"><div class="themes">${Object.entries(THEMES).map(([k, t]) => `<button data-theme-pick="${k}" aria-pressed="${k === cur}">
       <span class="tprev" style="background:${t.bg};color:${t.fg};font-family:'${t.font}',sans-serif"><b style="background:${t.card};color:${t.ink};border-radius:${t.r}px">Aa 124 €</b><i style="background:${t.pill}"></i><i style="background:${t.pill};opacity:.35"></i></span>${t.name}</button>`).join("")}</div></div>
-    <h2>Stile del testo</h2>
+    <h2>Stile del testo</h2>${cur === "vetro" ? `<p class="help" style="margin:-4px 2px 10px">Il tema Vetro usa il suo stile: quello che scegli qui vale per Nero OLED e Carta.</p>` : ""}
     <div class="panel">${Object.entries(LOOKS).map(([k, L]) => { lookFonts(k); return `<button class="list-item lookpick" data-look-pick="${k}"><span><b style="font-family:'${L.f}',sans-serif">${L.name} · 1.805,98 €</b><small>${L.d}</small></span>${(D.opt.look || "morbido") === k ? '<i class="ok">✓</i>' : ""}</button>`; }).join("")}</div>
     <h2>Lettura scontrini (IA)</h2>
     <div id="aiBox">${aiBox()}</div>
@@ -2521,7 +2560,8 @@ function render(){
   if ($("#sPcat").classList.contains("open")) drawPcat();
   document.querySelector(".tip")?.remove();
   const yearMode = S.tab === "vReport" && S.rview === "year";
-  $("#hMonth").textContent = yearMode ? "Anno " + S.month.slice(0, 4) : mLabel(S.month);
+  { const lab = yearMode ? "Anno " + S.month.slice(0, 4) : mLabel(S.month), k = lab.lastIndexOf(" ");
+    $("#hMonth").innerHTML = `${esc(lab.slice(0, k))} <span class="hy">${esc(lab.slice(k + 1))}</span>`; }
   $("#btnNext").disabled = yearMode ? S.month.slice(0, 4) >= thisMonth().slice(0, 4) : S.month >= thisMonth();
   document.querySelectorAll("nav [data-tab]").forEach(b => b.setAttribute("aria-current", b.dataset.tab === S.tab));
   document.querySelectorAll(".view").forEach(v => v.hidden = v.id !== S.tab);
