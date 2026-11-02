@@ -104,6 +104,8 @@ nav .plus svg{width:34px;height:34px;padding:11px;box-sizing:content-box;border-
   margin-top:-22px;box-shadow:0 6px 18px rgba(0,0,0,.35),0 0 0 5px var(--bg)}
 nav .plus svg circle{stroke:none}
 nav .plus:active svg{transform:scale(.94)}
+/* + grande: 68 px, sporge sopra la barra (vale anche con gli stili del testo) */
+nav .plus svg,:root[data-look] nav .plus svg{width:38px;height:38px;padding:15px;margin-top:-34px}
 @media (min-width:900px){nav .plus svg{margin-top:0;box-shadow:0 6px 18px rgba(0,0,0,.35)}}
 
 .section{padding:8px 16px}
@@ -696,7 +698,7 @@ html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261029111202";
+const BUILD = "20261102120241";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
