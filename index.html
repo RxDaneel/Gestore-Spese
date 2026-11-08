@@ -178,6 +178,11 @@ nav .plus svg,:root[data-look] nav .plus svg{width:38px;height:38px;padding:15px
 .nest .srow{padding:6px 0;border-top:0}
 .srow>div:first-child{display:flex;justify-content:space-between;gap:10px;font-size:14px;font-weight:500}
 .nest .srow>div:first-child{font-size:13.5px;font-weight:400}
+.sbtn{display:block;width:100%;border:0;border-top:1px solid var(--line);background:none;color:inherit;text-align:left;font:inherit}
+.sbtn:first-child{border-top:0}
+.sbtn .chev{width:16px;height:16px;margin:0 -4px 0 4px;vertical-align:-3px;transition:transform .2s}
+.sbtn.on .chev{transform:rotate(90deg)}
+.subtx{border-top:1px solid var(--line);box-shadow:inset 3px 0 0 var(--muted)}
 .srow small{display:block;color:var(--muted);font-size:12px;margin-top:1px}
 .srow .bar{height:4px;margin-top:6px}
 .leaf{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--line)}
@@ -702,7 +707,7 @@ html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261103153117";
+const BUILD = "20261108083029";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1540,7 +1545,7 @@ document.addEventListener("touchend", () => {
 document.addEventListener("touchcancel", () => { if (SW){ setSwipe(SW.tx, 0); SW = null; } });
 
 /* ---------- riepilogo categoria (solo lettura) ---------- */
-function openSum(id){ S.sum = id; drawSum(); open("#sSum"); }
+function openSum(id){ S.sum = id; S.sumSub = null; drawSum(); open("#sSum"); }
 function drawSum(){
   const c = D.cats.find(x => x.id === S.sum);
   if (!c){ $("#sSum").classList.remove("open"); return; }
@@ -1557,8 +1562,11 @@ function drawSum(){
       <span>${over ? `<span class="warn">Budget superato di ${eur0(tot - b)}</span>` : `Restano <b>${eur0(b - tot)}</b> del budget`}</span><span class="num">${pct(tot, b)}% di ${eur0(b)}</span></div>
       <div class="bar budget${over ? " over" : ""}"><i style="width:${Math.min(100, pct(tot, b))}%"></i></div></div>` : "";
   const bs = bySub(tx);
-  const subT = bs.some(x => x.sub) ? `<div class="shead"><h2>Per sottocategoria</h2></div><div class="panel">${bs.map(x => `<div class="srow"><div><span>${esc(x.name)}</span><span class="num">${eur(x.amt)}</span></div>
-      <small>${movs(x.n)} · ${pct(x.amt, tot)}%</small><div class="bar"><i style="width:${Math.max(2, x.amt / bs[0].amt * 100)}%;background:${cvar(c.color)}"></i></div></div>`).join("")}</div>` : "";
+  // toccando una sottocategoria si aprono i suoi movimenti, subito sotto
+  const subT = bs.some(x => x.sub) ? `<div class="shead"><h2>Per sottocategoria</h2></div><div class="panel">${bs.map(x => { const on = S.sumSub === x.key;
+      return `<button class="srow sbtn${on ? " on" : ""}" data-sumsub="${esc(x.key)}" aria-expanded="${on}"><div><span>${esc(x.name)}</span><span class="num">${eur(x.amt)}${ICON_CHEV}</span></div>
+      <small>${movs(x.n)} · ${pct(x.amt, tot)}%</small><div class="bar"><i style="width:${Math.max(2, x.amt / bs[0].amt * 100)}%;background:${cvar(c.color)}"></i></div></button>
+      ${on ? `<div class="subtx">${tx.filter(t => (sub(t)?.id || "-") === x.key).map(txRow).join("")}</div>` : ""}`; }).join("")}</div>` : "";
   const months = Array.from({ length: 6 }, (_, i) => addMonth(S.month, i - 5));
   const vals = months.map(m => { const t = sum(txIn(m).filter(x => x.cat === c.id)); return { v: t, lab: mShort(m), tip: mLabel(m), top: t ? eur0(t) : "", color: m === S.month ? cvar(c.color) : `color-mix(in srgb,${cvar(c.color)} 45%,transparent)` }; });
   const big = tx.length ? tx.reduce((a, x) => x.amt > a.amt ? x : a) : null;
@@ -2514,6 +2522,7 @@ document.addEventListener("click", e => {
   if (d.idel !== undefined){ readTx(); S.edit.items.splice(+d.idel, 1); return drawTx(); }
   if (d.prod){ return openProd(d.prod); }
   if (d.pccat){ return openPcat(d.pccat); }
+  if (d.sumsub !== undefined){ S.sumSub = S.sumSub === d.sumsub ? null : d.sumsub; const y = $("#sSum").scrollTop; drawSum(); $("#sSum").scrollTop = y; return; }
   if (d.asksug !== undefined){ const i = $("#askName"); i.value = d.asksug; i.dispatchEvent(new Event("input", { bubbles: true })); return; }
   if (d.manpc){ S.man.c = d.manpc; S.man.manual = true; document.querySelectorAll("[data-manpc]").forEach(b => b.setAttribute("aria-pressed", b === el)); return; }
   if (d.mansug !== undefined){ const o = knownProducts().get(d.mansug); if (!o) return; $("#manName").value = o.n; $("#manPrice").value = fmtInput(o.p); manSetPc(o.c); $("#manSug").innerHTML = ""; return $("#manPrice").focus(); }
