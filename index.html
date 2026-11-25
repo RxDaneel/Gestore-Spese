@@ -708,7 +708,7 @@ html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261125105701";
+const BUILD = "20261125110129";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1726,14 +1726,14 @@ function openSettings(){
    quindi iOS apre sempre il foglio di condivisione (Salva su File, Mail, AirDrop…); se non può, c'è "Copia" */
 function giveFile(name, text, type){
   S.exp = { name, text, type };
-  const rows = type === "text/csv" ? text.split("\n").length - 1 : null;
+  const rows = type === "text/csv" ? text.split("\n").length - 1 : null, bin = typeof text !== "string";
   $("#sExp").innerHTML = `<div class="pbar"><button class="icon-btn" data-act="close" aria-label="Chiudi">${ICON_X}</button><h3>Esporta</h3></div>
     <div class="section">
       <div class="panel pad"><div style="font-weight:700;font-size:16px;word-break:break-all">${esc(name)}</div>
         <p class="help" style="margin:4px 0 0">${rows !== null ? `${rows} ${rows === 1 ? "movimento" : "movimenti"} · ` : ""}${(new Blob([text]).size / 1024).toFixed(1).replace(".", ",")} KB</p></div>
       <div class="row-btns" style="flex-direction:column;align-items:stretch;gap:10px;margin-top:14px">
         <button class="btn" data-act="expShare">Condividi o salva in File</button>
-        <button class="btn ghost" data-act="expCopy">Copia il contenuto</button>
+        ${bin ? `<button class="btn ghost" data-act="expOpen">Apri anteprima</button>` : `<button class="btn ghost" data-act="expCopy">Copia il contenuto</button>`}
         <button class="btn ghost" data-act="expDown">Scarica</button>
       </div>
       <p class="help" id="expMsg" style="margin-top:12px">Con "Condividi" scegli <b>Salva su File</b> per tenerlo nell'iPhone, oppure mandalo via Mail o AirDrop.</p>
@@ -1743,7 +1743,7 @@ function giveFile(name, text, type){
 function expShare(){
   const { name, text, type } = S.exp || {}; if (!name) return;
   const msg = t => { const m = $("#expMsg"); if (m) m.innerHTML = t; };
-  const files = [new File([text], name, { type }), new File([text], name, { type: "text/plain" })];
+  const files = typeof text === "string" ? [new File([text], name, { type }), new File([text], name, { type: "text/plain" })] : [new File([text], name, { type })];
   const f = files.find(x => { try { return navigator.canShare?.({ files: [x] }); } catch { return false; } });
   if (!f || !navigator.share){ msg("Questo browser non permette di condividere file: usa <b>Copia il contenuto</b> o <b>Scarica</b>."); return; }
   navigator.share({ files: [f] }).catch(e => { if (e.name !== "AbortError") msg(`Condivisione non riuscita (${esc(e.name || "errore")}): usa <b>Copia il contenuto</b>.`); });
@@ -1758,6 +1758,115 @@ function expDown(){
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
 }
+/* ---------- report in PDF, generato dall'app (window.print non funziona nell'app installata su iPhone) ---------- */
+const PDFW = { // larghezze Helvetica (1/1000 em) per i caratteri ASCII 32–126
+  r: [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584],
+  b: [278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584] };
+const PDF_WIN = { "€": 0x80, "‚": 0x82, "„": 0x84, "…": 0x85, "‘": 0x91, "’": 0x92, "“": 0x93, "”": 0x94, "•": 0x95, "–": 0x96, "—": 0x97, "›": 0x9B, "‹": 0x8B, " ": 0x20, " ": 0x20, "−": 0x2D, "▲": 0x2B, "▼": 0x2D };
+function pdfBytes(str){ const out = []; for (const ch of String(str).normalize("NFC")){ const c = ch.codePointAt(0); out.push(PDF_WIN[ch] ?? (c < 256 ? c : 0x3F)); } return out; }
+function pdfW(str, size, bold){ let w = 0; for (const b of pdfBytes(str)){ w += b >= 32 && b <= 126 ? PDFW[bold ? "b" : "r"][b - 32] : 556; } return w * size / 1000; }
+function pdfStr(str){ return "(" + pdfBytes(str).map(b => b === 0x28 || b === 0x29 || b === 0x5C ? "\\" + String.fromCharCode(b) : b < 32 || b > 126 ? "\\" + b.toString(8).padStart(3, "0") : String.fromCharCode(b)).join("") + ")"; }
+const pdfHex = c => { const m = /^#?([0-9a-f]{6})$/i.exec(String(c).trim()); const n = m ? parseInt(m[1], 16) : 0x888888; return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255].map(v => v.toFixed(3)).join(" "); };
+const catHex = c => { if (typeof c.color === "string" && /^#/.test(c.color)) return c.color; const v = getComputedStyle(document.documentElement).getPropertyValue(c.color >= 0 && c.color < 8 ? `--c${c.color + 1}` : "--cx").trim(); return v || "#888888"; };
+/* piccolo impaginatore A4 */
+function makePdf(){
+  const W = 595, H = 842, M = 42, pages = []; let ops = [], y = H - M;
+  const P = {
+    W, M, get y(){ return y; },
+    newPage(){ if (ops.length) pages.push(ops.join("\n")); ops = []; y = H - M; },
+    need(h){ if (y - h < M + 20) this.newPage(); },
+    text(x, yy, s, size = 10, bold = false, color = "0.08 0.08 0.1", align = "l"){ const w = pdfW(s, size, bold); const xx = align === "r" ? x - w : align === "c" ? x - w / 2 : x;
+      ops.push(`BT ${color} rg /${bold ? "F2" : "F1"} ${size} Tf ${xx.toFixed(2)} ${yy.toFixed(2)} Td ${pdfStr(s)} Tj ET`); },
+    fit(s, size, bold, maxW){ if (pdfW(s, size, bold) <= maxW) return s; let t = String(s); while (t.length > 1 && pdfW(t + "…", size, bold) > maxW) t = t.slice(0, -1); return t + "…"; },
+    rect(x, yy, w, h, color){ ops.push(`${color} rg ${x.toFixed(2)} ${yy.toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re f`); },
+    line(x1, yy, x2, color = "0.85 0.85 0.85"){ ops.push(`${color} RG 0.6 w ${x1} ${yy.toFixed(2)} m ${x2} ${yy.toFixed(2)} l S`); },
+    down(h){ y -= h; },
+    build(){
+      if (ops.length) pages.push(ops.join("\n"));
+      const objs = [], add = s => { objs.push(s); return objs.length; };
+      const f1 = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
+      const f2 = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
+      const pagesId = objs.length + 1; objs.push(null);
+      const kids = [];
+      pages.forEach((c, i) => {
+        const foot = `BT 0.55 0.55 0.6 rg /F1 8 Tf ${M} 24 Td ${pdfStr(`Spese · pagina ${i + 1} di ${pages.length}`)} Tj ET`;
+        const body = c + "\n" + foot;
+        const cid = add(`<< /Length ${pdfBytes(body).length} >>\nstream\n${body}\nendstream`);
+        kids.push(add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >> >> /Contents ${cid} 0 R >>`));
+      });
+      objs[pagesId - 1] = `<< /Type /Pages /Kids [${kids.map(k => k + " 0 R").join(" ")}] /Count ${kids.length} >>`;
+      const cat = add(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
+      let out = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n"; const offs = [];
+      const bytes = []; const push = s => { for (const b of pdfBytes(s)) bytes.push(b); };
+      // l'intestazione binaria va scritta così com'è
+      for (const ch of out) bytes.push(ch.charCodeAt(0) & 255);
+      objs.forEach((o, i) => { offs.push(bytes.length); push(`${i + 1} 0 obj\n${o}\nendobj\n`); });
+      const xref = bytes.length;
+      push(`xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + offs.map(o => String(o).padStart(10, "0") + " 00000 n \n").join("") + `trailer\n<< /Size ${objs.length + 1} /Root ${cat} 0 R >>\nstartxref\n${xref}\n%%EOF`);
+      return new Uint8Array(bytes);
+    }
+  };
+  return P;
+}
+function pdfReport(){
+  const year = S.rview === "year", P = makePdf(), R = P.W - P.M, L = P.M, gray = "0.45 0.45 0.5";
+  const months = year ? Array.from({ length: 12 }, (_, i) => `${S.month.slice(0, 4)}-${pad(i + 1)}`) : [S.month];
+  const out = months.flatMap(m => txIn(m, "out")), inc = months.flatMap(m => txIn(m, "in")), tot = sum(out), income = sum(inc);
+  const title = year ? `Report del ${S.month.slice(0, 4)}` : `Report di ${mLabel(S.month)}`;
+  P.text(L, P.y - 20, title, 22, true); P.down(34);
+  P.text(L, P.y - 10, `Creato il ${dLabel(today())}`, 9, false, gray); P.down(26);
+  // riquadri riassuntivi
+  const cur = !year && S.month === thisMonth(), days = year ? null : cur ? +today().slice(8) : daysIn(S.month);
+  const boxes = [["Spese", eur(tot)], ["Entrate", eur(income)], ["Saldo", (income - tot >= 0 ? "+" : "-") + eur(Math.abs(income - tot))], year ? ["Media al mese", eur(tot / Math.max(1, months.filter(m => m <= thisMonth()).length))] : ["Media al giorno", eur(tot / days)]];
+  const bw = (R - L - 30) / 4;
+  boxes.forEach(([k, v], i) => { const x = L + i * (bw + 10); P.rect(x, P.y - 46, bw, 46, "0.95 0.95 0.96"); P.text(x + 10, P.y - 17, k, 8.5, false, gray); P.text(x + 10, P.y - 35, P.fit(v, 12.5, true, bw - 16), 12.5, true); });
+  P.down(62);
+  if (!year){
+    const pm = addMonth(S.month, -1), pout = txIn(pm, "out"), prev = sum(cur ? pout.filter(t => +t.date.slice(8) <= days) : pout);
+    if (prev){ const p = pct(tot - prev, prev); P.text(L, P.y - 10, p === 0 ? `Come ${cur ? `nei primi ${days} giorni di` : "a"} ${mName(pm)}.` : `${Math.abs(p)}% ${p > 0 ? "in più" : "in meno"} rispetto ${cur ? `ai primi ${days} giorni di` : "a"} ${mName(pm)} (${eur(prev)}).`, 10, false); P.down(22); }
+  } else {
+    // spese mese per mese
+    P.need(40); P.text(L, P.y - 14, "Mese per mese", 14, true); P.down(26);
+    const mv = months.map(m => sum(txIn(m, "out"))), mx = Math.max(1, ...mv);
+    months.forEach((m, i) => { P.need(18); P.text(L, P.y - 11, ucfirst(mName(m)), 10); const bx = L + 90, bwid = R - bx - 90; P.rect(bx, P.y - 11, bwid, 7, "0.93 0.93 0.94"); if (mv[i]) P.rect(bx, P.y - 11, Math.max(2, mv[i] / mx * bwid), 7, "0.2 0.4 0.75"); P.text(R, P.y - 11, eur(mv[i]), 10, false, "0.08 0.08 0.1", "r"); P.down(17); });
+    P.down(10);
+  }
+  // categorie e sottocategorie
+  const cats = byCat(out);
+  if (cats.length){
+    P.need(40); P.text(L, P.y - 14, "Dove hai speso", 14, true); P.down(26);
+    for (const c of cats){
+      P.need(34);
+      P.rect(L, P.y - 12, 9, 9, pdfHex(catHex(c.cat)));
+      P.text(L + 16, P.y - 11, P.fit(c.cat.name, 11, true, 250), 11, true);
+      P.text(R - 70, P.y - 11, `${pct(c.amt, tot)}%`, 9.5, false, gray, "r");
+      P.text(R, P.y - 11, eur(c.amt), 11, true, "0.08 0.08 0.1", "r");
+      P.down(16); P.rect(L + 16, P.y - 4, R - L - 16, 4, "0.93 0.93 0.94"); P.rect(L + 16, P.y - 4, Math.max(2, c.amt / cats[0].amt * (R - L - 16)), 4, pdfHex(catHex(c.cat))); P.down(10);
+      const bs = bySub(out.filter(t => t.cat === c.cat.id));
+      if (bs.some(x => x.sub)) for (const x of bs){ P.need(15); P.text(L + 28, P.y - 10, P.fit(x.name, 9.5, false, 260), 9.5, false, "0.3 0.3 0.35"); P.text(R - 70, P.y - 10, `${x.n} mov.`, 8.5, false, gray, "r"); P.text(R, P.y - 10, eur(x.amt), 9.5, false, "0.3 0.3 0.35", "r"); P.down(14); }
+      P.down(8);
+    }
+  }
+  // movimenti (solo nel report del mese)
+  if (!year){
+    const all = [...out, ...inc].sort((a, b) => a.date.localeCompare(b.date) || a.ts - b.ts);
+    if (all.length){
+      P.need(50); P.text(L, P.y - 14, "Movimenti", 14, true); P.down(24);
+      const head = () => { P.text(L, P.y - 9, "Data", 8.5, true, gray); P.text(L + 52, P.y - 9, "Categoria", 8.5, true, gray); P.text(L + 230, P.y - 9, "Nota", 8.5, true, gray); P.text(R, P.y - 9, "Importo", 8.5, true, gray, "r"); P.down(14); P.line(L, P.y, R); P.down(2); };
+      head();
+      for (const t of all){
+        if (P.y - 16 < P.M + 20){ P.newPage(); head(); }
+        P.text(L, P.y - 11, t.date.slice(8) + "/" + t.date.slice(5, 7), 9.5);
+        P.text(L + 52, P.y - 11, P.fit(catLabel(t).replace(" › ", " > "), 9.5, false, 170), 9.5);
+        P.text(L + 230, P.y - 11, P.fit(t.note || "", 9.5, false, R - L - 230 - 80), 9.5, false, "0.3 0.3 0.35");
+        P.text(R, P.y - 11, (t.type === "out" ? "-" : "+") + eur(t.amt), 9.5, true, t.type === "out" ? "0.08 0.08 0.1" : "0.08 0.5 0.25", "r");
+        P.down(15); P.line(L, P.y + 1, R, "0.93 0.93 0.94");
+      }
+    }
+  }
+  giveFile(year ? `report-spese-${S.month.slice(0, 4)}.pdf` : `report-spese-${S.month}.pdf`, P.build(), "application/pdf");
+}
+const ucfirst = s => String(s).charAt(0).toUpperCase() + String(s).slice(1);
 function csv(list){
   const q = s => `"${String(s).replace(/"/g, '""')}"`;
   return "﻿Data;Tipo;Categoria;Sottocategoria;Importo;Nota\n" + [...list].sort((a, b) => a.date.localeCompare(b.date))
@@ -2606,10 +2715,11 @@ document.addEventListener("click", e => {
     case "newSubTx": return newSubTx();
     case "delCat": return delCat();
     case "openReport": S.month = d.m; S.rview = "month"; return go("vReport");
-    case "print": return window.print();
+    case "print": return pdfReport();
     case "expShare": return expShare();
     case "expCopy": return expCopy();
     case "expDown": return expDown();
+    case "expOpen": { const u = URL.createObjectURL(new Blob([S.exp.text], { type: S.exp.type })); window.open(u, "_blank"); return; }
     case "csvYear": return giveFile(`spese-${S.month.slice(0, 4)}.csv`, csv(txIn(S.month.slice(0, 4))), "text/csv");
     case "csvMonth": return giveFile(`spese-${S.month}.csv`, csv(txIn(S.month)), "text/csv");
     case "csvAll": return giveFile(`spese-tutto.csv`, csv(D.tx), "text/csv");
