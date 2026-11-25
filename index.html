@@ -694,6 +694,7 @@ html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#
 <section class="sheet" id="sSum" aria-label="Riepilogo categoria"></section>
 <section class="sheet" id="sProd" aria-label="Prodotto"></section>
 <section class="sheet" id="sNames" aria-label="Prodotti ricordati"></section>
+<section class="sheet" id="sExp" aria-label="Esporta"></section>
 <section class="sheet" id="sPcat" aria-label="Prodotti di una categoria"></section>
 <section class="sheet" id="sTx" aria-label="Movimento"></section>
 <section class="sheet" id="sCat" aria-label="Categoria"></section>
@@ -707,7 +708,7 @@ html:root[data-theme]{--c1:#3498db;--c2:#e67e22;--c3:#1abc9c;--c4:#f1c40f;--c5:#
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const KEY = "spese.data";
-const BUILD = "20261108083029";
+const BUILD = "20261125105701";
 /* icone delle categorie (24×24, tratto) */
 const ICONS = {
   casa: '<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
@@ -1721,14 +1722,41 @@ function openSettings(){
   </div>`;
   open("#sSet");
 }
-async function giveFile(name, text, type){
-  const blob = new Blob([text], { type });
-  try {
-    const f = new File([blob], name, { type });
-    if (navigator.canShare?.({ files: [f] })){ await navigator.share({ files: [f], title: name }); return; }
-  } catch (e) { if (e.name === "AbortError") return; }
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
-  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+/* esportazione: si apre un foglio con il file pronto. Il tocco su "Condividi" è un gesto diretto,
+   quindi iOS apre sempre il foglio di condivisione (Salva su File, Mail, AirDrop…); se non può, c'è "Copia" */
+function giveFile(name, text, type){
+  S.exp = { name, text, type };
+  const rows = type === "text/csv" ? text.split("\n").length - 1 : null;
+  $("#sExp").innerHTML = `<div class="pbar"><button class="icon-btn" data-act="close" aria-label="Chiudi">${ICON_X}</button><h3>Esporta</h3></div>
+    <div class="section">
+      <div class="panel pad"><div style="font-weight:700;font-size:16px;word-break:break-all">${esc(name)}</div>
+        <p class="help" style="margin:4px 0 0">${rows !== null ? `${rows} ${rows === 1 ? "movimento" : "movimenti"} · ` : ""}${(new Blob([text]).size / 1024).toFixed(1).replace(".", ",")} KB</p></div>
+      <div class="row-btns" style="flex-direction:column;align-items:stretch;gap:10px;margin-top:14px">
+        <button class="btn" data-act="expShare">Condividi o salva in File</button>
+        <button class="btn ghost" data-act="expCopy">Copia il contenuto</button>
+        <button class="btn ghost" data-act="expDown">Scarica</button>
+      </div>
+      <p class="help" id="expMsg" style="margin-top:12px">Con "Condividi" scegli <b>Salva su File</b> per tenerlo nell'iPhone, oppure mandalo via Mail o AirDrop.</p>
+    </div>`;
+  open("#sExp");
+}
+function expShare(){
+  const { name, text, type } = S.exp || {}; if (!name) return;
+  const msg = t => { const m = $("#expMsg"); if (m) m.innerHTML = t; };
+  const files = [new File([text], name, { type }), new File([text], name, { type: "text/plain" })];
+  const f = files.find(x => { try { return navigator.canShare?.({ files: [x] }); } catch { return false; } });
+  if (!f || !navigator.share){ msg("Questo browser non permette di condividere file: usa <b>Copia il contenuto</b> o <b>Scarica</b>."); return; }
+  navigator.share({ files: [f] }).catch(e => { if (e.name !== "AbortError") msg(`Condivisione non riuscita (${esc(e.name || "errore")}): usa <b>Copia il contenuto</b>.`); });
+}
+async function expCopy(){
+  const t = S.exp?.text; if (!t) return;
+  try { await navigator.clipboard.writeText(t); toast("Copiato: incollalo dove vuoi"); }
+  catch { const ta = document.createElement("textarea"); ta.value = t; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;left:0;opacity:0"; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length); const ok = document.execCommand("copy"); ta.remove(); toast(ok ? "Copiato: incollalo dove vuoi" : "Non riesco a copiare"); }
+}
+function expDown(){
+  const { name, text, type } = S.exp || {}; if (!name) return;
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
 }
 function csv(list){
   const q = s => `"${String(s).replace(/"/g, '""')}"`;
@@ -2579,6 +2607,9 @@ document.addEventListener("click", e => {
     case "delCat": return delCat();
     case "openReport": S.month = d.m; S.rview = "month"; return go("vReport");
     case "print": return window.print();
+    case "expShare": return expShare();
+    case "expCopy": return expCopy();
+    case "expDown": return expDown();
     case "csvYear": return giveFile(`spese-${S.month.slice(0, 4)}.csv`, csv(txIn(S.month.slice(0, 4))), "text/csv");
     case "csvMonth": return giveFile(`spese-${S.month}.csv`, csv(txIn(S.month)), "text/csv");
     case "csvAll": return giveFile(`spese-tutto.csv`, csv(D.tx), "text/csv");
